@@ -1,4 +1,4 @@
-using JobBank1111.Infrastructure.TraceContext;
+using JobBank1111.Infrastructure;
 using JobBank1111.Job.DB;
 using JobBank1111.Job.WebAPI;
 using JobBank1111.Job.WebAPI.Member;
@@ -17,6 +17,12 @@ Log.Information("Starting web host");
 
 try
 {
+    if (Array.FindIndex(args, x => x == "--local") >= 0)
+    {
+        var envFolder = EnvironmentUtility.FindParentFolder("env");
+        EnvironmentUtility.ReadEnvironmentFile(envFolder, "local.env");
+    }
+
     var builder = WebApplication.CreateBuilder(args);
 
     // Add services to the container.
@@ -31,26 +37,31 @@ try
                                     .WriteTo.File("logs/aspnet-.txt", rollingInterval: RollingInterval.Minute)
     );
 
+    // 確定物件都有設定 DI Container
+    builder.Host.UseDefaultServiceProvider(p =>
+    {
+        p.ValidateScopes = true;
+        p.ValidateOnBuild = true;
+    });
+    
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-    
+
     builder.Services.AddSingleton(TimeProvider.System);
-    builder.Services.AddSingleton<ContextAccessor<AuthContext>>();
-    builder.Services.AddSingleton<IContextGetter<AuthContext>>(p => p.GetService<ContextAccessor<AuthContext>>());
-    builder.Services.AddSingleton<IContextSetter<AuthContext>>(p => p.GetService<ContextAccessor<AuthContext>>());
     
+    builder.Services.SetContextAccessor();
+    builder.Services.SetEnvironments();
     builder.Services.AddDbContextFactory<MemberDbContext>((provider, builder) =>
     {
-        var connectionString =
-            "Server=localhost;Database=demo;User Id=SA;Password=pass@w0rd1~;TrustServerCertificate=True";
+        var environment = provider.GetService<SYS_DATABASE_CONNECTION_STRING>();
+        var connectionString = environment.Value;
         builder.UseSqlServer(connectionString);
     });
     builder.Services.AddScoped<MemberCommand>();
     builder.Services.AddScoped<MemberRepository>();
-    
     var app = builder.Build();
-
+    
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
