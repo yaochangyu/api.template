@@ -339,13 +339,9 @@ stress/output
 **/*.feature.cs
 
 # secrets
-secrets
+secret/
+logs/
 
 .DS_Store
 *.zip
 
-deployments
-
-# minio local s3
-minio
-test/NineYi.Msa.MemberService.PressureTest/2023會員卡/K6/*-result.json
