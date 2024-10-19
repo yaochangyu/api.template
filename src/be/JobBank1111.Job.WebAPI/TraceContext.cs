@@ -1,6 +1,4 @@
-﻿using FluentResults.Extensions.AspNetCore;
-
-namespace JobBank1111.Job.WebAPI;
+﻿namespace JobBank1111.Job.WebAPI;
 
 public record TraceContext
 {

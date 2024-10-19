@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using JobBank1111.Infrastructure;
 using JobBank1111.Job.DB;
 using JobBank1111.Job.WebAPI;
@@ -43,15 +44,14 @@ try
         p.ValidateScopes = true;
         p.ValidateOnBuild = true;
     });
-    
+
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
-    builder.Services.AddSingleton(TimeProvider.System);
-    
-    builder.Services.SetContextAccessor();
-    builder.Services.SetEnvironments();
+    builder.Services.AddSingleton(TimeProvider.System)
+        .SetContextAccessor()
+        .SetEnvironments();
     builder.Services.AddDbContextFactory<MemberDbContext>((provider, builder) =>
     {
         var environment = provider.GetService<SYS_DATABASE_CONNECTION_STRING>();
@@ -60,8 +60,9 @@ try
     });
     builder.Services.AddScoped<MemberCommand>();
     builder.Services.AddScoped<MemberRepository>();
+    builder.Services.AddExternalApiHttpClient();
     var app = builder.Build();
-    
+
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {

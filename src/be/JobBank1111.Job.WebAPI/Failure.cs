@@ -1,9 +1,8 @@
 ﻿using System.Text.Json.Serialization;
-using FluentResults;
 
 namespace JobBank1111.Job.WebAPI;
 
-public class Failure : IError
+public class Failure
 {
     public Failure()
     {
@@ -25,8 +24,6 @@ public class Failure : IError
     /// </summary>
     public string Message { get; init; }
 
-    public Dictionary<string, object> Metadata { get; }
-
     /// <summary>
     /// 錯誤發生時的資料
     /// </summary>
@@ -44,6 +41,4 @@ public class Failure : IError
     public Exception Exception { get; set; }
 
     public List<Failure> Details { get; init; } = new();
-
-    public List<IError> Reasons { get; }
 }
