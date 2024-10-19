@@ -12,9 +12,9 @@ public static class ServiceCollectionExtension
     
     public static IServiceCollection SetContextAccessor(this IServiceCollection services)
     {
-        services.AddSingleton<ContextAccessor<AuthContext>>();
-        services.AddSingleton<IContextGetter<AuthContext>>(p => p.GetService<ContextAccessor<AuthContext>>());
-        services.AddSingleton<IContextSetter<AuthContext>>(p => p.GetService<ContextAccessor<AuthContext>>());
+        services.AddSingleton<ContextAccessor<TraceContext>>();
+        services.AddSingleton<IContextGetter<TraceContext>>(p => p.GetService<ContextAccessor<TraceContext>>());
+        services.AddSingleton<IContextSetter<TraceContext>>(p => p.GetService<ContextAccessor<TraceContext>>());
         return services;
     }
 }

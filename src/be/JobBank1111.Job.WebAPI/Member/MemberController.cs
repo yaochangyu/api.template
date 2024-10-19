@@ -1,4 +1,5 @@
-﻿using JobBank1111.Infrastructure.TraceContext;
+﻿using FluentResults;
+using JobBank1111.Infrastructure.TraceContext;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobBank1111.Job.WebAPI.Member;
@@ -16,7 +17,12 @@ public class MemberController(
     public async Task<ActionResult> InsertMember(InsertMemberRequest request,
                                                  CancellationToken cancel = default)
     {
-        await this._memberCommand.InsertAsync(request, cancel);
+        var result = await this._memberCommand.InsertAsync(request, cancel);
+        if (result.IsFailed)
+        {
+            var resultError = (Failure)result.Errors[0];
+            return this.BadRequest(resultError);
+        }
         return this.NoContent();
     }
 }

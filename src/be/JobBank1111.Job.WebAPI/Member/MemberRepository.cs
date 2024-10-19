@@ -6,7 +6,7 @@ namespace JobBank1111.Job.WebAPI.Member;
 
 public class MemberRepository(
     ILogger<MemberController> logger,
-    IContextGetter<AuthContext?> authContextGetter,
+    IContextGetter<TraceContext?> authContextGetter,
     IDbContextFactory<MemberDbContext> dbContextFactory,
     TimeProvider timeProvider)
 {

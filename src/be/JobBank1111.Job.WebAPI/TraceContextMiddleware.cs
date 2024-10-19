@@ -30,7 +30,7 @@ public class TraceContextMiddleware
             httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
             await httpContext.Response.WriteAsJsonAsync(new Failure
             {
-                Code = FailureCode.Unauthorized,
+                Code = nameof(FailureCode.Unauthorized),
                 Message = "not login",
             });
             return;
@@ -39,8 +39,8 @@ public class TraceContextMiddleware
         var userId = httpContext.User.Identity.Name;
 
         // 寫入 trace context 到 object context setter
-        var authContextSetter = httpContext.RequestServices.GetService<IContextSetter<AuthContext>>();
-        authContextSetter.Set(new AuthContext
+        var authContextSetter = httpContext.RequestServices.GetService<IContextSetter<TraceContext>>();
+        authContextSetter.Set(new TraceContext
         {
             TraceId = traceId,
             UserId = userId
@@ -51,8 +51,8 @@ public class TraceContextMiddleware
                                         "TW", traceId, userId);
 
         // 附加 traceId 到 response header 中
-        IContextGetter<AuthContext?>? contextGetter =
-            httpContext.RequestServices.GetService<IContextGetter<AuthContext>>();
+        IContextGetter<TraceContext?>? contextGetter =
+            httpContext.RequestServices.GetService<IContextGetter<TraceContext>>();
         var traceContext = contextGetter.Get();
         httpContext.Response.Headers.TryAdd(SysHeaderNames.TraceId, traceContext.TraceId);
 

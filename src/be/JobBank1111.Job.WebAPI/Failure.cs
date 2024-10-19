@@ -1,14 +1,15 @@
 ﻿using System.Text.Json.Serialization;
+using FluentResults;
 
 namespace JobBank1111.Job.WebAPI;
 
-public class Failure
+public class Failure : IError
 {
     public Failure()
     {
     }
 
-    public Failure(FailureCode code, string message)
+    public Failure(string code, string message)
     {
         this.Code = code;
         this.Message = message;
@@ -17,12 +18,14 @@ public class Failure
     /// <summary>
     /// 錯誤碼
     /// </summary>
-    public FailureCode Code { get; init; }
+    public string Code { get; init; }
 
     /// <summary>
     /// 錯誤訊息
     /// </summary>
     public string Message { get; init; }
+
+    public Dictionary<string, object> Metadata { get; }
 
     /// <summary>
     /// 錯誤發生時的資料
@@ -41,4 +44,6 @@ public class Failure
     public Exception Exception { get; set; }
 
     public List<Failure> Details { get; init; } = new();
+
+    public List<IError> Reasons { get; }
 }
