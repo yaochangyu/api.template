@@ -7,15 +7,21 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="11.7.1" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.11"/>
-        <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
-        <PackageReference Include="Serilog.Sinks.Seq" Version="5.2.2" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0"/>
+        <PackageReference Include="FluentValidation" Version="11.10.0" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
+        <PackageReference Include="Microsoft.Bcl.TimeProvider" Version="8.0.1" />
+        <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="8.0.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\JobBank1111.Infrastructure\JobBank1111.Infrastructure.csproj" />
+      <ProjectReference Include="..\JobBank1111.Job.DB\JobBank1111.Job.DB.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Security\" />
     </ItemGroup>
 
 </Project>

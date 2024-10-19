@@ -12,4 +12,12 @@ public partial class Member
     public int? Age { get; set; }
 
     public long SequenceId { get; set; }
+
+    public DateTimeOffset CreatedAt { get; set; }
+
+    public string? CreatedBy { get; set; }
+
+    public DateTimeOffset? ChangedAt { get; set; }
+
+    public string? ChangedBy { get; set; }
 }

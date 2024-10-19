@@ -17,10 +17,13 @@ public partial class MemberDbContext : DbContext
     {
         modelBuilder.Entity<Member>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("Member");
+            entity.HasKey(e => e.Id).HasName("Member_pk");
 
+            entity.ToTable("Member");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.ChangedBy).HasMaxLength(20);
+            entity.Property(e => e.CreatedBy).HasMaxLength(20);
             entity.Property(e => e.Name).HasMaxLength(20);
             entity.Property(e => e.SequenceId).ValueGeneratedOnAdd();
         });

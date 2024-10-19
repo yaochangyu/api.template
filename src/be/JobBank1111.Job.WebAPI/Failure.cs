@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace JobBank1111.Infrastructure;
+namespace JobBank1111.Job.WebAPI;
 
 public class Failure
 {

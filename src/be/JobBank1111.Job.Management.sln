@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobBank1111.Job.WebAPI.IntegrationTest", "JobBank1111.Job.WebAPI.IntegrationTest\JobBank1111.Job.WebAPI.IntegrationTest.csproj", "{072B154D-149F-416C-AC1A-E009FED7706E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobBank1111.Job.IntegrationTest", "JobBank1111.Job.IntegrationTest\JobBank1111.Job.IntegrationTest.csproj", "{072B154D-149F-416C-AC1A-E009FED7706E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobBank1111.Infrastructure", "JobBank1111.Infrastructure\JobBank1111.Infrastructure.csproj", "{F9C2045E-64DE-417A-BCC7-FE20B982153B}"
 EndProject

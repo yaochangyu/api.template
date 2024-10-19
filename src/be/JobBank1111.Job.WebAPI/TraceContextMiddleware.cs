@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using JobBank1111.Infrastructure;
 using JobBank1111.Infrastructure.TraceContext;
 
 namespace JobBank1111.Job.WebAPI;
@@ -15,7 +14,7 @@ public class TraceContextMiddleware
 
     public async Task Invoke(HttpContext httpContext, ILogger<TraceContextMiddleware> logger)
     {
-      var traceId = httpContext.Request.Headers[SysHeaderNames.TraceId].FirstOrDefault();
+        var traceId = httpContext.Request.Headers[SysHeaderNames.TraceId].FirstOrDefault();
 
         //// 若調用端沒有傳入 traceId，則產生一個新的 traceId
         if (string.IsNullOrWhiteSpace(traceId))
@@ -49,10 +48,11 @@ public class TraceContextMiddleware
 
         // 附加 traceId 與 userId 到 log 中
         using var _ = logger.BeginScope("{Location},{TraceId},{UserId}",
-            "TW", traceId, userId);
+                                        "TW", traceId, userId);
 
         // 附加 traceId 到 response header 中
-        IContextGetter<AuthContext?>? contextGetter = httpContext.RequestServices.GetService<IContextGetter<AuthContext>>();
+        IContextGetter<AuthContext?>? contextGetter =
+            httpContext.RequestServices.GetService<IContextGetter<AuthContext>>();
         var traceContext = contextGetter.Get();
         httpContext.Response.Headers.TryAdd(SysHeaderNames.TraceId, traceContext.TraceId);
 
