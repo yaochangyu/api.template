@@ -6,6 +6,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobBank1111.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobBank1111.Job.WebAPI", "JobBank1111.Job.WebAPI\JobBank1111.Job.WebAPI.csproj", "{5BB4C0EB-337D-44F4-BE0A-0694CAF47890}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobBank1111.Testing.Common", "JobBank1111.Testing.Common\JobBank1111.Testing.Common.csproj", "{6F3E9F7A-8956-4888-A901-80ECDF8D0780}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobBank1111.Job.DB", "JobBank1111.Job.DB\JobBank1111.Job.DB.csproj", "{C0A17226-F3B3-4C6D-A097-92A86CED5947}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +28,13 @@ Global
 		{5BB4C0EB-337D-44F4-BE0A-0694CAF47890}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5BB4C0EB-337D-44F4-BE0A-0694CAF47890}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5BB4C0EB-337D-44F4-BE0A-0694CAF47890}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F3E9F7A-8956-4888-A901-80ECDF8D0780}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F3E9F7A-8956-4888-A901-80ECDF8D0780}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F3E9F7A-8956-4888-A901-80ECDF8D0780}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F3E9F7A-8956-4888-A901-80ECDF8D0780}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0A17226-F3B3-4C6D-A097-92A86CED5947}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0A17226-F3B3-4C6D-A097-92A86CED5947}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0A17226-F3B3-4C6D-A097-92A86CED5947}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0A17226-F3B3-4C6D-A097-92A86CED5947}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,3 +1,5 @@
+using JobBank1111.Testing.Common;
+
 namespace JobBank1111.Job.WebAPI.IntegrationTest;
 
 class Data
@@ -8,6 +10,14 @@ class Data
 [TestClass]
 public class UnitTest1
 {
+    [TestMethod]
+    public async Task TestMethod2()
+    {
+        var container = await TestContainerFactory.CreateMsSqlContainerAsync();
+        await container.StartAsync();
+        var connectionString = container.GetConnectionString();
+    }
+
     [TestMethod]
     public async Task TestMethod1()
     {
