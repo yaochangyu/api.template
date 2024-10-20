@@ -20,6 +20,7 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Reqnroll.xUnit" Version="2.1.1" />
         <PackageReference Include="Testcontainers" Version="3.10.0" />
     </ItemGroup>
 

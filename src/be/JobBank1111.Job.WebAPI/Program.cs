@@ -35,8 +35,8 @@ try
                             .ReadFrom.Services(services)
                             .Enrich.FromLogContext()
                             .WriteTo.Console() //正式環境不要用 Console，除非有 Log Provider 專門用來收集 Console Log
-                            .WriteTo.Seq("http://localhost:5341")
-                            .WriteTo.File("logs/aspnet-.txt", rollingInterval: RollingInterval.Minute)
+                            .WriteTo.Seq("http://localhost:5341")//log server
+                            .WriteTo.File("logs/aspnet-.txt", rollingInterval: RollingInterval.Minute)//正式環境不要用 File
         );
 
     // 確定物件都有設定 DI Container
@@ -53,12 +53,7 @@ try
     builder.Services.AddSingleton(TimeProvider.System)
         .SetContextAccessor()
         .SetEnvironments();
-    builder.Services.AddDbContextFactory<MemberDbContext>((provider, builder) =>
-    {
-        var environment = provider.GetService<SYS_DATABASE_CONNECTION_STRING>();
-        var connectionString = environment.Value;
-        builder.UseSqlServer(connectionString);
-    });
+   
     builder.Services.AddScoped<MemberHandler>();
     builder.Services.AddScoped<MemberRepository>();
     builder.Services.AddExternalApiHttpClient();
@@ -69,6 +64,21 @@ try
     {
         app.UseSwagger();
         app.UseSwaggerUI();
+        builder.Services.AddDbContextFactory<MemberDbContext>((provider, builder) =>
+        {
+            var environment = provider.GetService<SYS_DATABASE_CONNECTION_STRING>();
+            var connectionString = environment.Value;
+            builder.UseSqlServer(connectionString);
+        });
+    }
+    else
+    {
+        builder.Services.AddDbContextFactory<MemberDbContext>((provider, builder) =>
+        {
+            var environment = provider.GetService<SYS_DATABASE_CONNECTION_STRING>();
+            var connectionString = environment.Value;
+            builder.UseSqlServer(connectionString);
+        });
     }
 
     app.UseSerilogRequestLogging();

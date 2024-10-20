@@ -2,21 +2,21 @@
 
 public sealed class RedirectConsole : IDisposable
 {
-    private readonly Action<string> logFunction;
-    private readonly TextWriter oldOut = Console.Out;
+    private readonly Action<string> _logFunction;
+    private readonly TextWriter _oldOut = Console.Out;
     private readonly StringWriter sw = new StringWriter();
 
     public RedirectConsole(Action<string> logFunction)
     {
-        this.logFunction = logFunction;
+        this._logFunction = logFunction;
         Console.SetOut(this.sw);
     }
 
     public void Dispose()
     {
-        Console.SetOut(this.oldOut);
+        Console.SetOut(this._oldOut);
         this.sw.Flush();
-        this.logFunction(this.sw.ToString());
+        this._logFunction(this.sw.ToString());
         this.sw.Dispose();
     }
 }
