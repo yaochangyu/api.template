@@ -1,9 +1,6 @@
-using System.Diagnostics;
 using JobBank1111.Infrastructure;
-using JobBank1111.Job.DB;
 using JobBank1111.Job.WebAPI;
 using JobBank1111.Job.WebAPI.Member;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 
@@ -35,8 +32,8 @@ try
                             .ReadFrom.Services(services)
                             .Enrich.FromLogContext()
                             .WriteTo.Console() //正式環境不要用 Console，除非有 Log Provider 專門用來收集 Console Log
-                            .WriteTo.Seq("http://localhost:5341")//log server
-                            .WriteTo.File("logs/aspnet-.txt", rollingInterval: RollingInterval.Minute)//正式環境不要用 File
+                            .WriteTo.Seq("http://localhost:5341") //log server
+                            .WriteTo.File("logs/aspnet-.txt", rollingInterval: RollingInterval.Minute) //正式環境不要用 File
         );
 
     // 確定物件都有設定 DI Container
@@ -50,13 +47,15 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
-    builder.Services.AddSingleton(TimeProvider.System)
-        .SetContextAccessor()
-        .SetEnvironments();
-   
+    builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
+    builder.Services.AddContextAccessor();
+    builder.Services.AddSysEnvironments();
+
+    builder.Services.AddScoped<IUuidProvider, UuidProvider>();
     builder.Services.AddScoped<MemberHandler>();
     builder.Services.AddScoped<MemberRepository>();
     builder.Services.AddExternalApiHttpClient();
+    builder.Services.AddDatabase();
     var app = builder.Build();
 
     // Configure the HTTP request pipeline.
@@ -64,21 +63,6 @@ try
     {
         app.UseSwagger();
         app.UseSwaggerUI();
-        builder.Services.AddDbContextFactory<MemberDbContext>((provider, builder) =>
-        {
-            var environment = provider.GetService<SYS_DATABASE_CONNECTION_STRING>();
-            var connectionString = environment.Value;
-            builder.UseSqlServer(connectionString);
-        });
-    }
-    else
-    {
-        builder.Services.AddDbContextFactory<MemberDbContext>((provider, builder) =>
-        {
-            var environment = provider.GetService<SYS_DATABASE_CONNECTION_STRING>();
-            var connectionString = environment.Value;
-            builder.UseSqlServer(connectionString);
-        });
     }
 
     app.UseSerilogRequestLogging();

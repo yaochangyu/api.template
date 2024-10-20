@@ -6,22 +6,22 @@ class TestAssistant
     {
         Environment.SetEnvironmentVariable("JOB1111_ENVIRONMENT", "QA");
         Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
-        Environment.SetEnvironmentVariable("EXTERNAL_API", "http://localhost:5000/api");
+        Environment.SetEnvironmentVariable(nameof(EXTERNAL_API), "http://localhost:5000/api");
     }
 
     public static void SetDbConnectionEnvironmentVariable(string connectionString)
     {
-        Environment.SetEnvironmentVariable("SYS_DATABASE_CONNECTION_STRING", connectionString);
+        Environment.SetEnvironmentVariable(nameof(SYS_DATABASE_CONNECTION_STRING), connectionString);
     }
 
     public static void SetRedisConnectionEnvironmentVariable(string url)
     {
-        Environment.SetEnvironmentVariable("SYS_REDIS_URL", url);
+        Environment.SetEnvironmentVariable(nameof(SYS_REDIS_URL), url);
     }
 
     public static void SetExternalConnectionEnvironmentVariable(string url)
     {
-        Environment.SetEnvironmentVariable("EXTERNAL_API", url);
+        Environment.SetEnvironmentVariable(nameof(EXTERNAL_API), url);
     }
 
     public static DateTime ToUtc(string time)

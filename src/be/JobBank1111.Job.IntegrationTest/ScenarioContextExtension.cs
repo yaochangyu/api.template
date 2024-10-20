@@ -1,28 +1,33 @@
 ﻿using System.Net;
 using System.Text;
+using System.Text.Json.Nodes;
+using JobBank1111.Job.DB;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Reqnroll;
 
 namespace JobBank1111.Job.WebAPI.IntegrationTest;
 
 public static class ScenarioContextExtension
 {
-    public static void SetServiceProvider(this ScenarioContext scenarioContext, IServiceProvider serviceProvider)
+    public static T? GetOrDefault<T>(this ScenarioContext context, string key, T? defaultValue = default) =>
+        context.ContainsKey(key) ? context.Get<T>(key) : defaultValue;
+
+    public static void SetServiceProvider(this ScenarioContext context, IServiceProvider serviceProvider)
     {
-        scenarioContext.Set(serviceProvider);
+        context.Set(serviceProvider);
     }
 
-    public static IServiceProvider GetServiceProvider(this ScenarioContext scenarioContext)
+    public static IServiceProvider GetServiceProvider(this ScenarioContext context)
     {
-        return scenarioContext.Get<IServiceProvider>();
+        return context.Get<IServiceProvider>();
     }
 
-    public static string? GetMarket(this ScenarioContext context)
-        => context.TryGetValue($"Market", out string market)
-            ? market
-            : null;
-
-    public static void SetMarket(this ScenarioContext context, string market)
-        => context.Set(market, $"Market");
+    public static IDbContextFactory<MemberDbContext> GetMemberDbContextFactory(this ScenarioContext context)
+    {
+        return GetServiceProvider(context).GetService<IDbContextFactory<MemberDbContext>>();
+    }
 
     public static string? GetUserId(this ScenarioContext context)
         => context.TryGetValue($"UserId", out string userId)
@@ -44,14 +49,11 @@ public static class ScenarioContextExtension
             ? firmId
             : null;
 
-    public static void SetFirmId(this ScenarioContext context, long firmId) =>
-        context.Set(firmId, $"FirmId");
+    public static void SetHttpClient(this ScenarioContext context, HttpClient httpClient) =>
+        context.Set(httpClient);
 
-    public static void SetHttpClient(this ScenarioContext scenarioContext, HttpClient httpClient) =>
-        scenarioContext.Set(httpClient);
-
-    public static HttpClient GetHttpClient(this ScenarioContext scenarioContext) =>
-        scenarioContext.Get<HttpClient>();
+    public static HttpClient GetHttpClient(this ScenarioContext context) =>
+        context.Get<HttpClient>();
 
     public static void AddQueryString(this ScenarioContext context, string key, string value)
     {
@@ -64,6 +66,16 @@ public static class ScenarioContextExtension
         context.Set(data, "QueryString");
     }
 
+    public static IList<(string Key, string Value)> GetAllQueryString(this ScenarioContext context)
+    {
+        return context.TryGetValue(out IList<(string Key, string Value)> result)
+            ? result
+            : new List<(string Key, string Value)>();
+    }
+
+    public static void SetHttpResponse(this ScenarioContext context, HttpResponseMessage response) =>
+        context.Set(response);
+
     public static HttpResponseMessage GetHttpResponse(this ScenarioContext context) =>
         context.TryGetValue(out HttpResponseMessage result) ? result : default;
 
@@ -73,11 +85,11 @@ public static class ScenarioContextExtension
     public static string GetHttpResponseBody(this ScenarioContext context) =>
         context.TryGetValue("HttpResponseBody", out string body) ? body : null;
 
-    public static void SetHttpStatusCode(this ScenarioContext scenarioContext, HttpStatusCode httpStatusCode) =>
-        scenarioContext.Set(httpStatusCode, "HttpStatusCode");
+    public static void SetHttpStatusCode(this ScenarioContext context, HttpStatusCode httpStatusCode) =>
+        context.Set(httpStatusCode, "HttpStatusCode");
 
-    public static HttpStatusCode GetHttpStatusCode(this ScenarioContext scenarioContext) =>
-        scenarioContext.Get<HttpStatusCode>("HttpStatusCode");
+    public static HttpStatusCode GetHttpStatusCode(this ScenarioContext context) =>
+        context.Get<HttpStatusCode>("HttpStatusCode");
 
     public static void SetXUnitLog(this ScenarioContext context, StringBuilder stringBuilder)
     {
@@ -88,5 +100,38 @@ public static class ScenarioContextExtension
     {
         context.TryGetValue("XUnitLog", out StringBuilder? stringBuilder);
         return stringBuilder ?? new StringBuilder();
+    }
+
+    public static void AddHttpHeader(this ScenarioContext context, string key, string value)
+    {
+        var headers = context.GetOrNewHeaders();
+        headers[key] = value;
+        context.Set(headers);
+    }
+
+    public static IHeaderDictionary GetOrNewHeaders(this ScenarioContext context)
+    {
+        if (context.TryGetValue(out IHeaderDictionary result) is false)
+        {
+            result = new HeaderDictionary();
+        }
+
+        return result;
+    }
+
+    public static void SetHttpRequestBody(this ScenarioContext context, string body) =>
+        context.Set(body, "HttpRequestBody");
+
+    public static string? GetHttpRequestBody(this ScenarioContext context) =>
+        context.GetOrDefault<string>($"HttpRequestBody");
+
+    public static void SetJsonNode(this ScenarioContext context, JsonNode input)
+    {
+        context.Set(input);
+    }
+
+    public static JsonNode GetJsonNode(this ScenarioContext context)
+    {
+        return context.Get<JsonNode>();
     }
 }

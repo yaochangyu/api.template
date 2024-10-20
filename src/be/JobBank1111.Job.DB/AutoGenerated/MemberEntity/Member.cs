@@ -5,7 +5,7 @@ namespace JobBank1111.Job.DB;
 
 public partial class Member
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; } = null!;
 
     public string? Name { get; set; }
 

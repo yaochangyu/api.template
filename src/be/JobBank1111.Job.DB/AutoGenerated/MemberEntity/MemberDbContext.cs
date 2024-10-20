@@ -21,7 +21,9 @@ public partial class MemberDbContext : DbContext
 
             entity.ToTable("Member");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Id)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.ChangedBy).HasMaxLength(20);
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
             entity.Property(e => e.Email)

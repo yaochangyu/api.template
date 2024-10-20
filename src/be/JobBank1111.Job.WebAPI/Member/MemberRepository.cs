@@ -1,4 +1,5 @@
-﻿using JobBank1111.Infrastructure.TraceContext;
+﻿using JobBank1111.Infrastructure;
+using JobBank1111.Infrastructure.TraceContext;
 using JobBank1111.Job.DB;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,26 +9,29 @@ public class MemberRepository(
     ILogger<MemberController> logger,
     IContextGetter<TraceContext?> authContextGetter,
     IDbContextFactory<MemberDbContext> dbContextFactory,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    IUuidProvider uuidProvider)
 {
     public async Task<int> InsertAsync(InsertMemberRequest request,
                                        CancellationToken cancel = default)
     {
-        throw new DbUpdateConcurrencyException("資料衝突了");
+        // throw new DbUpdateConcurrencyException("資料衝突了");
 
         var now = timeProvider.GetUtcNow();
         var userId = authContextGetter.Get().UserId;
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
-        dbContext.Members.Add(new DB.Member
+        var toDb = new DB.Member
         {
-            Id = Guid.NewGuid(),
+            Id = uuidProvider.NewId(),
             Name = request.Name,
             Age = request.Age,
+            Email = request.Email,
             CreatedAt = now,
             CreatedBy = userId,
             ChangedAt = now,
             ChangedBy = userId
-        });
+        };
+        var entityEntry = dbContext.Members.Add(toDb);
         return await dbContext.SaveChangesAsync(cancel);
     }
 
