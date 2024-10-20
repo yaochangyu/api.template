@@ -12,7 +12,6 @@ using Json.Path;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Reqnroll;
 using Xunit.Abstractions;
 
@@ -56,7 +55,6 @@ public class BaseStep : Steps
         //
         async Task InitialDatabase(ServiceProvider serviceProvider)
         {
-            var environmentVariable = Environment.GetEnvironmentVariable(nameof(SYS_DATABASE_CONNECTION_STRING));
             var dbContextFactory = serviceProvider.GetService<IDbContextFactory<MemberDbContext>>();
             await using var dbContext = await dbContextFactory.CreateDbContextAsync();
             await dbContext.Initial();
@@ -94,8 +92,8 @@ public class BaseStep : Steps
     {
     }
 
-    [Given(@"建立模擬 API，HttpMethod = ""(.*)""，URL = ""(.*)""，StatusCode = ""(.*)""，ResponseContent =")]
-    public async Task Given建立模擬apiHttpMethodUrlStatusCodeResponseContent(
+    [Given(@"建立假端點，HttpMethod = ""(.*)""，URL = ""(.*)""，StatusCode = ""(.*)""，ResponseContent =")]
+    public async Task Given建立假端點HttpMethodUrlStatusCodeResponseContent(
         string httpMethod, string url, int statusCode, string body)
     {
         var client = ExternalClient;

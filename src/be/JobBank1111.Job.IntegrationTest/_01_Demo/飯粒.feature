@@ -30,7 +30,7 @@
         Given 資料庫已存在 Member 資料
             | Id |
             | 1  |
-        Given 建立模擬 API，HttpMethod = "POST"，URL = "/ec/V1/SalePage/UpdateStock"，StatusCode = "200"，ResponseContent =
+        Given 建立假端點，HttpMethod = "POST"，URL = "/ec/V1/SalePage/UpdateStock"，StatusCode = "200"，ResponseContent =
         """
         {
             "ErrorId": "",
