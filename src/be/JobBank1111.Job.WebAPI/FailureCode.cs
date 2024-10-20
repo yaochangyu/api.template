@@ -4,4 +4,5 @@ public enum FailureCode
 {
     Unauthorized,
     DbError,
+    DuplicateEmail
 }

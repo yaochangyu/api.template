@@ -6,17 +6,13 @@ namespace JobBank1111.Job.WebAPI.Member;
 [ApiController]
 [Route("[controller]")]
 public class MemberController(
-    ILogger<MemberController> logger,
-    MemberCommand memberCommand)
-    : ControllerBase
+    MemberHandler memberHandler) : ControllerBase
 {
-    private MemberCommand _memberCommand = memberCommand;
-
     [HttpPost(Name = "InsertMember")]
-    public async Task<ActionResult> InsertMember(InsertMemberRequest request,
-                                                 CancellationToken cancel = default)
+    public async Task<ActionResult> InsertMemberAsync(InsertMemberRequest request,
+                                                      CancellationToken cancel = default)
     {
-        var result = await this._memberCommand.InsertAsync(request, cancel);
+        var result = await memberHandler.InsertAsync(request, cancel);
         if (result.IsFailure)
         {
             if (result.TryGetError(out var failure))
@@ -25,14 +21,6 @@ public class MemberController(
             }
         }
 
-        if (result.IsSuccess)
-        {
-            if (result.TryGetValue(out var value))
-            {
-                return this.Ok(value);
-            }
-        }
-
-        return this.NoContent();
+        return this.Ok(result.Value);
     }
 }

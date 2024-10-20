@@ -23,7 +23,10 @@ public partial class MemberDbContext : DbContext
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.ChangedBy).HasMaxLength(20);
-            entity.Property(e => e.CreatedBy).HasMaxLength(20);
+            entity.Property(e => e.CreatedBy).HasMaxLength(50);
+            entity.Property(e => e.Email)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.Name).HasMaxLength(20);
             entity.Property(e => e.SequenceId).ValueGeneratedOnAdd();
         });

@@ -20,4 +20,6 @@ public partial class Member
     public DateTimeOffset? ChangedAt { get; set; }
 
     public string? ChangedBy { get; set; }
+
+    public string? Email { get; set; }
 }

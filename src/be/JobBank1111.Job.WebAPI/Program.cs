@@ -29,14 +29,15 @@ try
     // Add services to the container.
     builder.Services.AddControllers();
 
-    builder.Host.UseSerilog((context, services, config) =>
-                                config.ReadFrom.Configuration(context.Configuration)
-                                    .ReadFrom.Services(services)
-                                    .Enrich.FromLogContext()
-                                    .WriteTo.Console()
-                                    .WriteTo.Seq("http://localhost:5341")
-                                    .WriteTo.File("logs/aspnet-.txt", rollingInterval: RollingInterval.Minute)
-    );
+    builder.Host
+        .UseSerilog((context, services, config) =>
+                        config.ReadFrom.Configuration(context.Configuration)
+                            .ReadFrom.Services(services)
+                            .Enrich.FromLogContext()
+                            .WriteTo.Console() //正式環境不要用 Console，除非有 Log Provider 專門用來收集 Console Log
+                            .WriteTo.Seq("http://localhost:5341")
+                            .WriteTo.File("logs/aspnet-.txt", rollingInterval: RollingInterval.Minute)
+        );
 
     // 確定物件都有設定 DI Container
     builder.Host.UseDefaultServiceProvider(p =>
@@ -58,7 +59,7 @@ try
         var connectionString = environment.Value;
         builder.UseSqlServer(connectionString);
     });
-    builder.Services.AddScoped<MemberCommand>();
+    builder.Services.AddScoped<MemberHandler>();
     builder.Services.AddScoped<MemberRepository>();
     builder.Services.AddExternalApiHttpClient();
     var app = builder.Build();
