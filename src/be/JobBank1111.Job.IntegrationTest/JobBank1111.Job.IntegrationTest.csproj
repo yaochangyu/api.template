@@ -27,6 +27,11 @@
         <PackageReference Include="SystemTextJson.JsonDiffPatch.Xunit" Version="2.0.0" />
         <PackageReference Include="Testcontainers" Version="3.10.0" />
         <PackageReference Include="JsonPath.Net" Version="1.1.6" />
+        <PackageReference Include="xunit" Version="2.9.2" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
 
     </ItemGroup>
 
