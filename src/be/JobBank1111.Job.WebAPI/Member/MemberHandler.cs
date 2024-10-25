@@ -108,4 +108,10 @@ public class MemberHandler(
 
         return Result.Success<Member, Failure>(src);
     }
+
+    public async Task<IEnumerable<GetAllMemberResponse>> GetAllMembersAsync(CancellationToken cancel)
+    {
+        var result = await repository.GetAllMembersAsync(cancel);
+        return result;
+    }
 }

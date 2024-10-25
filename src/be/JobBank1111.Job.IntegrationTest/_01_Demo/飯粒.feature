@@ -28,6 +28,22 @@
 
     Scenario: 查詢一筆會員
         Given 資料庫已存在 Member 資料
+            | Id | Email    | Name | Age |
+            | 1  | yao@9527 | yao  | 18  |
+        When 調用端發送 "GET" 請求至 "member/1"
+        Then 預期得到 HttpStatusCode 為 "200"
+        Then 預期回傳內容為
+        """
+        {
+          "Id": 1,
+          "Email": "yao@9527",
+          "Name": "yao",
+          "Age": 18
+        }
+        """
+
+    Scenario: 外部服務
+        Given 資料庫已存在 Member 資料
             | Id |
             | 1  |
         Given 建立假端點，HttpMethod = "POST"，URL = "/ec/V1/SalePage/UpdateStock"，StatusCode = "200"，ResponseContent =

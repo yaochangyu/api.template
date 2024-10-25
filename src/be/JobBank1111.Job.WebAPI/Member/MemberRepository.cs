@@ -57,4 +57,23 @@ public class MemberRepository(
             .FirstOrDefaultAsync(cancel);
         return result;
     }
+
+    public async Task<IEnumerable<GetAllMemberResponse>> GetAllMembersAsync(CancellationToken cancel = default)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
+        var query = dbContext.Members
+            .Select(p => new GetAllMemberResponse { Id = p.Id, Name = p.Name, Age = p.Age, Email = p.Email });
+
+        var result = await query.TagWith($"{nameof(MemberRepository)}.{nameof(this.GetAllMembersAsync)}()")
+            .Select(p => new GetAllMemberResponse
+            {
+                Id = p.Id,
+                Name = p.Name, 
+                Age = p.Age, 
+                Email = p.Email
+            })
+            .AsNoTracking()
+            .ToListAsync(cancel);
+        return result;
+    }
 }

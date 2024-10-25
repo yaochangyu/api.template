@@ -23,4 +23,14 @@ public class MemberController(
 
         return this.Ok(result.Value);
     }
+    
+    [HttpGet(Name = "GetAllMembers")]
+    [Route("/members")]
+    public async Task<ActionResult> GetAllMembersAsync(
+                                                      CancellationToken cancel = default)
+    {
+        var result = await memberHandler.GetAllMembersAsync(cancel);
+        return this.Ok(result);
+    }
+
 }

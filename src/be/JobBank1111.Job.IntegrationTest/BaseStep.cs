@@ -88,8 +88,12 @@ public class BaseStep : Steps
     }
 
     [Given(@"資料庫已存在 Member 資料")]
-    public void Given資料庫已存在Member資料(Table table)
+    public async Task Given資料庫已存在Member資料(Table table)
     {
+        var toDb = table.CreateSet<DB.Member>();
+        await using var dbContext = await this.ScenarioContext.GetMemberDbContextFactory().CreateDbContextAsync();
+        await dbContext.Members.AddRangeAsync(toDb);
+        await dbContext.SaveChangesAsync();
     }
 
     [Given(@"建立假端點，HttpMethod = ""(.*)""，URL = ""(.*)""，StatusCode = ""(.*)""，ResponseContent =")]
