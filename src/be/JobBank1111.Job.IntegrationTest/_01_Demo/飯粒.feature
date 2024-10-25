@@ -9,7 +9,7 @@
             | avatarUrl      |
         Given 初始化測試伺服器
             | Now                       | UserId |
-            | 2000-01-01T00:00:00+00:00 | QOO    |
+            | 2000-01-01T00:00:00+00:00 | yao    |
 
     Scenario: 新增一筆會員
         Given 調用端已準備 Body 參數(Json)
@@ -20,32 +20,54 @@
           "age": 18
         }
         """
-        When 調用端發送 "POST" 請求至 "member"
+        When 調用端發送 "POST" 請求至 "api/v1/members"
         Then 預期得到 HttpStatusCode 為 "204"
         Then 預期資料庫已存在 Member 資料為
             | Email    | Name | Age | CreatedAt                 | CreatedAt                 |
             | yao@9527 | yao  | 18  | 2000-01-01T00:00:00+00:00 | 2000-01-01T00:00:00+00:00 |
 
-    Scenario: 查詢一筆會員
+    Scenario: 查詢所有會員
         Given 資料庫已存在 Member 資料
             | Id | Email    | Name | Age |
-            | 1  | yao@9527 | yao  | 18  |
-        When 調用端發送 "GET" 請求至 "member/1"
+            | 1  | yao@9527 | yao1 | 18  |
+            | 2  | yao@9528 | yao2 | 18  |
+            | 3  | yao@9529 | yao3 | 18  |
+        Given 調用端已準備 Header 參數
+            | x-page-size | x-page-index | cache-control |
+            | 2           | 0            | no-cache      |
+        When 調用端發送 "GET" 請求至 "api/v1/members"
         Then 預期得到 HttpStatusCode 為 "200"
+        Then 預期得到 Header 為
+            | page-size | page-index | row-total |
+            | 2         | 0          | 3         |
         Then 預期回傳內容為
         """
         {
-          "Id": 1,
-          "Email": "yao@9527",
-          "Name": "yao",
-          "Age": 18
+          "items": [
+            {
+              "id": "1",
+              "name": "yao1",
+              "age": 18,
+              "email": "yao@9527"
+            },
+            {
+              "id": "2",
+              "name": "yao2",
+              "age": 18,
+              "email": "yao@9528"
+            }
+          ],
+          "pageIndex": 0,
+          "totalPages": 2,
+          "hasPreviousPage": false,
+          "hasNextPage": true
         }
         """
 
     Scenario: 外部服務
         Given 資料庫已存在 Member 資料
-            | Id |
-            | 1  |
+            | Id | Email    | Name | Age |
+            | 1  | yao@9527 | yao1 | 18  |
         Given 建立假端點，HttpMethod = "POST"，URL = "/ec/V1/SalePage/UpdateStock"，StatusCode = "200"，ResponseContent =
         """
         {

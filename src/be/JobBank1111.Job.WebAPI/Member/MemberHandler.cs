@@ -109,9 +109,10 @@ public class MemberHandler(
         return Result.Success<Member, Failure>(src);
     }
 
-    public async Task<IEnumerable<GetAllMemberResponse>> GetAllMembersAsync(CancellationToken cancel)
+    public async Task<PaginatedList<GetMemberResponse>>
+        GetMembersAsync(int pageIndex, int pageSize, bool noCache = true, CancellationToken cancel = default)
     {
-        var result = await repository.GetAllMembersAsync(cancel);
+        var result = await repository.GetMembersAsync(pageIndex, pageSize, noCache, cancel);
         return result;
     }
 }

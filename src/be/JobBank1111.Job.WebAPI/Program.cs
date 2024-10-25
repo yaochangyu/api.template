@@ -64,7 +64,17 @@ try
         app.UseSwagger();
         app.UseSwaggerUI();
     }
-
+    app.MapDefaultControllerRoute();
+    app.UseRouting();
+    app.UseEndpoints(endpoints =>{
+        //注册Web API Controller
+        endpoints.MapControllers();
+        //注册MVC Controller模板 {controller=Home}/{action=Index}/{id?}
+        // endpoints.MapDefaultControllerRoute();
+        
+        //注册健康检查
+        // endpoints.MapHealthChecks("/_hc");
+    });
     app.UseSerilogRequestLogging();
     app.UseHttpsRedirection();
 

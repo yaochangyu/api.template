@@ -90,7 +90,20 @@ public class BaseStep : Steps
     [Given(@"資料庫已存在 Member 資料")]
     public async Task Given資料庫已存在Member資料(Table table)
     {
-        var toDb = table.CreateSet<DB.Member>();
+        var userId = this.ScenarioContext.GetUserId();
+        var now = this.ScenarioContext.GetUtcNow().Value;
+        var toDb = table.CreateSet<DB.Member>(p=>new DB.Member
+        {
+            Id = null,
+            Name = null,
+            Age = null,
+            SequenceId = 0,
+            CreatedAt = now,
+            CreatedBy = userId,
+            ChangedAt = now,
+            ChangedBy = userId,
+            Email = null
+        });
         await using var dbContext = await this.ScenarioContext.GetMemberDbContextFactory().CreateDbContextAsync();
         await dbContext.Members.AddRangeAsync(toDb);
         await dbContext.SaveChangesAsync();
@@ -297,5 +310,11 @@ public class BaseStep : Steps
     {
         var actual = (int)this.ScenarioContext.GetHttpStatusCode();
         actual.Should().Be(expected);
+    }
+
+    [Then(@"預期得到 Header 為")]
+    public void Then預期得到Header為(Table table)
+    {
+        
     }
 }

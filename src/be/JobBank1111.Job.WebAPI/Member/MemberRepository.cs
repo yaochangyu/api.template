@@ -58,22 +58,22 @@ public class MemberRepository(
         return result;
     }
 
-    public async Task<IEnumerable<GetAllMemberResponse>> GetAllMembersAsync(CancellationToken cancel = default)
+    public async Task<PaginatedList<GetMemberResponse>>
+        GetMembersAsync(int pageIndex, int pageSize, bool noCache, CancellationToken cancel = default)
     {
+        // if (noCache) 永遠撈新的資料
+        // else 撈快取的資料
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
-        var query = dbContext.Members
-            .Select(p => new GetAllMemberResponse { Id = p.Id, Name = p.Name, Age = p.Age, Email = p.Email });
 
-        var result = await query.TagWith($"{nameof(MemberRepository)}.{nameof(this.GetAllMembersAsync)}()")
-            .Select(p => new GetAllMemberResponse
-            {
-                Id = p.Id,
-                Name = p.Name, 
-                Age = p.Age, 
-                Email = p.Email
-            })
-            .AsNoTracking()
-            .ToListAsync(cancel);
-        return result;
+        var selector = dbContext.Members
+            .Select(p => new GetMemberResponse { Id = p.Id, Name = p.Name, Age = p.Age, Email = p.Email })
+            .AsNoTracking();
+        
+        var totalCount = selector.Count();
+        var paging = selector.OrderBy(p => p.Id)
+            .Skip(pageIndex * pageSize)
+            .Take(pageSize);
+        var result = await paging.ToListAsync(cancel);
+        return new PaginatedList<GetMemberResponse>(result, pageIndex, pageSize, totalCount);
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace JobBank1111.Job.WebAPI.Member;
 
-public class GetAllMemberResponse
+public class GetMemberResponse
 {
     public string Id { get; set; }
 
