@@ -44,7 +44,7 @@ namespace JobBank1111.Job.WebAPI.Contract
         }
 
         /// <returns>OK</returns>
-        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v1/tags:cursor")]
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v2/tags:cursor")]
         public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetTagsCursor(System.Threading.CancellationToken cancellationToken)
         {
 
@@ -69,11 +69,6 @@ namespace JobBank1111.Job.WebAPI.Contract
 
         /// <returns>OK</returns>
 
-        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.IActionResult> InsertMember2Async(InsertMemberRequest body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-
-        /// <returns>OK</returns>
-
         System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.IActionResult> InsertMember1Async(InsertMemberRequest body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
     }
@@ -90,7 +85,7 @@ namespace JobBank1111.Job.WebAPI.Contract
         }
 
         /// <returns>OK</returns>
-        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v1/members:cursor")]
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v2/members:cursor")]
         public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetMembersCursor(System.Threading.CancellationToken cancellationToken)
         {
 
@@ -98,7 +93,7 @@ namespace JobBank1111.Job.WebAPI.Contract
         }
 
         /// <returns>OK</returns>
-        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v1/members:offset")]
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v2/members:offset")]
         public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetMemberOffset(System.Threading.CancellationToken cancellationToken)
         {
 
@@ -107,14 +102,6 @@ namespace JobBank1111.Job.WebAPI.Contract
 
         /// <returns>OK</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/v2/members")]
-        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.IActionResult> InsertMember2([Microsoft.AspNetCore.Mvc.FromBody] InsertMemberRequest body, System.Threading.CancellationToken cancellationToken)
-        {
-
-            return _implementation.InsertMember2Async(body, cancellationToken);
-        }
-
-        /// <returns>OK</returns>
-        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/v1/members")]
         public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.IActionResult> InsertMember1([Microsoft.AspNetCore.Mvc.FromBody] InsertMemberRequest body, System.Threading.CancellationToken cancellationToken)
         {
 

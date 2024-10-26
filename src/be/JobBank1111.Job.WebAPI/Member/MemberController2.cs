@@ -24,7 +24,7 @@ public class MemberController2(
         var request = httpContextAccessor.HttpContext.Request;
         var pageSize = 10;
         var pageIndex = 0;
-        var noCache = true;
+        var noCache = false;
 
         if (request.Headers.TryGetValue("x-page-index", out var pageIndexText))
         {

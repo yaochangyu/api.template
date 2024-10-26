@@ -1,9 +1,10 @@
-﻿// using Microsoft.AspNetCore.Mvc;
+﻿// using JobBank1111.Job.WebAPI.Contract;
+// using Microsoft.AspNetCore.Mvc;
 //
 // namespace JobBank1111.Job.WebAPI.Member;
 //
 // [ApiController]
-// public class MemberController(
+// public class MemberV1Controller(
 //     MemberHandler memberHandler) : ControllerBase
 // {
 //     [HttpGet]
@@ -44,15 +45,7 @@
 //         var result = await memberHandler.GetMembersAsync(pageIndex, pageSize, noCache, cancel);
 //         return this.Ok(result);
 //     }
-//
-//     [HttpPost]
-//     [Route("api/v2/members", Name = "InsertMember2")]
-//     public async Task<ActionResult> InsertMember2Async(InsertMemberRequest request,
-//                                                        CancellationToken cancel = default)
-//     {
-//         return this.NoContent();
-//     }
-//
+//     
 //     [HttpPost]
 //     [Route("api/v1/members", Name = "InsertMember1")]
 //     public async Task<ActionResult> InsertMemberAsync(InsertMemberRequest request,

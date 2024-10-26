@@ -5,15 +5,17 @@ using JobBank1111.Infrastructure;
 using JobBank1111.Infrastructure.TraceContext;
 using JobBank1111.Job.DB;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace JobBank1111.Job.WebAPI.Member;
 
 public class MemberRepository(
     ILogger<MemberRepository> logger,
-    IContextGetter<TraceContext?> authContextGetter,
+    IContextGetter<TraceContext?> contextGetter,
     IDbContextFactory<MemberDbContext> dbContextFactory,
     TimeProvider timeProvider,
-    IUuidProvider uuidProvider)
+    IUuidProvider uuidProvider,
+    IDistributedCache cache)
 {
     public async Task<int> InsertAsync(InsertMemberRequest request,
                                        CancellationToken cancel = default)
@@ -21,7 +23,8 @@ public class MemberRepository(
         // throw new DbUpdateConcurrencyException("資料衝突了");
 
         var now = timeProvider.GetUtcNow();
-        var userId = authContextGetter.Get().UserId;
+        var traceContext = contextGetter.Get();
+        var userId = traceContext.UserId;
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
         var toDb = new DB.Member
         {
@@ -62,10 +65,22 @@ public class MemberRepository(
     }
 
     public async Task<PaginatedList<GetMemberResponse>>
-        GetMembersAsync(int pageIndex, int pageSize, bool noCache, CancellationToken cancel = default)
+        GetMembersAsync(int pageIndex, int pageSize, bool noCache = false, CancellationToken cancel = default)
     {
-        // if (noCache) 永遠撈新的資料
-        // else 撈快取的資料
+        var traceContext = contextGetter.Get();
+        var userId = traceContext.UserId;
+        PaginatedList<GetMemberResponse> result;
+        var key = nameof(CacheKeys.MemberData);
+        if (noCache == false) // 如果有快取，就從快取撈資料
+        {
+            var cachedData = await cache.GetStringAsync(key, cancel);
+            if (cachedData != null)
+            {
+                result = JsonSerializer.Deserialize<PaginatedList<GetMemberResponse>>(cachedData);
+                return result;
+            }
+        }
+
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
 
         var selector = dbContext.Members
@@ -76,10 +91,17 @@ public class MemberRepository(
         var paging = selector.OrderBy(p => p.Id)
             .Skip(pageIndex * pageSize)
             .Take(pageSize);
-        var result = await paging
+        var data = await paging
             .TagWith($"{nameof(MemberRepository)}.{nameof(this.GetMembersAsync)}")
             .ToListAsync(cancel);
-        return new PaginatedList<GetMemberResponse>(result, pageIndex, pageSize, totalCount);
+        result = new PaginatedList<GetMemberResponse>(data, pageIndex, pageSize, totalCount);
+        cache.SetStringAsync(key, JsonSerializer.Serialize(result),
+                             new DistributedCacheEntryOptions
+                             {
+                                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) //最好從組態設定讀取
+                             }, cancel);
+
+        return result;
     }
 
     public async Task<CursorPaginatedList<GetMemberResponse>>

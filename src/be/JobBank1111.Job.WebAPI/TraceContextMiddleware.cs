@@ -39,8 +39,8 @@ public class TraceContextMiddleware
         var userId = httpContext.User.Identity.Name;
 
         // 寫入 trace context 到 object context setter
-        var authContextSetter = httpContext.RequestServices.GetService<IContextSetter<TraceContext>>();
-        authContextSetter.Set(new TraceContext
+        var contextSetter = httpContext.RequestServices.GetService<IContextSetter<TraceContext>>();
+        contextSetter.Set(new TraceContext
         {
             TraceId = traceId,
             UserId = userId

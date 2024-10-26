@@ -12,6 +12,10 @@ public class PaginatedList<T>
 
     public bool HasNextPage => PageIndex < TotalPages;
 
+    public PaginatedList()
+    {
+        
+    }
     public PaginatedList(List<T> items, int pageIndex, int pageSize, int totalCount)
     {
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);

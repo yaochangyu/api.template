@@ -1,6 +1,8 @@
 using JobBank1111.Infrastructure;
 using JobBank1111.Job.WebAPI;
 using JobBank1111.Job.WebAPI.Contract;
+
+// using JobBank1111.Job.WebAPI.Contract;
 using JobBank1111.Job.WebAPI.Member;
 using Scalar.AspNetCore;
 using Serilog;
@@ -44,11 +46,27 @@ try
         p.ValidateScopes = true;
         p.ValidateOnBuild = true;
     });
+    var configuration = builder.Configuration;
+
+    builder.Services.AddStackExchangeRedisCache((options) =>
+    {
+        var connectionString = configuration.GetValue<string>(nameof(SYS_REDIS_URL));
+
+        // options.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions
+        // {
+        //     EndPoints = { connectionString },
+        //     DefaultDatabase = 0,
+        // };
+
+        options.Configuration = connectionString;
+
+        // options.InstanceName = "SampleInstance";
+    });
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-    builder.Services.AddHttpContextAccessor(); 
+    builder.Services.AddHttpContextAccessor();
     builder.Services.AddScoped<IMemberController, JobBank1111.Job.WebAPI.Member.MemberController2>();
 
     builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
@@ -75,7 +93,7 @@ try
             options.RoutePrefix = "redoc";
             options.ConfigObject.HideHostname = true;
         });
-        
+
         app.MapScalarApiReference(p =>
         {
             p.OpenApiRoutePattern = "/swagger/v1/swagger.json";
@@ -84,6 +102,8 @@ try
         });
     }
 
+    app.UseAuthorization();
+    app.UseMiddleware<TraceContextMiddleware>();
     app.MapDefaultControllerRoute();
     app.UseRouting();
     app.UseEndpoints(endpoints =>
@@ -99,9 +119,6 @@ try
     });
     app.UseSerilogRequestLogging();
     app.UseHttpsRedirection();
-
-    app.UseAuthorization();
-    app.UseMiddleware<TraceContextMiddleware>();
     app.MapControllers();
     app.Run();
     return 0;
