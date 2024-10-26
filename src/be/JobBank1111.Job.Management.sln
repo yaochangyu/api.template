@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infra", "Infra", "{9F8A43C9
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobBank1111.Job.DB", "JobBank1111.Job.DB\JobBank1111.Job.DB.csproj", "{6478BF0B-92D8-458F-B808-3552B60682EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobBank1111.Job.WebAPI.Contract", "JobBank1111.Job.WebAPI.Contract\JobBank1111.Job.WebAPI.Contract.csproj", "{F48CF870-2039-42E2-B4A1-9B0D3F1749FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobBank1111.Job.Contract", "JobBank1111.Job.Contract\JobBank1111.Job.Contract.csproj", "{F48CF870-2039-42E2-B4A1-9B0D3F1749FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

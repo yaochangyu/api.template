@@ -36,8 +36,8 @@ tasks:
   codegen-api:
     desc: codegen client and server
     cmds:
-      - task: codegen-client
-      - task: codegen-server
+      - task: codegen-api-client
+      - task: codegen-api-server
   codegen-api-client:
     desc: codegen client
     cmds:
