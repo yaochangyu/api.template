@@ -1,4 +1,7 @@
-﻿using JobBank1111.Infrastructure;
+﻿using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using JobBank1111.Infrastructure;
 using JobBank1111.Infrastructure.TraceContext;
 using JobBank1111.Job.DB;
 using Microsoft.EntityFrameworkCore;
@@ -68,12 +71,108 @@ public class MemberRepository(
         var selector = dbContext.Members
             .Select(p => new GetMemberResponse { Id = p.Id, Name = p.Name, Age = p.Age, Email = p.Email })
             .AsNoTracking();
-        
+
         var totalCount = selector.Count();
         var paging = selector.OrderBy(p => p.Id)
             .Skip(pageIndex * pageSize)
             .Take(pageSize);
-        var result = await paging.ToListAsync(cancel);
+        var result = await paging
+            .TagWith($"{nameof(MemberRepository)}.{nameof(this.GetMembersAsync)}")
+            .ToListAsync(cancel);
         return new PaginatedList<GetMemberResponse>(result, pageIndex, pageSize, totalCount);
+    }
+
+    public async Task<CursorPaginatedList<GetMemberResponse>>
+        GetMembersAsync(int pageSize,
+                        string nextPageToken,
+                        bool noCache = true,
+                        CancellationToken cancel = default)
+    {
+        // if (noCache) 永遠撈新的資料
+        // else 撈快取的資料
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
+        var decodeResult = DecodePageToken(nextPageToken);
+        var query = dbContext.Members
+            .Select(p => p)
+            .AsNoTracking();
+        if (decodeResult.lastSequenceId > 0)
+        {
+            query = query.Where(p => p.SequenceId > decodeResult.lastSequenceId);
+        }
+
+        query = query.Take(pageSize + 1);
+        var selector =
+            query.Select(p => new GetMemberResponse
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Age = p.Age,
+                Email = p.Email,
+                SequenceId = p.SequenceId
+            });
+        var results = await selector
+            .TagWith($"{nameof(MemberRepository)}.{nameof(this.GetMembersAsync)}")
+            .ToListAsync(cancel);
+
+        // 是否有下一頁
+        var hasNextPage = results.Count > pageSize;
+
+        if (hasNextPage)
+        {
+            // 有下一頁，刪除最後一筆
+            results.RemoveAt(results.Count - 1);
+
+            // 產生下一頁的令牌
+            var after = results.LastOrDefault();
+            if (after != null)
+            {
+                nextPageToken = EncodePageToken(after.Id, after.SequenceId);
+            }
+            else
+            {
+                nextPageToken = null;
+            }
+        }
+
+        return new CursorPaginatedList<GetMemberResponse>(results, nextPageToken, null);
+    }
+
+    // 將 Id 和 SequenceId 轉換為下一頁的令牌
+    public static string EncodePageToken(string? lastId, long? lastSequenceId)
+    {
+        if (lastId == null || lastSequenceId == null)
+        {
+            return null;
+        }
+
+        var json = JsonSerializer.Serialize(new { lastId, lastSequenceId });
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+    }
+
+    // 將下一頁的令牌解碼為 Id 和 SequenceId
+    private static (string lastId, long lastSequenceId) DecodePageToken(string nextToken)
+    {
+        if (string.IsNullOrEmpty(nextToken))
+        {
+            return (null, 0);
+        }
+
+        string lastId = null;
+        long lastSequenceId = 0;
+        var base64Bytes = Convert.FromBase64String(nextToken);
+        var json = Encoding.UTF8.GetString(base64Bytes);
+        var jsonNode = JsonNode.Parse(json);
+        var jsonObject = jsonNode.AsObject();
+        if (jsonObject.TryGetPropertyValue("lastSequenceId", out var lastSequenceIdNode))
+        {
+            lastSequenceId = lastSequenceIdNode.GetValue<long>();
+        }
+
+        if (jsonObject.TryGetPropertyValue("lastId", out var lastIdNode))
+        {
+            lastId = lastIdNode.GetValue<string>();
+        }
+
+        return (lastId, lastSequenceId);
     }
 }

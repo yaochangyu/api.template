@@ -26,7 +26,7 @@
             | Email    | Name | Age | CreatedAt                 | CreatedAt                 |
             | yao@9527 | yao  | 18  | 2000-01-01T00:00:00+00:00 | 2000-01-01T00:00:00+00:00 |
 
-    Scenario: 查詢所有會員
+    Scenario: 查詢所有會員 offset
         Given 資料庫已存在 Member 資料
             | Id | Email    | Name | Age |
             | 1  | yao@9527 | yao1 | 18  |
@@ -35,7 +35,7 @@
         Given 調用端已準備 Header 參數
             | x-page-size | x-page-index | cache-control |
             | 2           | 0            | no-cache      |
-        When 調用端發送 "GET" 請求至 "api/v1/members"
+        When 調用端發送 "GET" 請求至 "api/v1/members:offset"
         Then 預期得到 HttpStatusCode 為 "200"
         Then 預期得到 Header 為
             | page-size | page-index | row-total |
@@ -63,6 +63,56 @@
           "hasNextPage": true
         }
         """
+
+    Scenario: 查詢所有會員 cursor
+        Given 資料庫已存在 Member 資料
+            | Id | Email    | Name | Age |
+            | 1  | yao@9527 | yao1 | 18  |
+            | 2  | yao@9528 | yao2 | 18  |
+            | 3  | yao@9529 | yao3 | 18  |
+        Given 調用端已準備 Header 參數
+            | x-page-size | x-next-page-token |
+            | 1           |                   |
+        When 調用端發送 "GET" 請求至 "api/v1/members:cursor"
+        Then 預期得到 HttpStatusCode 為 "200"
+        Then 預期回傳內容為
+        """
+        {
+          "items": [
+            {
+              "id": "1",
+              "name": "yao1",
+              "age": 18,
+              "email": "yao@9527",
+              "sequenceId": 1
+            }
+          ],
+          "nextPageToken": "eyJsYXN0SWQiOiIxIiwibGFzdFNlcXVlbmNlSWQiOjF9",
+          "nextPreviousToken": null
+        }
+        """
+        Then 預期得到 HttpStatusCode 為 "200"
+        Given 調用端已準備 Header 參數
+            | x-page-size | x-next-page-token   |
+            | 1           | {{next-page-token}} |
+        When 調用端發送 "GET" 請求至 "api/v1/members:cursor"
+        Then 預期得到 HttpStatusCode 為 "200"
+        Then 預期回傳內容為
+        """
+        {
+          "items": [
+            {
+              "id": "2",
+              "name": "yao2",
+              "age": 18,
+              "email": "yao@9528",
+              "sequenceId": 2
+            }
+          ],
+          "nextPageToken": "eyJsYXN0SWQiOiIyIiwibGFzdFNlcXVlbmNlSWQiOjJ9",
+          "nextPreviousToken": null
+        }
+        """ 
 
     Scenario: 外部服務
         Given 資料庫已存在 Member 資料

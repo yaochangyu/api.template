@@ -115,4 +115,11 @@ public class MemberHandler(
         var result = await repository.GetMembersAsync(pageIndex, pageSize, noCache, cancel);
         return result;
     }
+
+    public async Task<CursorPaginatedList<GetMemberResponse>>
+        GetMembersAsync(int pageSize, string nextPageToken, bool noCache = true, CancellationToken cancel = default)
+    {
+        var result = await repository.GetMembersAsync(pageSize, nextPageToken, noCache, cancel);
+        return result;
+    }
 }

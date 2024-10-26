@@ -91,6 +91,12 @@ public static class ScenarioContextExtension
     public static HttpStatusCode GetHttpStatusCode(this ScenarioContext context) =>
         context.Get<HttpStatusCode>("HttpStatusCode");
 
+    public static void SetNextPageToken(this ScenarioContext context, string nextPageToken) =>
+        context.Set(nextPageToken, "NextPageToken");
+
+    public static string GetNextPageToken(this ScenarioContext context) =>
+        context.Get<string>("NextPageToken");
+
     public static void SetXUnitLog(this ScenarioContext context, StringBuilder stringBuilder)
     {
         context.Set(stringBuilder, "XUnitLog");

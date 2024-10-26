@@ -92,7 +92,7 @@ public class BaseStep : Steps
     {
         var userId = this.ScenarioContext.GetUserId();
         var now = this.ScenarioContext.GetUtcNow().Value;
-        var toDb = table.CreateSet<DB.Member>(p=>new DB.Member
+        var toDb = table.CreateSet<DB.Member>(p => new DB.Member
         {
             Id = null,
             Name = null,
@@ -156,7 +156,15 @@ public class BaseStep : Steps
         if (string.IsNullOrWhiteSpace(responseBody) == false)
         {
             Console.WriteLine(responseBody);
-            this.ScenarioContext.SetJsonNode(JsonNode.Parse(responseBody));
+            var jsonNode = JsonNode.Parse(responseBody);
+            this.ScenarioContext.SetJsonNode(jsonNode);
+            var jsonObject = jsonNode.AsObject();
+
+            if (jsonObject.TryGetPropertyValue("nextPageToken", out var nextPageTokenNode))
+            {
+                var nextPageToken = nextPageTokenNode.GetValue<string>();
+                this.ScenarioContext.SetNextPageToken(nextPageToken);
+            }
         }
     }
 
@@ -239,6 +247,7 @@ public class BaseStep : Steps
     public void Then預期回傳內容為(string expected)
     {
         var actual = this.ScenarioContext.GetHttpResponseBody();
+        JsonNode expectedJsonNode = JsonNode.Parse(actual);
         JsonAssert.Equal(expected, actual, true);
     }
 
@@ -250,6 +259,11 @@ public class BaseStep : Steps
             foreach (var header in table.Header)
             {
                 var value = row[header];
+                if (value == "{{next-page-token}}")
+                {
+                    value = this.ScenarioContext.GetNextPageToken();
+                }
+
                 this.ScenarioContext.AddHttpHeader(header, value);
             }
         }
@@ -315,6 +329,5 @@ public class BaseStep : Steps
     [Then(@"預期得到 Header 為")]
     public void Then預期得到Header為(Table table)
     {
-        
     }
 }
