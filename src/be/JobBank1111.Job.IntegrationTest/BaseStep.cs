@@ -9,19 +9,26 @@ using JobBank1111.Job.DB;
 using JobBank1111.Testing.Common;
 using JobBank1111.Testing.Common.MockServer;
 using Json.Path;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Reqnroll;
+using Xunit;
 using Xunit.Abstractions;
+
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 namespace JobBank1111.Job.WebAPI.IntegrationTest;
 
 [Binding]
+[CollectionDefinition("JobBank1111.Job.IntegrationTest", DisableParallelization = true)]
 public class BaseStep : Steps
 {
     private readonly ITestOutputHelper _testOutputHelper;
     private static HttpClient ExternalClient;
+   static IServiceProvider ServiceProvider;
+
     private const string StringEquals = "字串等於";
     private const string NumberEquals = "數值等於";
     private const string BoolEquals = "布林值等於";
@@ -47,13 +54,11 @@ public class BaseStep : Steps
         TestAssistant.SetEnvironmentVariables();
 
         //建立當前測試步驟所需要的 DI Containers
-        var serviceProvider = CreateServiceProvider();
+        ServiceProvider = CreateServiceProvider();
 
-        // //初始化測試專案需要的資源
-        await InitialDatabase(serviceProvider);
-
-        //
-        async Task InitialDatabase(ServiceProvider serviceProvider)
+        await InitialDatabase(ServiceProvider);
+        
+        async Task InitialDatabase(IServiceProvider serviceProvider)
         {
             var dbContextFactory = serviceProvider.GetService<IDbContextFactory<MemberDbContext>>();
             await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -76,7 +81,13 @@ public class BaseStep : Steps
         }
     }
 
-    private static ServiceProvider CreateServiceProvider()
+    [BeforeScenario]
+    public async Task BeforeScenario()
+    {
+        this.ClearData(ServiceProvider);
+    }
+
+    private static IServiceProvider CreateServiceProvider()
     {
         var services = new ServiceCollection();
         services.AddSysEnvironments();
@@ -85,6 +96,13 @@ public class BaseStep : Steps
 
         var serviceProvider = services.BuildServiceProvider();
         return serviceProvider;
+    }
+
+    private void ClearData(IServiceProvider serviceProvider)
+    {
+        var contextFactory = serviceProvider.GetRequiredService<IDbContextFactory<MemberDbContext>>();
+        using var dbContext = contextFactory.CreateDbContext();
+        dbContext.ClearAllData();
     }
 
     [Given(@"資料庫已存在 Member 資料")]

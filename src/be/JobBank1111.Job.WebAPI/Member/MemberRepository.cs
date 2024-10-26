@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace JobBank1111.Job.WebAPI.Member;
 
 public class MemberRepository(
-    ILogger<MemberController> logger,
+    ILogger<MemberRepository> logger,
     IContextGetter<TraceContext?> authContextGetter,
     IDbContextFactory<MemberDbContext> dbContextFactory,
     TimeProvider timeProvider,

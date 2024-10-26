@@ -48,20 +48,22 @@
               "id": "1",
               "name": "yao1",
               "age": 18,
-              "email": "yao@9527"
+              "email": "yao@9527",
+              "sequenceId": null
             },
             {
               "id": "2",
               "name": "yao2",
               "age": 18,
-              "email": "yao@9528"
+              "email": "yao@9528",
+              "sequenceId": null
             }
           ],
           "pageIndex": 0,
           "totalPages": 2,
           "hasPreviousPage": false,
           "hasNextPage": true
-        }
+        } 
         """
 
     Scenario: 查詢所有會員 cursor

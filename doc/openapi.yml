@@ -1,0 +1,171 @@
+openapi: 3.0.1
+info:
+  title: JobBank1111.Job.WebAPI
+  version: '1.0'
+paths:
+  /api/v1/tags:cursor:
+    get:
+      tags:
+        - Tag
+      operationId: GetTagsCursor
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Failure'
+  /api/v1/members:cursor:
+    get:
+      tags:
+        - Member
+      operationId: GetMembersCursor
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+  /api/v1/members:offset:
+    get:
+      tags:
+        - Member
+      operationId: GetMemberOffset
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+  /api/v2/members:
+    post:
+      tags:
+        - Member
+      operationId: InsertMember2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsertMemberRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/InsertMemberRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/InsertMemberRequest'
+      responses:
+        '200':
+          description: OK
+  /api/v1/members:
+    post:
+      tags:
+        - Member
+      operationId: InsertMember1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsertMemberRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/InsertMemberRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/InsertMemberRequest'
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    GetMemberResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        age:
+          type: integer
+          format: int32
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        sequenceId:
+          type: integer
+          format: int64
+          nullable: true
+      additionalProperties: false
+    GetMemberResponseCursorPaginatedList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/GetMemberResponse'
+          nullable: true
+        nextPageToken:
+          type: string
+          nullable: true
+        nextPreviousToken:
+          type: string
+          nullable: true
+      additionalProperties: false
+    InsertMemberRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        age:
+          type: integer
+          format: int32
+      additionalProperties: false
+
+    Failure:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: false
+        reason:
+          type: string
+          nullable: false
+      additionalProperties: false

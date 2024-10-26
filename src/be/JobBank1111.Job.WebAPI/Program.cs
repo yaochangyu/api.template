@@ -1,6 +1,8 @@
 using JobBank1111.Infrastructure;
 using JobBank1111.Job.WebAPI;
+using JobBank1111.Job.WebAPI.Contract;
 using JobBank1111.Job.WebAPI.Member;
+using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
 
@@ -46,11 +48,12 @@ try
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
+    builder.Services.AddHttpContextAccessor(); 
+    builder.Services.AddScoped<IMemberController, JobBank1111.Job.WebAPI.Member.MemberController2>();
 
     builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
     builder.Services.AddContextAccessor();
     builder.Services.AddSysEnvironments();
-
     builder.Services.AddScoped<IUuidProvider, UuidProvider>();
     builder.Services.AddScoped<MemberHandler>();
     builder.Services.AddScoped<MemberRepository>();
@@ -62,16 +65,35 @@ try
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
-        app.UseSwaggerUI();
+        app.UseSwaggerUI(options =>
+                             options.SwaggerEndpoint("/swagger/v1/swagger.yaml",
+                                                     "Swagger Demo Documentation v1"));
+        app.UseReDoc(options =>
+        {
+            options.DocumentTitle = "Swagger Demo Documentation";
+            options.SpecUrl = "/swagger/v1/swagger.yaml";
+            options.RoutePrefix = "redoc";
+            options.ConfigObject.HideHostname = true;
+        });
+        
+        app.MapScalarApiReference(p =>
+        {
+            p.OpenApiRoutePattern = "/swagger/v1/swagger.json";
+
+            // p.EndpointPathPrefix = "scalar";
+        });
     }
+
     app.MapDefaultControllerRoute();
     app.UseRouting();
-    app.UseEndpoints(endpoints =>{
+    app.UseEndpoints(endpoints =>
+    {
         //注册Web API Controller
         endpoints.MapControllers();
+
         //注册MVC Controller模板 {controller=Home}/{action=Index}/{id?}
         // endpoints.MapDefaultControllerRoute();
-        
+
         //注册健康检查
         // endpoints.MapHealthChecks("/_hc");
     });
