@@ -26,9 +26,11 @@ namespace JobBank1111.Job.WebAPI.Contract
     public interface ITagController
     {
 
+        /// <param name="x_next_page_token">next page token</param>
+
         /// <returns>OK</returns>
 
-        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetTagsCursorAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetTagsCursorAsync(string x_next_page_token, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
     }
 
@@ -43,12 +45,13 @@ namespace JobBank1111.Job.WebAPI.Contract
             _implementation = implementation;
         }
 
+        /// <param name="x_next_page_token">next page token</param>
         /// <returns>OK</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v2/tags:cursor")]
-        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetTagsCursor(System.Threading.CancellationToken cancellationToken)
+        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetTagsCursor([Microsoft.AspNetCore.Mvc.FromHeader(Name = "x-next-page-token")] string x_next_page_token, System.Threading.CancellationToken cancellationToken)
         {
 
-            return _implementation.GetTagsCursorAsync(cancellationToken);
+            return _implementation.GetTagsCursorAsync(x_next_page_token, cancellationToken);
         }
 
     }

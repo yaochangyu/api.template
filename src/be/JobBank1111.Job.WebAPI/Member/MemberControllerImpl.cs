@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JobBank1111.Job.WebAPI.Member;
 
-public class MemberController2(
+public class MemberControllerImpl(
     MemberHandler memberHandler,
     IHttpContextAccessor httpContextAccessor
 ) : IMemberController

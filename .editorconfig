@@ -317,3 +317,7 @@ dotnet_diagnostic.ca1012.severity = warning
 
 # CA1822: Make member static
 dotnet_diagnostic.ca1822.severity = warning
+
+[{*.yaml,*.yml}]
+indent_size = 2
+tab_width = 2

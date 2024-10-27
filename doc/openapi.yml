@@ -8,6 +8,13 @@ paths:
       tags:
         - Tag
       operationId: GetTagsCursor
+      parameters:
+        - in: header
+          name: x-next-page-token
+          schema:
+            type: string
+          required: true
+          description: next page token
       responses:
         '200':
           description: OK
@@ -21,6 +28,15 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+            headers:
+              x-next-page-token:
+                description: The next page token
+                schema:
+                  type: string
+              x-next-previous-token:
+                description: The next previous token
+                schema:
+                  type: string
         '400':
           description: Bad Request
           content:
@@ -51,6 +67,15 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+          headers: 
+            x-next-page-token:
+              description: The next page token
+              schema:
+                type: string
+            x-next-previous-token:
+              description: The next previous token
+              schema:
+                type: string
   /api/v2/members:offset:
     get:
       tags:
