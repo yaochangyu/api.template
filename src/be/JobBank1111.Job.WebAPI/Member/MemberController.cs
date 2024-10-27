@@ -1,5 +1,4 @@
-﻿// using JobBank1111.Job.WebAPI.Contract;
-// using Microsoft.AspNetCore.Mvc;
+﻿// using Microsoft.AspNetCore.Mvc;
 //
 // namespace JobBank1111.Job.WebAPI.Member;
 //
@@ -8,8 +7,8 @@
 //     MemberHandler memberHandler) : ControllerBase
 // {
 //     [HttpGet]
-//     [Route("api/v1/members:cursor", Name = "GetCursor")]
-//     public async Task<ActionResult<CursorPaginatedList<GetMemberResponse>>> GetCursor(
+//     [Route("api/v1/members:cursor", Name = "GetMemberCursor")]
+//     public async Task<ActionResult<CursorPaginatedList<GetMemberResponse>>> GetMemberCursor(
 //         CancellationToken cancel = default)
 //     {
 //         var noCache = true;
@@ -20,8 +19,8 @@
 //     }
 //
 //     [HttpGet]
-//     [Route("api/v1/members:offset", Name = "GetOffset")]
-//     public async Task<ActionResult<CursorPaginatedList<GetMemberResponse>>> GetOffset(
+//     [Route("api/v1/members:offset", Name = "GetMemberOffset")]
+//     public async Task<ActionResult<PaginatedList<GetMemberResponse>>> GetMemberOffset(
 //         CancellationToken cancel = default)
 //     {
 //         var pageSize = 10;

@@ -18,7 +18,7 @@ public class MemberControllerImpl(
         return new ObjectResult(result) { StatusCode = StatusCodes.Status200OK };
     }
 
-    public async Task<ActionResult<GetMemberResponseCursorPaginatedList>> GetMemberOffsetAsync(
+    public async Task<ActionResult<GetMemberResponsePaginatedList>> GetMemberOffsetAsync(
         CancellationToken cancellationToken = default(CancellationToken))
     {
         var request = httpContextAccessor.HttpContext.Request;

@@ -1,6 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
 using JobBank1111.Infrastructure.TraceContext;
-using JobBank1111.Job.WebAPI.Contract;
 
 namespace JobBank1111.Job.WebAPI.Member;
 

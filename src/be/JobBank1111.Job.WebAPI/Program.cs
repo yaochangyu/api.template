@@ -1,8 +1,5 @@
 using JobBank1111.Infrastructure;
 using JobBank1111.Job.WebAPI;
-using JobBank1111.Job.WebAPI.Contract;
-
-// using JobBank1111.Job.WebAPI.Contract;
 using JobBank1111.Job.WebAPI.Member;
 using Scalar.AspNetCore;
 using Serilog;
@@ -28,8 +25,10 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     // Add services to the container.
-    builder.Services.AddControllers();
-
+    builder.Services.AddSingleton(p => JsonSerializeFactory.DefaultOptions);
+    builder.Services.AddControllers()
+        .AddJsonOptions(options => JsonSerializeFactory.Apply(options.JsonSerializerOptions))
+        ;
     builder.Host
         .UseSerilog((context, services, config) =>
                         config.ReadFrom.Configuration(context.Configuration)
@@ -67,7 +66,7 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
     builder.Services.AddHttpContextAccessor();
-    builder.Services.AddScoped<IMemberController, JobBank1111.Job.WebAPI.Member.MemberControllerImpl>();
+    builder.Services.AddScoped<JobBank1111.Job.WebAPI.Contract.IMemberController, JobBank1111.Job.WebAPI.Member.MemberControllerImpl>();
 
     builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
     builder.Services.AddContextAccessor();

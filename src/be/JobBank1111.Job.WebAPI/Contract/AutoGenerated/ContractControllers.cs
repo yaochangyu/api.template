@@ -67,7 +67,7 @@ namespace JobBank1111.Job.WebAPI.Contract
 
         /// <returns>OK</returns>
 
-        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetMemberOffsetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponsePaginatedList>> GetMemberOffsetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
 
         /// <returns>OK</returns>
@@ -97,7 +97,7 @@ namespace JobBank1111.Job.WebAPI.Contract
 
         /// <returns>OK</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v2/members:offset")]
-        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetMemberOffset(System.Threading.CancellationToken cancellationToken)
+        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponsePaginatedList>> GetMemberOffset(System.Threading.CancellationToken cancellationToken)
         {
 
             return _implementation.GetMemberOffsetAsync(cancellationToken);
@@ -146,6 +146,27 @@ namespace JobBank1111.Job.WebAPI.Contract
 
         [System.Text.Json.Serialization.JsonPropertyName("nextPreviousToken")]
         public string NextPreviousToken { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.1.0.0 (NJsonSchema v11.0.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class GetMemberResponsePaginatedList
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        public System.Collections.Generic.List<GetMemberResponse> Items { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageIndex")]
+        public int PageIndex { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("totalPages")]
+        public int TotalPages { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("hasPreviousPage")]
+        public bool HasPreviousPage { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("hasNextPage")]
+        public bool HasNextPage { get; set; }
 
     }
 

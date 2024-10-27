@@ -87,13 +87,13 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+                $ref: '#/components/schemas/GetMemberResponsePaginatedList'
             application/json:
               schema:
-                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+                $ref: '#/components/schemas/GetMemberResponsePaginatedList'
             text/json:
               schema:
-                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+                $ref: '#/components/schemas/GetMemberResponsePaginatedList'
   /api/v2/members:
     post:
       tags:
@@ -150,6 +150,30 @@ components:
         nextPreviousToken:
           type: string
           nullable: true
+      additionalProperties: false
+    GetMemberResponsePaginatedList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/GetMemberResponse'
+          nullable: true
+          readOnly: true
+        pageIndex:
+          type: integer
+          format: int32
+          readOnly: true
+        totalPages:
+          type: integer
+          format: int32
+          readOnly: true
+        hasPreviousPage:
+          type: boolean
+          readOnly: true
+        hasNextPage:
+          type: boolean
+          readOnly: true
       additionalProperties: false
     InsertMemberRequest:
       type: object

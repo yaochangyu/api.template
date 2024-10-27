@@ -15,7 +15,8 @@ public class MemberRepository(
     IDbContextFactory<MemberDbContext> dbContextFactory,
     TimeProvider timeProvider,
     IUuidProvider uuidProvider,
-    IDistributedCache cache)
+    IDistributedCache cache,
+    JsonSerializerOptions jsonSerializerOptions)
 {
     public async Task<int> InsertAsync(InsertMemberRequest request,
                                        CancellationToken cancel = default)
@@ -71,12 +72,14 @@ public class MemberRepository(
         var userId = traceContext.UserId;
         PaginatedList<GetMemberResponse> result;
         var key = nameof(CacheKeys.MemberData);
+        string cachedData = null;
         if (noCache == false) // 如果有快取，就從快取撈資料
         {
-            var cachedData = await cache.GetStringAsync(key, cancel);
+            cachedData = await cache.GetStringAsync(key, cancel);
             if (cachedData != null)
             {
-                result = JsonSerializer.Deserialize<PaginatedList<GetMemberResponse>>(cachedData);
+                result = JsonSerializer.Deserialize<PaginatedList<GetMemberResponse>>(
+                    cachedData, jsonSerializerOptions);
                 return result;
             }
         }
@@ -95,7 +98,8 @@ public class MemberRepository(
             .TagWith($"{nameof(MemberRepository)}.{nameof(this.GetMembersAsync)}")
             .ToListAsync(cancel);
         result = new PaginatedList<GetMemberResponse>(data, pageIndex, pageSize, totalCount);
-        cache.SetStringAsync(key, JsonSerializer.Serialize(result),
+        cachedData = JsonSerializer.Serialize(result, jsonSerializerOptions);
+        cache.SetStringAsync(key, cachedData,
                              new DistributedCacheEntryOptions
                              {
                                  AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) //最好從組態設定讀取
