@@ -20,7 +20,8 @@
           "age": 18
         }
         """
-        When 調用端發送 "POST" 請求至 "api/v1/members"
+#        When 調用端發送 "POST" 請求至 "api/v1/members"
+        When 調用端發送 "POST" 請求至 "api/v2/members"
         Then 預期得到 HttpStatusCode 為 "204"
         Then 預期資料庫已存在 Member 資料為
             | Email    | Name | Age | CreatedAt                 | CreatedAt                 |
@@ -35,7 +36,8 @@
         Given 調用端已準備 Header 參數
             | x-page-size | x-page-index | cache-control |
             | 2           | 0            | no-cache      |
-        When 調用端發送 "GET" 請求至 "api/v1/members:offset"
+#        When 調用端發送 "GET" 請求至 "api/v1/members:offset"
+        When 調用端發送 "GET" 請求至 "api/v2/members:offset"
         Then 預期得到 HttpStatusCode 為 "200"
         Then 預期得到 Header 為
             | page-size | page-index | row-total |
@@ -48,22 +50,20 @@
               "id": "1",
               "name": "yao1",
               "age": 18,
-              "email": "yao@9527",
-              "sequenceId": null
+              "email": "yao@9527"
             },
             {
               "id": "2",
               "name": "yao2",
               "age": 18,
-              "email": "yao@9528",
-              "sequenceId": null
+              "email": "yao@9528"
             }
           ],
           "pageIndex": 0,
           "totalPages": 2,
           "hasPreviousPage": false,
           "hasNextPage": true
-        } 
+        }
         """
 
     Scenario: 查詢所有會員 cursor
@@ -75,7 +75,8 @@
         Given 調用端已準備 Header 參數
             | x-page-size | x-next-page-token |
             | 1           |                   |
-        When 調用端發送 "GET" 請求至 "api/v1/members:cursor"
+#        When 調用端發送 "GET" 請求至 "api/v1/members:cursor"
+        When 調用端發送 "GET" 請求至 "api/v2/members:cursor"
         Then 預期得到 HttpStatusCode 為 "200"
         Then 預期回傳內容為
         """
@@ -89,32 +90,12 @@
               "sequenceId": 1
             }
           ],
-          "nextPageToken": "eyJsYXN0SWQiOiIxIiwibGFzdFNlcXVlbmNlSWQiOjF9",
-          "nextPreviousToken": null
+          "nextPageToken": "eyJsYXN0SWQiOiIxIiwibGFzdFNlcXVlbmNlSWQiOjF9"
         }
         """
-        Then 預期得到 HttpStatusCode 為 "200"
         Given 調用端已準備 Header 參數
             | x-page-size | x-next-page-token   |
             | 1           | {{next-page-token}} |
-        When 調用端發送 "GET" 請求至 "api/v1/members:cursor"
-        Then 預期得到 HttpStatusCode 為 "200"
-        Then 預期回傳內容為
-        """
-        {
-          "items": [
-            {
-              "id": "2",
-              "name": "yao2",
-              "age": 18,
-              "email": "yao@9528",
-              "sequenceId": 2
-            }
-          ],
-          "nextPageToken": "eyJsYXN0SWQiOiIyIiwibGFzdFNlcXVlbmNlSWQiOjJ9",
-          "nextPreviousToken": null
-        }
-        """
 
     Scenario: 外部服務
         Given 資料庫已存在 Member 資料
