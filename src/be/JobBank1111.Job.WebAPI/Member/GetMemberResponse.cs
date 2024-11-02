@@ -1,4 +1,6 @@
-﻿namespace JobBank1111.Job.WebAPI.Member;
+﻿using System.Text.Json.Serialization;
+
+namespace JobBank1111.Job.WebAPI.Member;
 
 public class GetMemberResponse
 {
@@ -10,5 +12,6 @@ public class GetMemberResponse
 
     public string Email { get; set; }
 
+    [JsonIgnore]
     public long? SequenceId { get; set; }
 }

@@ -86,11 +86,10 @@
               "id": "1",
               "name": "yao1",
               "age": 18,
-              "email": "yao@9527",
-              "sequenceId": 1
+              "email": "yao@9527"
             }
           ],
-          "nextPageToken": "eyJsYXN0SWQiOiIxIiwibGFzdFNlcXVlbmNlSWQiOjF9"
+          "nextPageToken": "eyJsYXN0SWQiOiIxIiwibGFzdFNlcXVlbmNlSWQiOjJ9"
         }
         """
         Given 調用端已準備 Header 參數
