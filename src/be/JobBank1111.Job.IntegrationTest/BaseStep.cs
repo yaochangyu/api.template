@@ -139,12 +139,10 @@ public class BaseStep : Steps
     public async Task When調用端發送請求至(string methodName, string url)
     {
         var client = this.ScenarioContext.GetHttpClient();
-
+        var baseUrl = client.BaseAddress.ToString();
         var httpMethod = new HttpMethod(methodName);
-        var urlSegments = Url.ParsePathSegments(url);
-        var urlEncoded = Url.Combine(urlSegments.ToArray());
-        urlEncoded = this.AppendQuery(urlEncoded);
-        using var httpRequest = new HttpRequestMessage(httpMethod, urlEncoded);
+        var finalUrl = this.AppendQuery(baseUrl, url);
+        using var httpRequest = new HttpRequestMessage(httpMethod, finalUrl);
 
         var contentType = MediaTypeNames.Application.Json;
         var headers = this.ScenarioContext.GetOrNewHeaders();
@@ -240,18 +238,16 @@ public class BaseStep : Steps
         }
     }
 
-    private string AppendQuery(string url)
+    private string AppendQuery(string baseUrl,string url)
     {
-        var flUrl = new Url(url);
+        var urlBuilder = new UrlBuilder(baseUrl, url);
+        
         foreach (var query in this.ScenarioContext.GetAllQueryString())
         {
-            flUrl.QueryParams.Add(query.Key, query.Value.Trim());
-
-            // 不能用  SetQueryParam，因為有多個相同的 querystring 如: filters，會後蓋前
-            //url = url.SetQueryParam(query.Key, query.Value.Trim());
+            urlBuilder.AddParameter(query.Key, query.Value);
         }
 
-        return flUrl.ToString();
+        return urlBuilder.BuildUrl();
     }
 
     [Then(@"預期回傳內容中路徑 ""(.*)"" 的""(.*)"" ""(.*)""")]
@@ -265,7 +261,7 @@ public class BaseStep : Steps
     public void Then預期回傳內容為(string expected)
     {
         var actual = this.ScenarioContext.GetHttpResponseBody();
-        JsonNode expectedJsonNode = JsonNode.Parse(actual);
+        var expectedJsonNode = JsonNode.Parse(actual);
         JsonAssert.Equal(expected, actual, true);
     }
 
@@ -347,5 +343,18 @@ public class BaseStep : Steps
     [Then(@"預期得到 Header 為")]
     public void Then預期得到Header為(Table table)
     {
+    }
+
+    [Given(@"調用端已準備以下 Query 參數")]
+    public void Given調用端已準備以下Query參數(Table table)
+    {
+        foreach (var row in table.Rows)
+        {
+            foreach (var header in table.Header)
+            {
+                var value = row[header];
+                this.ScenarioContext.AddQueryString(header, value);
+            }
+        }
     }
 }

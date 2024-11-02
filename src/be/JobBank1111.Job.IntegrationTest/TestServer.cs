@@ -1,4 +1,5 @@
 ﻿using JobBank1111.Infrastructure.TraceContext;
+using JobBank1111.Job.WebAPI.IntegrationTest._01_Demo;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,9 @@ public class TestServer(DateTimeOffset now,
 {
     private void ConfigureServices(IServiceCollection services)
     {
+        services.AddControllers()
+            .AddApplicationPart(typeof(TestController).Assembly);
+        
         //模擬身分
         services.AddFakeContextAccessor(userId);
         

@@ -114,7 +114,7 @@
           "nextPageToken": "eyJsYXN0SWQiOiIyIiwibGFzdFNlcXVlbmNlSWQiOjJ9",
           "nextPreviousToken": null
         }
-        """ 
+        """
 
     Scenario: 外部服務
         Given 資料庫已存在 Member 資料
@@ -174,3 +174,27 @@
         Then 預期回傳內容中路徑 "$.Birthday" 的"時間等於" "2000-01-01T00:00:00+00:00"
         Then 預期回傳內容中路徑 "$.FullName.FirstName" 的"字串等於" "John"
         Then 預期回傳內容中路徑 "$.FullName.LastName" 的"字串等於" "Doe"
+
+    Scenario: 測試 API Header-1
+        When 調用端發送 "GET" 請求至 "api/v1/tests?userId=yao&description=我跟你說你不要跟別人說，你若跟別人說，不要跟別人說，是我叫你不要跟別人說"
+        Then 預期得到 HttpStatusCode 為 "200"
+        Then 預期回傳內容為
+        """
+        {
+          "userId": "yao",
+          "description": "我跟你說你不要跟別人說，你若跟別人說，不要跟別人說，是我叫你不要跟別人說"
+        }
+        """
+
+    Scenario: 測試 API Header-2
+        Given 調用端已準備以下 Query 參數
+            | userId | description                          |
+            | yao    | 我跟你說你不要跟別人說，你若跟別人說，不要跟別人說，是我叫你不要跟別人說 |
+        When 調用端發送 "GET" 請求至 "api/v1/tests"
+        Then 預期回傳內容為
+        """
+        {
+          "userId": "yao",
+          "description": "我跟你說你不要跟別人說，你若跟別人說，不要跟別人說，是我叫你不要跟別人說"
+        }
+        """

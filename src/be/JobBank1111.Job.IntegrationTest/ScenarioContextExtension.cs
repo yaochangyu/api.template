@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Reqnroll;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace JobBank1111.Job.WebAPI.IntegrationTest;
 
@@ -57,20 +58,23 @@ public static class ScenarioContextExtension
 
     public static void AddQueryString(this ScenarioContext context, string key, string value)
     {
-        if (!context.TryGetValue<IList<(string Key, string Value)>>("QueryString", out var data))
+        if (context.TryGetValue<IDictionary<string, string>>("QueryString", out var data) == false)
         {
-            data = new List<(string Key, string Value)>();
+            data = new Dictionary<string, string>();
         }
 
-        data.Add((key, value));
+        data.Add(key, value);
         context.Set(data, "QueryString");
     }
 
-    public static IList<(string Key, string Value)> GetAllQueryString(this ScenarioContext context)
+    public static IDictionary<string, string> GetAllQueryString(this ScenarioContext context)
     {
-        return context.TryGetValue(out IList<(string Key, string Value)> result)
-            ? result
-            : new List<(string Key, string Value)>();
+        if (context.TryGetValue<IDictionary<string, string>>("QueryString", out var data) == false)
+        {
+            data = new Dictionary<string, string>();
+        }
+
+        return data;
     }
 
     public static void SetHttpResponse(this ScenarioContext context, HttpResponseMessage response) =>
