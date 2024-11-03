@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="LazyProxy" Version="1.0.2" />
+      <PackageReference Include="LazyProxy.ServiceProvider" Version="0.1.3" />
+      <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.10" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
     </ItemGroup>
 

@@ -46,21 +46,7 @@ try
         p.ValidateOnBuild = true;
     });
     var configuration = builder.Configuration;
-
-    builder.Services.AddStackExchangeRedisCache((options) =>
-    {
-        var connectionString = configuration.GetValue<string>(nameof(SYS_REDIS_URL));
-
-        // options.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions
-        // {
-        //     EndPoints = { connectionString },
-        //     DefaultDatabase = 0,
-        // };
-
-        options.Configuration = connectionString;
-
-        // options.InstanceName = "SampleInstance";
-    });
+    builder.Services.AddCacheProviderFactory(configuration);
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
