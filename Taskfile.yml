@@ -63,3 +63,9 @@ tasks:
     dir: "./doc"
     cmds:
       - redocly preview-docs ./openapi.yml
+
+  api-dev:
+    desc: WebApi Development
+    dir: "src/be/JobBank1111.Job.WebAPI"
+    cmds:
+      - dotnet watch run --local

@@ -8,7 +8,7 @@ public class SqlServerGenerateScript
     {
         return @"
 EXEC sp_MSForEachTable 'ALTER TABLE ? NOCHECK CONSTRAINT ALL'
-EXEC sp_MSForEachTable 'SET QUOTED_IDENTIFIER ON; DELETE FROM ?'
+EXEC sp_MSForEachTable 'SET QUOTED_IDENTIFIER ON; TRUNCATE  TABLE ?'
 EXEC sp_MSForEachTable 'ALTER TABLE ? WITH CHECK CHECK CONSTRAINT ALL'
 ";
     }
