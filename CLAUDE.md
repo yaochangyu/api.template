@@ -106,3 +106,20 @@
 - **集中處理**: 集中在 Middleware 處理，例如 TraceContextMiddleware
 - **依賴注入**: 透過 IContextSetter 設定用戶資訊
 - **資訊取得**: 透過 IContextGetter 取得用戶資訊
+
+## Result Pattern 實作指引
+
+專案中的方法應套用 Result Pattern，提供明確的成功/失敗處理機制：
+
+### 實作要點
+- **回傳類型**: 使用 `Result<TSuccess, TFailure>` 作為回傳類型
+- **驗證鏈**: 使用連續驗證模式，遇到失敗時立即回傳
+- **例外處理**: 統一捕捉例外並轉換為 `Failure` 物件
+- **追蹤資訊**: 在 `Failure` 物件中包含 TraceId 用於日誌追蹤
+- **結構化日誌**: 使用結構化日誌記錄錯誤資訊
+
+### 最佳實務
+- **不要重複拋出例外**: 處理過的例外不應再次 throw
+- **統一錯誤碼**: 使用 `nameof(FailureCode.*)` 定義錯誤碼
+- **包含追蹤資訊**: 確保所有 Failure 物件都包含 TraceId
+- **結構化資料**: 將相關資料存放在 Failure.Data 中供除錯使用
