@@ -75,3 +75,34 @@
 3. 在處理器與儲存庫中實作商業邏輯
 4. 執行 `task api-dev` 進行熱重載開發
 5. 使用 BDD 情境的整合測試進行測試
+
+## 開發原則
+
+### 不可變物件設計 (Immutable Objects)
+- 使用 C# record 類型定義不可變物件，例如 `TraceContext`
+- 所有屬性使用 `init` 關鍵字，確保物件在建立後無法修改
+- 避免在應用程式各層間傳遞可變狀態
+
+### TraceContext 管理
+- **集中式管理**: 所有追蹤內容與使用者資訊統一在 `TraceContextMiddleware` 中處理
+- **不可變性**: `TraceContext` 使用 record 定義，包含 `TraceId` 與 `UserId` 等不可變屬性
+- **生命週期**: 透過 `AsyncLocal<T>` 機制確保 TraceContext 在整個請求生命週期內可用
+- **服務注入**: 使用 `IContextGetter<T>` 與 `IContextSetter<T>` 介面進行依賴注入
+
+### 中介軟體責任
+- **身分驗證**: 在 `TraceContextMiddleware` 中統一處理使用者身分驗證
+- **TraceId 處理**: 從請求標頭擷取或自動產生 TraceId
+- **日誌增強**: 自動將 TraceId 與 UserId 附加到結構化日誌中
+- **回應標頭**: 自動將 TraceId 加入回應標頭供追蹤使用
+
+### 架構守則
+- 業務邏輯層不應直接處理 HTTP 相關邏輯
+- 所有跨領域關注點 (如身分驗證、日誌、追蹤) 應在中介軟體層處理
+- 使用不可變物件傳遞狀態，避免意外修改
+- 透過 DI 容器注入 TraceContext，而非直接傳遞參數
+
+### 用戶資訊管理
+- **不可變性原則**: 確保物件的不可變，例如身分驗證後的用戶資訊，存放在 TraceContext
+- **集中處理**: 集中在 Middleware 處理，例如 TraceContextMiddleware
+- **依賴注入**: 透過 IContextSetter 設定用戶資訊
+- **資訊取得**: 透過 IContextGetter 取得用戶資訊

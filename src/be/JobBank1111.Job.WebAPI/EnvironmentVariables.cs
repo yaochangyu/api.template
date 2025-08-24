@@ -1,7 +1,7 @@
 ﻿using JobBank1111.Infrastructure;
 
 namespace JobBank1111.Job.WebAPI;
-
+// 一個環境變數對應到一個物件，單一職責配置
 public record ASPNETCORE_ENVIRONMENT : EnvironmentVariableBase;
 
 public record SYS_DATABASE_CONNECTION_STRING : EnvironmentVariableBase;
