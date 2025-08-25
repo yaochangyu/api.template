@@ -62,15 +62,8 @@ public class MemberControllerImpl(
             Name = body.Name,
             Age = body.Age,
         }, cancellationToken);
-        if (result.IsFailure)
-        {
-            if (result.TryGetError(out var failure))
-            {
-                return new BadRequestObjectResult(failure);
-            }
-        }
 
-        return new ObjectResult(result.Value);
+        return result.ToActionResult();
     }
 
     private int TryGetPageSize()
