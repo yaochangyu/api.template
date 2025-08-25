@@ -24,31 +24,14 @@ public class MemberHandler(
             return validateResult;
         }
 
-        try
+        var insertResult = await repository.InsertAsync(request, cancel);
+        if (insertResult.IsFailure)
         {
-            var count = await repository.InsertAsync(request, cancel);
-            var success = Result.Success<Member, Failure>(srcMember);
-            return success;
-
-            //發送 Event 給 MQ
+            return Result.Failure<Member, Failure>(insertResult.Error);
         }
-        catch (Exception e)
-        {
-            //各自處理例外，處理過就不要再次 throw
-            //模擬插資料失敗
-            var failure = new Failure
-            {
-                Code = nameof(FailureCode.DbError),
-                Message = "資料庫錯誤",
-                Data = request,
-                Exception = e,
-                TraceId = traceContext.TraceId
-            };
 
-            logger.LogError($"{failure}", e);
-            var failed = Result.Failure<Member, Failure>(failure);
-            return failed;
-        }
+        var success = Result.Success<Member, Failure>(srcMember);
+        return success;
     }
 
     // 檢查是否有重複的 Email

@@ -8,14 +8,15 @@ public static class FailureCodeMapper
     {
         [nameof(FailureCode.Unauthorized)] = HttpStatusCode.Unauthorized,
         [nameof(FailureCode.DbError)] = HttpStatusCode.InternalServerError,
-        [nameof(FailureCode.DuplicateEmail)] = HttpStatusCode.Conflict
+        [nameof(FailureCode.DuplicateEmail)] = HttpStatusCode.Conflict,
+        [nameof(FailureCode.DbConcurrency)] = HttpStatusCode.Conflict
     };
 
     public static HttpStatusCode GetHttpStatusCode(string failureCode)
     {
         return CodeMapping.TryGetValue(failureCode, out var statusCode) 
             ? statusCode 
-            : HttpStatusCode.BadRequest;
+            : HttpStatusCode.InternalServerError;
     }
 
     public static HttpStatusCode GetHttpStatusCode(Failure failure)

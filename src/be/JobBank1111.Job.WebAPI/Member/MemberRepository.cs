@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using CSharpFunctionalExtensions;
 using JobBank1111.Infrastructure;
 using JobBank1111.Infrastructure.TraceContext;
 using JobBank1111.Job.DB;
@@ -18,28 +19,58 @@ public class MemberRepository(
     IDistributedCache cache,
     JsonSerializerOptions jsonSerializerOptions)
 {
-    public async Task<int> InsertAsync(InsertMemberRequest request,
-                                       CancellationToken cancel = default)
+    public async Task<Result<int, Failure>> InsertAsync(InsertMemberRequest request,
+                                                        CancellationToken cancel = default)
     {
-        // throw new DbUpdateConcurrencyException("資料衝突了");
-
-        var now = timeProvider.GetUtcNow();
-        var traceContext = contextGetter.Get();
-        var userId = traceContext.UserId;
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
-        var toDb = new DB.Member
+        try
         {
-            Id = uuidProvider.NewId(),
-            Name = request.Name,
-            Age = request.Age,
-            Email = request.Email,
-            CreatedAt = now,
-            CreatedBy = userId,
-            ChangedAt = now,
-            ChangedBy = userId
-        };
-        var entityEntry = dbContext.Members.Add(toDb);
-        return await dbContext.SaveChangesAsync(cancel);
+            var now = timeProvider.GetUtcNow();
+            var traceContext = contextGetter.Get();
+            var userId = traceContext?.UserId;
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
+            var toDb = new DB.Member
+            {
+                Id = uuidProvider.NewId(),
+                Name = request.Name,
+                Age = request.Age,
+                Email = request.Email,
+                CreatedAt = now,
+                CreatedBy = userId,
+                ChangedAt = now,
+                ChangedBy = userId
+            };
+            var entityEntry = dbContext.Members.Add(toDb);
+            var affectedRows = await dbContext.SaveChangesAsync(cancel);
+            return Result.Success<int, Failure>(affectedRows);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            var traceContext = contextGetter.Get();
+            var failure = new Failure
+            {
+                Code = nameof(FailureCode.DbConcurrency),
+                Message = "資料衝突，請稍後再試",
+                Data = request,
+                Exception = ex,
+                TraceId = traceContext?.TraceId
+            };
+            logger.LogError("資料庫同步衝突: {Failure}", failure, ex);
+            return Result.Failure<int, Failure>(failure);
+        }
+        catch (Exception ex)
+        {
+            var traceContext = contextGetter.Get();
+            var failure = new Failure
+            {
+                Code = nameof(FailureCode.DbError),
+                Message = "執行資料庫操作時發生未預期錯誤",
+                Data = request,
+                Exception = ex,
+                TraceId = traceContext?.TraceId
+            };
+            logger.LogError("資料庫操作未預期錯誤: {Failure}", failure, ex);
+            return Result.Failure<int, Failure>(failure);
+        }
     }
 
     public async Task<Member> QueryEmailAsync(string email,

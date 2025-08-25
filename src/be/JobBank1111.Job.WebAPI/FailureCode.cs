@@ -4,5 +4,6 @@ public enum FailureCode
 {
     Unauthorized,
     DbError,
-    DuplicateEmail
+    DuplicateEmail,
+    DbConcurrency
 }
