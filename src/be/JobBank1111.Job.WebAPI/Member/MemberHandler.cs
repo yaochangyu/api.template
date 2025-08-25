@@ -98,14 +98,14 @@ public class MemberHandler(
         return Result.Success<Member, Failure>(src);
     }
 
-    public async Task<PaginatedList<GetMemberResponse>>
+    public async Task<Result<PaginatedList<GetMemberResponse>, Failure>>
         GetMembersAsync(int pageIndex, int pageSize, bool noCache = true, CancellationToken cancel = default)
     {
         var result = await repository.GetMembersAsync(pageIndex, pageSize, noCache, cancel);
         return result;
     }
 
-    public async Task<CursorPaginatedList<GetMemberResponse>>
+    public async Task<Result<CursorPaginatedList<GetMemberResponse>, Failure>>
         GetMembersAsync(int pageSize, string nextPageToken, bool noCache = true, CancellationToken cancel = default)
     {
         var result = await repository.GetMembersAsync(pageSize, nextPageToken, noCache, cancel);

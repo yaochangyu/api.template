@@ -20,7 +20,7 @@ public class MemberRepository(
     JsonSerializerOptions jsonSerializerOptions)
 {
     public async Task<Result<int, Failure>> InsertAsync(InsertMemberRequest request,
-                                                        CancellationToken cancel = default)
+        CancellationToken cancel = default)
     {
         try
         {
@@ -72,7 +72,7 @@ public class MemberRepository(
     }
 
     public async Task<Result<Member, Failure>> QueryEmailAsync(string email,
-                                                               CancellationToken cancel = default)
+        CancellationToken cancel = default)
     {
         try
         {
@@ -110,102 +110,136 @@ public class MemberRepository(
         }
     }
 
-    public async Task<PaginatedList<GetMemberResponse>>
+    public async Task<Result<PaginatedList<GetMemberResponse>, Failure>>
         GetMembersAsync(int pageIndex, int pageSize, bool noCache = false, CancellationToken cancel = default)
     {
         var traceContext = contextGetter.Get();
-        var userId = traceContext.UserId;
+        var traceId = traceContext.TraceId;
         PaginatedList<GetMemberResponse> result;
         var key = nameof(CacheKeys.MemberData);
-        string cachedData = null;
-        if (noCache == false) // 如果有快取，就從快取撈資料
+        try
         {
-            cachedData = await cache.GetStringAsync(key, cancel);
-            if (cachedData != null)
+            string cachedData = null;
+            if (noCache == false) // 如果有快取，就從快取撈資料
             {
-                result = JsonSerializer.Deserialize<PaginatedList<GetMemberResponse>>(
-                    cachedData, jsonSerializerOptions);
-                return result;
+                cachedData = await cache.GetStringAsync(key, cancel);
+                if (cachedData != null)
+                {
+                    result = JsonSerializer.Deserialize<PaginatedList<GetMemberResponse>>(
+                        cachedData, jsonSerializerOptions);
+                    return Result.Success<PaginatedList<GetMemberResponse>, Failure>(result);
+                }
             }
+
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
+
+            var selector = dbContext.Members
+                .Select(p => new GetMemberResponse { Id = p.Id, Name = p.Name, Age = p.Age, Email = p.Email })
+                .AsNoTracking();
+
+            var totalCount = selector.Count();
+            var paging = selector.OrderBy(p => p.Id)
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize);
+            var data = await paging
+                .TagWith($"{nameof(MemberRepository)}.{nameof(this.GetMembersAsync)}")
+                .ToListAsync(cancel);
+            result = new PaginatedList<GetMemberResponse>(data, pageIndex, pageSize, totalCount);
+            cachedData = JsonSerializer.Serialize(result, jsonSerializerOptions);
+            cache.SetStringAsync(key, cachedData,
+                new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) //最好從組態設定讀取
+                }, cancel);
+
+            return Result.Success<PaginatedList<GetMemberResponse>, Failure>(result);
         }
-
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
-
-        var selector = dbContext.Members
-            .Select(p => new GetMemberResponse { Id = p.Id, Name = p.Name, Age = p.Age, Email = p.Email })
-            .AsNoTracking();
-
-        var totalCount = selector.Count();
-        var paging = selector.OrderBy(p => p.Id)
-            .Skip(pageIndex * pageSize)
-            .Take(pageSize);
-        var data = await paging
-            .TagWith($"{nameof(MemberRepository)}.{nameof(this.GetMembersAsync)}")
-            .ToListAsync(cancel);
-        result = new PaginatedList<GetMemberResponse>(data, pageIndex, pageSize, totalCount);
-        cachedData = JsonSerializer.Serialize(result, jsonSerializerOptions);
-        cache.SetStringAsync(key, cachedData,
-                             new DistributedCacheEntryOptions
-                             {
-                                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) //最好從組態設定讀取
-                             }, cancel);
-
-        return result;
+        catch (Exception ex)
+        {
+            var failure = new Failure
+            {
+                Code = nameof(FailureCode.DbError),
+                Message = "執行資料庫查詢時發生未預期錯誤",
+                Data = new { pageIndex, pageSize, noCache },
+                Exception = ex,
+                TraceId = traceId
+            };
+            return Result.Failure<PaginatedList<GetMemberResponse>, Failure>(failure);
+        }
     }
 
-    public async Task<CursorPaginatedList<GetMemberResponse>>
+    public async Task<Result<CursorPaginatedList<GetMemberResponse>, Failure>>
         GetMembersAsync(int pageSize,
-                        string nextPageToken,
-                        bool noCache = true,
-                        CancellationToken cancel = default)
+            string nextPageToken,
+            bool noCache = true,
+            CancellationToken cancel = default)
     {
-        // if (noCache) 永遠撈新的資料
-        // else 撈快取的資料
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
-        var decodeResult = DecodePageToken(nextPageToken);
-        var query = dbContext.Members
-            .Select(p => p)
-            .AsNoTracking();
-        if (decodeResult.lastSequenceId > 0)
+        var traceContext = contextGetter.Get();
+        var traceId = traceContext.TraceId;
+
+        try
         {
-            query = query.Where(p => p.SequenceId > decodeResult.lastSequenceId);
-        }
-
-        query = query.Take(pageSize + 1);
-        var selector =
-            query.Select(p => new GetMemberResponse
+            // if (noCache) 永遠撈新的資料
+            // else 撈快取的資料
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
+            var decodeResult = DecodePageToken(nextPageToken);
+            var query = dbContext.Members
+                .Select(p => p)
+                .AsNoTracking();
+            if (decodeResult.lastSequenceId > 0)
             {
-                Id = p.Id,
-                Name = p.Name,
-                Age = p.Age,
-                Email = p.Email,
-                SequenceId = p.SequenceId
-            });
-        var results = await selector
-            .TagWith($"{nameof(MemberRepository)}.{nameof(this.GetMembersAsync)}")
-            .ToListAsync(cancel);
+                query = query.Where(p => p.SequenceId > decodeResult.lastSequenceId);
+            }
 
-        // 是否有下一頁
-        var hasNextPage = results.Count > pageSize;
+            query = query.Take(pageSize + 1);
+            var selector =
+                query.Select(p => new GetMemberResponse
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Age = p.Age,
+                    Email = p.Email,
+                    SequenceId = p.SequenceId
+                });
+            var results = await selector
+                .TagWith($"{nameof(MemberRepository)}.{nameof(this.GetMembersAsync)}")
+                .ToListAsync(cancel);
 
-        if (hasNextPage)
+            // 是否有下一頁
+            var hasNextPage = results.Count > pageSize;
+
+            if (hasNextPage)
+            {
+                // 有下一頁，刪除最後一筆
+                results.RemoveAt(results.Count - 1);
+
+                // 產生下一頁的令牌
+                var after = results.LastOrDefault();
+                if (after != null)
+                {
+                    nextPageToken = EncodePageToken(after.Id, after.SequenceId);
+                }
+                else
+                {
+                    nextPageToken = null;
+                }
+            }
+
+            var result = new CursorPaginatedList<GetMemberResponse>(results, nextPageToken, null);
+            return Result.Success<CursorPaginatedList<GetMemberResponse>, Failure>(result);
+        }
+        catch (Exception ex)
         {
-            // 有下一頁，刪除最後一筆
-            results.RemoveAt(results.Count - 1);
-
-            // 產生下一頁的令牌
-            var after = results.LastOrDefault();
-            if (after != null)
+            var failure = new Failure
             {
-                nextPageToken = EncodePageToken(after.Id, after.SequenceId);
-            }
-            else
-            {
-                nextPageToken = null;
-            }
+                Code = nameof(FailureCode.DbError),
+                Message = "執行資料庫查詢時發生未預期錯誤",
+                Data = new { pageSize, nextPageToken, noCache },
+                Exception = ex,
+                TraceId = traceContext?.TraceId
+            };
+            return Result.Failure<CursorPaginatedList<GetMemberResponse>, Failure>(failure);
         }
-
-        return new CursorPaginatedList<GetMemberResponse>(results, nextPageToken, null);
     }
 
     // 將 Id 和 SequenceId 轉換為下一頁的令牌
