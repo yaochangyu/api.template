@@ -14,7 +14,7 @@ public class MemberControllerImpl(
         var noCache = true;
         var pageSize = this.TryGetPageSize();
         var nextPageToken = this.TryGetPageToken();
-        var result = await memberHandler.GetMembersAsync(pageSize, nextPageToken, noCache, cancellationToken);
+        var result = await memberHandler.GetMembersCursorAsync(pageSize, nextPageToken, noCache, cancellationToken);
         return new ObjectResult(result) { StatusCode = StatusCodes.Status200OK };
     }
 
@@ -41,7 +41,7 @@ public class MemberControllerImpl(
             bool.TryParse(noCacheText, out noCache);
         }
 
-        var result = await memberHandler.GetMembersAsync(pageIndex, pageSize, noCache, cancellationToken);
+        var result = await memberHandler.GetMemberOffsetAsync(pageIndex, pageSize, noCache, cancellationToken);
         return new ObjectResult(result) { StatusCode = StatusCodes.Status200OK };
     }
 

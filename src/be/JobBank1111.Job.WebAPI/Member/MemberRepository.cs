@@ -111,7 +111,7 @@ public class MemberRepository(
     }
 
     public async Task<Result<PaginatedList<GetMemberResponse>, Failure>>
-        GetMembersAsync(int pageIndex, int pageSize, bool noCache = false, CancellationToken cancel = default)
+        GetMemberOffsetAsync(int pageIndex, int pageSize, bool noCache = false, CancellationToken cancel = default)
     {
         var traceContext = contextGetter.Get();
         var traceId = traceContext.TraceId;
@@ -142,7 +142,7 @@ public class MemberRepository(
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize);
             var data = await paging
-                .TagWith($"{nameof(MemberRepository)}.{nameof(this.GetMembersAsync)}")
+                .TagWith($"{nameof(MemberRepository)}.{nameof(this.GetMemberOffsetAsync)}")
                 .ToListAsync(cancel);
             result = new PaginatedList<GetMemberResponse>(data, pageIndex, pageSize, totalCount);
             cachedData = JsonSerializer.Serialize(result, jsonSerializerOptions);
@@ -169,7 +169,7 @@ public class MemberRepository(
     }
 
     public async Task<Result<CursorPaginatedList<GetMemberResponse>, Failure>>
-        GetMembersAsync(int pageSize,
+        GetMembersCursorAsync(int pageSize,
             string nextPageToken,
             bool noCache = true,
             CancellationToken cancel = default)
@@ -202,7 +202,7 @@ public class MemberRepository(
                     SequenceId = p.SequenceId
                 });
             var results = await selector
-                .TagWith($"{nameof(MemberRepository)}.{nameof(this.GetMembersAsync)}")
+                .TagWith($"{nameof(MemberRepository)}.{nameof(this.GetMemberOffsetAsync)}")
                 .ToListAsync(cancel);
 
             // 是否有下一頁
