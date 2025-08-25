@@ -111,6 +111,11 @@
 
 專案中的方法應套用 Result Pattern，提供明確的成功/失敗處理機制：
 
+### Web API 層
+**強制使用** `Result<TSuccess, TFailure>` 作為處理器層回傳類型                                                                             
+**映射規則**: 使用 `FailureCodeMapper` 將錯誤代碼映射至 HTTP 狀態碼                                                                        
+**統一轉換**: 使用 `ResultActionResult<T>` 與擴充方法 `.ToActionResult()` 統一處理成功/失敗回應
+
 ### 實作要點
 - **回傳類型**: 使用 `Result<TSuccess, TFailure>` 作為回傳類型
 - **驗證鏈**: 使用連續驗證模式，遇到失敗時立即回傳
