@@ -13,7 +13,13 @@ public class MemberHandler(
                     CancellationToken cancel = default)
     {
         var traceContext = traceContextGetter.Get();
-        var srcMember = await repository.QueryEmailAsync(request.Email, cancel);
+        var queryResult = await repository.QueryEmailAsync(request.Email, cancel);
+        if (queryResult.IsFailure)
+        {
+            return queryResult;
+        }
+
+        var srcMember = queryResult.Value;
 
         //前置條件檢查，可以用 Fluent Pattern 重構
         var validateResult = Result.Success<Member, Failure>(srcMember);

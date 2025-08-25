@@ -54,7 +54,6 @@ public class MemberRepository(
                 Exception = ex,
                 TraceId = traceContext?.TraceId
             };
-            logger.LogError("資料庫同步衝突: {Failure}", failure, ex);
             return Result.Failure<int, Failure>(failure);
         }
         catch (Exception ex)
@@ -68,32 +67,47 @@ public class MemberRepository(
                 Exception = ex,
                 TraceId = traceContext?.TraceId
             };
-            logger.LogError("資料庫操作未預期錯誤: {Failure}", failure, ex);
             return Result.Failure<int, Failure>(failure);
         }
     }
 
-    public async Task<Member> QueryEmailAsync(string email,
-                                              CancellationToken cancel = default)
+    public async Task<Result<Member, Failure>> QueryEmailAsync(string email,
+                                                               CancellationToken cancel = default)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
-        var query = dbContext.Members
-            .Where(p => p.Email == email)
-            .Select(p => new Member
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Age = p.Age,
-                CreatedAt = p.CreatedAt,
-                CreatedBy = p.CreatedBy,
-                ChangedAt = p.ChangedAt,
-                ChangedBy = p.ChangedBy
-            });
+        try
+        {
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
+            var query = dbContext.Members
+                .Where(p => p.Email == email)
+                .Select(p => new Member
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Age = p.Age,
+                    CreatedAt = p.CreatedAt,
+                    CreatedBy = p.CreatedBy,
+                    ChangedAt = p.ChangedAt,
+                    ChangedBy = p.ChangedBy
+                });
 
-        var result = await query.TagWith($"{nameof(MemberRepository)}.{nameof(this.QueryEmailAsync)}({email})")
-            .AsNoTracking()
-            .FirstOrDefaultAsync(cancel);
-        return result;
+            var result = await query.TagWith($"{nameof(MemberRepository)}.{nameof(this.QueryEmailAsync)}({email})")
+                .AsNoTracking()
+                .FirstOrDefaultAsync(cancel);
+            return Result.Success<Member, Failure>(result);
+        }
+        catch (Exception ex)
+        {
+            var traceContext = contextGetter.Get();
+            var failure = new Failure
+            {
+                Code = nameof(FailureCode.DbError),
+                Message = "執行資料庫查詢時發生未預期錯誤",
+                Data = new { email },
+                Exception = ex,
+                TraceId = traceContext?.TraceId
+            };
+            return Result.Failure<Member, Failure>(failure);
+        }
     }
 
     public async Task<PaginatedList<GetMemberResponse>>
