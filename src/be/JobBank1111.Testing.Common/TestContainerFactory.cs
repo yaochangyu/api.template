@@ -8,6 +8,12 @@ namespace JobBank1111.Testing.Common;
 
 public class TestContainerFactory
 {
+    static TestContainerFactory()
+    {
+        // 設定 Docker 端點
+        Environment.SetEnvironmentVariable("DOCKER_HOST", "tcp://127.0.0.1:2375");
+    }
+
     // TODO:docker hub 有訪問次數限制，需要一台 proxy server
     public static async Task<RedisContainer> CreateRedisContainerAsync()
     {
