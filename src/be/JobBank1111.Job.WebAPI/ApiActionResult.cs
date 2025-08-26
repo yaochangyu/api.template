@@ -13,7 +13,7 @@ public class ApiActionResult<TSuccess, TFailure> : ActionResult
         _result = result;
     }
 
-    public async Task ExecuteResultAsync(ActionContext context)
+    public override async Task ExecuteResultAsync(ActionContext context)
     {
         var objectResult = _result.IsSuccess
             ? CreateSuccessResult(_result.Value)
