@@ -87,8 +87,10 @@ try
         });
     }
 
+    app.UseMiddleware<ExceptionHandlingMiddleware>();
     app.UseAuthorization();
     app.UseMiddleware<TraceContextMiddleware>();
+    app.UseMiddleware<LoggerMiddleware>();
     app.MapDefaultControllerRoute();
     app.UseRouting();
     app.UseEndpoints(endpoints =>

@@ -5,5 +5,10 @@ public enum FailureCode
     Unauthorized,
     DbError,
     DuplicateEmail,
-    DbConcurrency
+    DbConcurrency,
+    ValidationError,
+    InvalidOperation,
+    Timeout,
+    InternalServerError,
+    Unknown
 }

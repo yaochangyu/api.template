@@ -243,7 +243,7 @@ public class MemberRepository(
     }
 
     // 將 Id 和 SequenceId 轉換為下一頁的令牌
-    public static string EncodePageToken(string? lastId, long? lastSequenceId)
+    private static string EncodePageToken(string? lastId, long? lastSequenceId)
     {
         if (lastId == null || lastSequenceId == null)
         {

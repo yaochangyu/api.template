@@ -134,3 +134,55 @@
 - **統一錯誤碼**: 使用 `nameof(FailureCode.*)` 定義錯誤碼
 - **包含追蹤資訊**: 確保所有 Failure 物件都包含 TraceId
 - **結構化資料**: 將相關資料存放在 Failure.Data 中供除錯使用
+
+## 例外處理中介軟體指引
+
+專案實作集中式例外處理機制，統一捕捉、記錄與回應未處理的例外：
+
+### 中介軟體架構
+- **ExceptionHandlingMiddleware**: 最外層中介軟體，捕捉所有未處理例外
+- **TraceContextMiddleware**: 處理使用者身分驗證與追蹤內容設定
+- **LoggerMiddleware**: 記錄請求與回應日誌，例外發生時交由 ExceptionHandlingMiddleware 處理
+
+### 例外處理流程
+1. **捕捉例外**: 在 `ExceptionHandlingMiddleware` 統一捕捉未處理例外
+2. **記錄日誌**: 使用結構化日誌記錄例外詳細資訊，包含 TraceId、UserId、例外類型
+3. **建立回應**: 將例外轉換為標準化的 `Failure` 物件回應
+4. **設定狀態碼**: 統一設定為 500 Internal Server Error
+5. **回傳 JSON**: 序列化 `Failure` 物件為 JSON 格式回傳
+
+### FailureCode 定義
+```csharp
+public enum FailureCode
+{
+    Unauthorized,        // 未授權存取
+    DbError,            // 資料庫錯誤
+    DuplicateEmail,     // 重複郵件地址
+    DbConcurrency,      // 資料庫併發衝突
+    ValidationError,    // 驗證錯誤
+    InvalidOperation,   // 無效操作
+    Timeout,           // 逾時
+    InternalServerError, // 內部伺服器錯誤
+    Unknown            // 未知錯誤
+}
+```
+
+### Failure 物件結構
+- **Code**: 錯誤代碼，使用 `nameof(FailureCode.Unknown)` 作為預設值
+- **Message**: 顯示例外的原始訊息，供開發除錯使用
+- **TraceId**: 追蹤識別碼，用於日誌關聯與問題追蹤
+- **Exception**: 原始例外物件，不會序列化到客戶端回應
+- **Data**: 包含例外類型與時間戳記的結構化資料
+
+### 實作要點
+- **簡化設計**: 統一使用 500 Internal Server Error，避免複雜的狀態碼映射邏輯
+- **完整日誌**: 記錄例外的完整資訊，包含堆疊追蹤與內容資訊
+- **安全回應**: 不洩露內部實作細節給客戶端
+- **追蹤整合**: 自動整合 TraceContext 資訊到錯誤回應中
+- **JSON 序列化**: 使用專案統一的 JsonSerializerOptions 設定
+
+### 開發守則
+- **集中處理**: 所有未處理例外都應交由 ExceptionHandlingMiddleware 統一處理
+- **不重複處理**: 其他中介軟體記錄例外後應重新拋出，由最外層統一處理
+- **一致性回應**: 確保所有例外都轉換為相同格式的 Failure 回應
+- **追蹤完整性**: 確保例外處理過程中 TraceId 的連續性與可追蹤性
