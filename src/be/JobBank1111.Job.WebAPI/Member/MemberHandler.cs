@@ -41,7 +41,7 @@ public class MemberHandler(
     }
 
     // 檢查是否有重複的 Email
-    private static Result<Member, Failure>
+    private Result<Member, Failure>
         ValidateEmail(Result<Member, Failure> previousResult,
                       InsertMemberRequest dest)
     {
@@ -56,6 +56,7 @@ public class MemberHandler(
             return Result.Success<Member, Failure>(src);
         }
 
+        var traceContext = traceContextGetter.Get();
         if (src.Email == dest.Email)
         {
             return Result.Failure<Member, Failure>(new Failure
@@ -63,14 +64,15 @@ public class MemberHandler(
                 Code = nameof(FailureCode.DuplicateEmail),
                 Message = "Email 重複",
                 Data = src,
+                TraceId = traceContext?.TraceId
             });
         }
 
         return Result.Success<Member, Failure>(src);
     }
 
-    // 檢查是否有重複的 Email
-    private static Result<Member, Failure>
+    // 檢查是否有重複的 Name
+    private Result<Member, Failure>
         ValidateName(Result<Member, Failure> previousResult,
                      InsertMemberRequest dest)
     {
@@ -85,13 +87,15 @@ public class MemberHandler(
             return Result.Success<Member, Failure>(src);
         }
 
-        if (src.Email == dest.Email)
+        var traceContext = traceContextGetter.Get();
+        if (src.Name == dest.Name)
         {
             return Result.Failure<Member, Failure>(new Failure
             {
-                Code = nameof(FailureCode.DuplicateEmail),
-                Message = "Email 重複",
+                Code = nameof(FailureCode.ValidationError),
+                Message = "Name 重複",
                 Data = src,
+                TraceId = traceContext?.TraceId
             });
         }
 

@@ -32,13 +32,13 @@ public class Failure
     /// <summary>
     /// 追蹤 Id
     /// </summary>
-    public string TraceId { get; set; }
+    public string TraceId { get; init; }
 
     /// <summary>
     /// 例外，不回傳給 Web API 
     /// </summary>
     [JsonIgnore]
-    public Exception Exception { get; set; }
+    public Exception Exception { get; init; }
 
     public List<Failure> Details { get; init; } = new();
 }

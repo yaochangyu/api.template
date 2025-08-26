@@ -71,18 +71,6 @@ public class LoggerMiddleware
         );
     }
 
-    private void LogRequestException(HttpContext httpContext, TraceContext traceContext, Exception exception, long elapsedMilliseconds)
-    {
-        _logger.LogError(exception,
-            "Request failed - {Method} {Path} | Duration: {Duration}ms | TraceId: {TraceId} | UserId: {UserId} | Error: {ErrorMessage}",
-            httpContext.Request.Method,
-            httpContext.Request.Path,
-            elapsedMilliseconds,
-            traceContext.TraceId,
-            traceContext.UserId,
-            exception.Message
-        );
-    }
 
     private static string GetClientIpAddress(HttpContext httpContext)
     {
