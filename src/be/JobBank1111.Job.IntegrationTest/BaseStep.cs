@@ -27,7 +27,7 @@ public class BaseStep : Steps
 {
     private readonly ITestOutputHelper _testOutputHelper;
     private static HttpClient ExternalClient;
-   static IServiceProvider ServiceProvider;
+    static IServiceProvider ServiceProvider;
 
     private const string StringEquals = "字串等於";
     private const string NumberEquals = "數值等於";
@@ -57,7 +57,7 @@ public class BaseStep : Steps
         ServiceProvider = CreateServiceProvider();
 
         await InitialDatabase(ServiceProvider);
-        
+
         async Task InitialDatabase(IServiceProvider serviceProvider)
         {
             var dbContextFactory = serviceProvider.GetService<IDbContextFactory<MemberDbContext>>();
@@ -238,10 +238,10 @@ public class BaseStep : Steps
         }
     }
 
-    private string AppendQuery(string baseUrl,string url)
+    private string AppendQuery(string baseUrl, string url)
     {
         var urlBuilder = new UrlBuilder(baseUrl, url);
-        
+
         foreach (var query in this.ScenarioContext.GetAllQueryString())
         {
             urlBuilder.AddParameter(query.Key, query.Value);

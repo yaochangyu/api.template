@@ -6,7 +6,7 @@ namespace JobBank1111.Job.WebAPI.Member;
 public class MemberControllerImpl(
     MemberHandler memberHandler,
     IHttpContextAccessor httpContextAccessor
-    ) : IMemberController
+) : IMemberController
 {
     public async Task<ActionResult<GetMemberResponseCursorPaginatedList>> GetMembersCursorAsync(
         CancellationToken cancellationToken = default(CancellationToken))
@@ -56,12 +56,8 @@ public class MemberControllerImpl(
         CancellationToken cancellationToken =
             default(CancellationToken))
     {
-        var result = await memberHandler.InsertAsync(new InsertMemberRequest
-        {
-            Email = body.Email,
-            Name = body.Name,
-            Age = body.Age,
-        }, cancellationToken);
+        var result = await memberHandler.InsertAsync(
+            new InsertMemberRequest { Email = body.Email, Name = body.Name, Age = body.Age, }, cancellationToken);
 
         if (result.IsFailure)
         {
