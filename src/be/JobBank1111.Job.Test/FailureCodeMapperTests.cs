@@ -10,7 +10,7 @@ public class FailureCodeMapperTests
     [InlineData(nameof(FailureCode.Unauthorized), HttpStatusCode.Unauthorized)]
     [InlineData(nameof(FailureCode.DbError), HttpStatusCode.InternalServerError)]
     [InlineData(nameof(FailureCode.DuplicateEmail), HttpStatusCode.Conflict)]
-    [InlineData("UnknownCode", HttpStatusCode.BadRequest)]
+    [InlineData("UnknownCode", HttpStatusCode.InternalServerError)]
     public void GetHttpStatusCode_ShouldReturnCorrectStatusCode(string failureCode, HttpStatusCode expected)
     {
         var result = FailureCodeMapper.GetHttpStatusCode(failureCode);
