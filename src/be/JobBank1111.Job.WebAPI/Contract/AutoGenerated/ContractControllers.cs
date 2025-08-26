@@ -62,12 +62,12 @@ namespace JobBank1111.Job.WebAPI.Contract
 
         /// <returns>OK</returns>
 
-        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetMembersCursorAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.IActionResult> GetMembersCursorAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
 
         /// <returns>OK</returns>
 
-        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponsePaginatedList>> GetMemberOffsetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.IActionResult> GetMemberOffsetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
 
         /// <returns>OK</returns>
@@ -89,7 +89,7 @@ namespace JobBank1111.Job.WebAPI.Contract
 
         /// <returns>OK</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v2/members:cursor")]
-        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetMembersCursor(System.Threading.CancellationToken cancellationToken)
+        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.IActionResult> GetMembersCursor(System.Threading.CancellationToken cancellationToken)
         {
 
             return _implementation.GetMembersCursorAsync(cancellationToken);
@@ -97,7 +97,7 @@ namespace JobBank1111.Job.WebAPI.Contract
 
         /// <returns>OK</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v2/members:offset")]
-        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponsePaginatedList>> GetMemberOffset(System.Threading.CancellationToken cancellationToken)
+        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.IActionResult> GetMemberOffset(System.Threading.CancellationToken cancellationToken)
         {
 
             return _implementation.GetMemberOffsetAsync(cancellationToken);

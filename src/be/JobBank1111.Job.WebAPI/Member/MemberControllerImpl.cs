@@ -6,19 +6,19 @@ namespace JobBank1111.Job.WebAPI.Member;
 public class MemberControllerImpl(
     MemberHandler memberHandler,
     IHttpContextAccessor httpContextAccessor
-) : IMemberController
+    ) : IMemberController
 {
-    public async Task<ActionResult<GetMemberResponseCursorPaginatedList>> GetMembersCursorAsync(
+    public async Task<IActionResult> GetMembersCursorAsync(
         CancellationToken cancellationToken = default(CancellationToken))
     {
         var noCache = true;
         var pageSize = this.TryGetPageSize();
         var nextPageToken = this.TryGetPageToken();
         var result = await memberHandler.GetMembersCursorAsync(pageSize, nextPageToken, noCache, cancellationToken);
-        return new ObjectResult(result) { StatusCode = StatusCodes.Status200OK };
+        return result.ToActionResult();
     }
 
-    public async Task<ActionResult<GetMemberResponsePaginatedList>> GetMemberOffsetAsync(
+    public async Task<IActionResult> GetMemberOffsetAsync(
         CancellationToken cancellationToken = default(CancellationToken))
     {
         var request = httpContextAccessor.HttpContext.Request;
@@ -42,19 +42,19 @@ public class MemberControllerImpl(
         }
 
         var result = await memberHandler.GetMemberOffsetAsync(pageIndex, pageSize, noCache, cancellationToken);
-        return new ObjectResult(result) { StatusCode = StatusCodes.Status200OK };
+        return result.ToActionResult();
     }
 
     public async Task<IActionResult> InsertMember2Async(Contract.InsertMemberRequest body,
-                                                        CancellationToken cancellationToken =
-                                                            default(CancellationToken))
+        CancellationToken cancellationToken =
+            default(CancellationToken))
     {
         return new NoContentResult();
     }
 
     public async Task<IActionResult> InsertMember1Async(Contract.InsertMemberRequest body,
-                                                        CancellationToken cancellationToken =
-                                                            default(CancellationToken))
+        CancellationToken cancellationToken =
+            default(CancellationToken))
     {
         var result = await memberHandler.InsertAsync(new InsertMemberRequest
         {
