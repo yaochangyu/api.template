@@ -27,17 +27,11 @@ public class LoggerMiddleware
         {
             await _next(httpContext);
             stopwatch.Stop();
-
+        }
+        finally
+        {
             // 記錄請求成功完成
             LogRequestCompleted(httpContext, traceContext, stopwatch.ElapsedMilliseconds);
-        }
-        catch (Exception ex)
-        {
-            stopwatch.Stop();
-
-            // 記錄請求發生例外
-            LogRequestException(httpContext, traceContext, ex, stopwatch.ElapsedMilliseconds);
-            throw; // 讓 ExceptionHandlingMiddleware 處理
         }
     }
 
@@ -46,8 +40,7 @@ public class LoggerMiddleware
         var contextGetter = httpContext.RequestServices.GetService<IContextGetter<TraceContext>>();
         return contextGetter?.Get() ?? new TraceContext
         {
-            TraceId = httpContext.TraceIdentifier,
-            UserId = "anonymous"
+            TraceId = httpContext.TraceIdentifier, UserId = "anonymous"
         };
     }
 
@@ -66,7 +59,7 @@ public class LoggerMiddleware
     private void LogRequestCompleted(HttpContext httpContext, TraceContext traceContext, long elapsedMilliseconds)
     {
         var logLevel = httpContext.Response.StatusCode >= 400 ? LogLevel.Warning : LogLevel.Information;
-        
+
         _logger.Log(logLevel,
             "Request completed - {Method} {Path} | Status: {StatusCode} | Duration: {Duration}ms | TraceId: {TraceId} | UserId: {UserId}",
             httpContext.Request.Method,
