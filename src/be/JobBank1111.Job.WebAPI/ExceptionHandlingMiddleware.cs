@@ -36,14 +36,18 @@ public class ExceptionHandlingMiddleware
     {
         var traceContext = GetTraceContext(context);
         
-        // 記錄未處理的例外
+        // 擷取請求資訊用於日誌記錄
+        var requestInfo = await RequestInfoExtractor.ExtractRequestInfoAsync(context, _jsonOptions);
+        
+        // 記錄未處理的例外，包含所有請求資訊
         _logger.LogError(exception,
-            "Unhandled exception occurred - {Method} {Path} | TraceId: {TraceId} | UserId: {UserId} | ExceptionType: {ExceptionType}",
+            "Unhandled exception occurred - {Method} {Path} | TraceId: {TraceId} | UserId: {UserId} | ExceptionType: {ExceptionType} | RequestInfo: {@RequestInfo}",
             context.Request.Method,
             context.Request.Path,
             traceContext.TraceId,
             traceContext.UserId,
-            exception.GetType().Name);
+            exception.GetType().Name,
+            requestInfo);
 
         // 設定回應內容類型
         context.Response.ContentType = "application/json";

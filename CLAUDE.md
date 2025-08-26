@@ -186,3 +186,47 @@ public enum FailureCode
 - **不重複處理**: 其他中介軟體記錄例外後應重新拋出，由最外層統一處理
 - **一致性回應**: 確保所有例外都轉換為相同格式的 Failure 回應
 - **追蹤完整性**: 確保例外處理過程中 TraceId 的連續性與可追蹤性
+
+## 請求資訊記錄指引
+
+專案實作集中式請求資訊記錄機制，分別處理正常請求與例外情況的日誌記錄：
+
+### 架構設計
+- **RequestInfoExtractor**: 共用的請求資訊擷取工具類別
+- **ExceptionHandlingMiddleware**: 當發生例外時記錄完整的請求資訊
+- **RequestParameterLoggerMiddleware**: 當請求成功完成時記錄請求資訊
+
+### RequestInfoExtractor 功能
+1. **路由參數**: 擷取 URL 路由中的參數
+2. **查詢參數**: 擷取 URL 查詢字串參數
+3. **請求標頭**: 擷取 HTTP 標頭，自動排除敏感標頭（如 Authorization、Cookie）
+4. **請求本文**: 對於 POST/PUT/PATCH 請求，擷取請求本文內容並嘗試解析 JSON
+5. **基本資訊**: 記錄 HTTP 方法、路徑、內容類型、內容長度等基本資訊
+
+### 日誌記錄策略
+- **例外情況**: 在 `ExceptionHandlingMiddleware` 中記錄所有請求資訊，包含例外詳細資訊
+- **正常完成**: 在 `RequestParameterLoggerMiddleware` 中記錄請求資訊，僅在沒有例外發生時記錄
+- **避免重複**: 透過例外處理流程控制，確保同一請求不會重複記錄資訊
+
+### 安全考量
+- **敏感資訊過濾**: 自動排除 Authorization、Cookie、x-api-key 等敏感標頭
+- **請求本文處理**: 安全讀取請求本文，失敗時不影響主要流程
+- **錯誤容錯**: 記錄過程中發生錯誤不影響業務邏輯執行
+
+### 實作細節
+```csharp
+// 使用方式
+var requestInfo = await RequestInfoExtractor.ExtractRequestInfoAsync(context, jsonOptions);
+
+// 例外時記錄 (ExceptionHandlingMiddleware)
+_logger.LogError(exception, "Unhandled exception - RequestInfo: {@RequestInfo}", requestInfo);
+
+// 正常完成時記錄 (RequestParameterLoggerMiddleware)  
+_logger.LogInformation("Request completed - RequestInfo: {@RequestInfo}", requestInfo);
+```
+
+### 最佳實務
+- **結構化日誌**: 使用 `{@RequestInfo}` 格式記錄結構化資料
+- **統一格式**: 所有請求資訊記錄使用相同的資料結構
+- **效能考量**: 只有在需要時才擷取請求本文，避免不必要的處理
+- **可擴展性**: 透過靜態方法設計，便於在不同中介軟體中重用
