@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JobBank1111.Job.WebAPI;
 
-public class ResultActionResult<TSuccess, TFailure> : IActionResult 
+public class ResultActionResult<TSuccess, TFailure> : ActionResult 
     where TFailure : class
 {
     private readonly Result<TSuccess, TFailure> _result;

@@ -8,7 +8,7 @@ public class MemberControllerImpl(
     IHttpContextAccessor httpContextAccessor
     ) : IMemberController
 {
-    public async Task<IActionResult> GetMembersCursorAsync(
+    public async Task<ActionResult<GetMemberResponseCursorPaginatedList>> GetMembersCursorAsync(
         CancellationToken cancellationToken = default(CancellationToken))
     {
         var noCache = true;
@@ -18,7 +18,7 @@ public class MemberControllerImpl(
         return result.ToActionResult();
     }
 
-    public async Task<IActionResult> GetMemberOffsetAsync(
+    public async Task<ActionResult<GetMemberResponsePaginatedList>> GetMemberOffsetAsync(
         CancellationToken cancellationToken = default(CancellationToken))
     {
         var request = httpContextAccessor.HttpContext.Request;
