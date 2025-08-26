@@ -21,21 +21,10 @@ public class RequestParameterLoggerMiddleware
 
     public async Task InvokeAsync(HttpContext httpContext)
     {
-        var exceptionOccurred = false;
-        
-        try
-        {
-            await _next(httpContext);
-        }
-        catch
-        {
-            // 標記有例外發生，讓 ExceptionHandlingMiddleware 處理
-            exceptionOccurred = true;
-            throw; // 重新拋出例外讓上層處理
-        }
+        await _next(httpContext);
 
-        // 只有在沒有例外發生時才記錄請求參數
-        if (!exceptionOccurred)
+        if ((httpContext.Response.StatusCode >= 200 && httpContext.Response.StatusCode < 300)
+            || httpContext.Response.StatusCode >= 400 && httpContext.Response.StatusCode < 500)
         {
             await LogRequestParametersAsync(httpContext);
         }
@@ -68,8 +57,7 @@ public class RequestParameterLoggerMiddleware
         var contextGetter = context.RequestServices.GetService<IContextGetter<TraceContext>>();
         return contextGetter?.Get() ?? new TraceContext
         {
-            TraceId = context.TraceIdentifier,
-            UserId = "anonymous"
+            TraceId = context.TraceIdentifier, UserId = "anonymous"
         };
     }
 }
