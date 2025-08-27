@@ -89,23 +89,11 @@
 - **生命週期**: 透過 `AsyncLocal<T>` 機制確保 TraceContext 在整個請求生命週期內可用
 - **服務注入**: 使用 `IContextGetter<T>` 與 `IContextSetter<T>` 介面進行依賴注入
 
-### 中介軟體責任
-- **身分驗證**: 在 `TraceContextMiddleware` 中統一處理使用者身分驗證
-- **TraceId 處理**: 從請求標頭擷取或自動產生 TraceId
-- **日誌增強**: 自動將 TraceId 與 UserId 附加到結構化日誌中
-- **回應標頭**: 自動將 TraceId 加入回應標頭供追蹤使用
-
 ### 架構守則
 - 業務邏輯層不應直接處理 HTTP 相關邏輯
 - 所有跨領域關注點 (如身分驗證、日誌、追蹤) 應在中介軟體層處理
 - 使用不可變物件傳遞狀態，避免意外修改
 - 透過 DI 容器注入 TraceContext，而非直接傳遞參數
-
-### 日誌記錄原則
-- **集中式日誌**: 所有日誌記錄應集中在 Middleware 層處理，避免在 Handler 層重複寫 log
-- **結構化日誌**: 使用 Serilog 結構化日誌，統一包含 TraceId 與 UserId
-- **請求追蹤**: 記錄請求進入、處理時間、回應狀態等關鍵資訊
-- **錯誤日誌**: 統一捕捉並記錄例外與錯誤資訊，包含完整的錯誤堆疊
 
 ### 用戶資訊管理
 - **不可變性原則**: 確保物件的不可變，例如身分驗證後的用戶資訊，存放在 TraceContext
@@ -172,30 +160,58 @@ var failure = new Failure
 - **安全回應**: 不洩露內部實作細節給客戶端，根據環境決定訊息詳細程度
 - **追蹤整合**: 自動整合 TraceContext 資訊到錯誤回應中
 
-## 例外處理中介軟體指引
+## 中介軟體 (Middleware) 架構與實作指引
 
-專案實作集中式例外處理機制，統一捕捉、記錄與回應未處理的例外：
+專案使用完整的中介軟體管線處理跨領域關注點，包含例外處理、追蹤內容管理、日誌記錄與請求資訊擷取等功能。
 
-### 中介軟體架構
+### 中介軟體架構與責任
 - **ExceptionHandlingMiddleware**: 最外層中介軟體，捕捉所有未處理例外
 - **TraceContextMiddleware**: 處理使用者身分驗證與追蹤內容設定
 - **LoggerMiddleware**: 記錄請求與回應日誌，例外發生時交由 ExceptionHandlingMiddleware 處理
+- **RequestParameterLoggerMiddleware**: 當請求成功完成時記錄請求資訊
+
+### TraceContext 中介軟體責任
+- **身分驗證**: 在 `TraceContextMiddleware` 中統一處理使用者身分驗證
+- **TraceId 處理**: 從請求標頭擷取或自動產生 TraceId
+- **日誌增強**: 自動將 TraceId 與 UserId 附加到結構化日誌中
+- **回應標頭**: 自動將 TraceId 加入回應標頭供追蹤使用
 
 ### 例外處理流程
-1. **捕捉例外**: 在 `ExceptionHandlingMiddleware` 統一捕捉未處理例外
-2. **記錄日誌**: 使用結構化日誌記錄例外詳細資訊，包含 TraceId、UserId、例外類型
-3. **建立回應**: 將例外轉換為標準化的 `Failure` 物件回應
+ExceptionHandlingMiddleware 專門處理未預期的系統層級例外，不處理業務邏輯錯誤：
+
+1. **捕捉系統例外**: 僅捕捉未處理的系統層級例外（如資料庫連線失敗、記憶體不足等）
+2. **記錄完整資訊**: 使用結構化日誌記錄例外詳細資訊與完整請求參數
+3. **建立標準回應**: 將系統例外轉換為標準化的 `Failure` 物件回應
 4. **設定狀態碼**: 統一設定為 500 Internal Server Error
 5. **回傳 JSON**: 序列化 `Failure` 物件為 JSON 格式回傳
 
-### 實作要點
-- **簡化設計**: 統一使用 500 Internal Server Error，避免複雜的狀態碼映射邏輯
-- **完整日誌**: 記錄例外的完整資訊，包含堆疊追蹤與內容資訊
-- **安全回應**: 不洩露內部實作細節給客戶端
-- **追蹤整合**: 自動整合 TraceContext 資訊到錯誤回應中
-- **JSON 序列化**: 使用專案統一的 JsonSerializerOptions 設定
+**重要原則**：
+- **保持整潔**: 不處理業務邏輯錯誤，業務錯誤應在 Handler 層使用 Result Pattern 處理
+- **必須記錄**: 每次捕捉例外時，必須記錄錯誤資訊與完整請求參數供除錯使用
+- **系統級專用**: 僅處理真正的系統異常，如基礎設施故障、未預期的運行時錯誤等
 
-### 敏感資訊過濾處理
+### 請求資訊記錄機制
+專案實作集中式請求資訊記錄機制，分別處理正常請求與例外情況的日誌記錄：
+
+#### RequestInfoExtractor 功能
+1. **路由參數**: 擷取 URL 路由中的參數
+2. **查詢參數**: 擷取 URL 查詢字串參數
+3. **請求標頭**: 擷取 HTTP 標頭，自動排除敏感標頭（如 Authorization、Cookie）
+4. **請求本文**: 對於 POST/PUT/PATCH 請求，擷取請求本文內容並嘗試解析 JSON
+5. **基本資訊**: 記錄 HTTP 方法、路徑、內容類型、內容長度等基本資訊
+
+#### 日誌記錄策略
+- **例外情況**: 在 `ExceptionHandlingMiddleware` 中記錄所有請求資訊，包含例外詳細資訊
+- **正常完成**: 在 `RequestParameterLoggerMiddleware` 中記錄請求資訊，僅在沒有例外發生時記錄
+- **避免重複**: 透過例外處理流程控制，確保同一請求不會重複記錄資訊
+
+### 日誌記錄原則
+- **集中式日誌**: 所有日誌記錄應集中在 Middleware 層處理，避免在 Handler 層重複寫 log
+- **結構化日誌**: 使用 Serilog 結構化日誌，統一包含 TraceId 與 UserId
+- **請求追蹤**: 記錄請求進入、處理時間、回應狀態等關鍵資訊
+- **錯誤日誌**: 統一捕捉並記錄例外與錯誤資訊，包含完整的錯誤堆疊
+
+### 安全考量與敏感資訊過濾
 ```csharp
 // 敏感資訊過濾
 private static readonly string[] SensitiveHeaders = 
@@ -221,68 +237,19 @@ else
 }
 ```
 
-### 開發守則
-- **未處理的例外，集中處理**: 所有未處理例外都應交由 ExceptionHandlingMiddleware 統一處理，其他 Middleware 應避免攔截錯誤後再次拋出，造成重複記錄
-- **一致性回應**: 確保所有例外都轉換為相同格式的 Failure 回應
-- **追蹤完整性**: 確保例外處理過程中 TraceId 的連續性與可追蹤性
-
-## 請求資訊記錄指引
-
-專案實作集中式請求資訊記錄機制，分別處理正常請求與例外情況的日誌記錄：
-
-### 架構設計
-- **RequestInfoExtractor**: 共用的請求資訊擷取工具類別
-- **ExceptionHandlingMiddleware**: 當發生例外時記錄完整的請求資訊
-- **RequestParameterLoggerMiddleware**: 當請求成功完成時記錄請求資訊
-
-### RequestInfoExtractor 功能
-1. **路由參數**: 擷取 URL 路由中的參數
-2. **查詢參數**: 擷取 URL 查詢字串參數
-3. **請求標頭**: 擷取 HTTP 標頭，自動排除敏感標頭（如 Authorization、Cookie）
-4. **請求本文**: 對於 POST/PUT/PATCH 請求，擷取請求本文內容並嘗試解析 JSON
-5. **基本資訊**: 記錄 HTTP 方法、路徑、內容類型、內容長度等基本資訊
-
-### 日誌記錄策略
-- **例外情況**: 在 `ExceptionHandlingMiddleware` 中記錄所有請求資訊，包含例外詳細資訊
-- **正常完成**: 在 `RequestParameterLoggerMiddleware` 中記錄請求資訊，僅在沒有例外發生時記錄
-- **避免重複**: 透過例外處理流程控制，確保同一請求不會重複記錄資訊
-
-### 安全考量
-- **敏感資訊過濾**: 自動排除 Authorization、Cookie、x-api-key 等敏感標頭
-- **請求本文處理**: 安全讀取請求本文，失敗時不影響主要流程
-- **錯誤容錯**: 記錄過程中發生錯誤不影響業務邏輯執行
-
-### 實作細節
-```csharp
-// 使用方式
-var requestInfo = await RequestInfoExtractor.ExtractRequestInfoAsync(context, jsonOptions);
-
-// 例外時記錄 (ExceptionHandlingMiddleware)
-_logger.LogError(exception, "Unhandled exception - RequestInfo: {@RequestInfo}", requestInfo);
-
-// 正常完成時記錄 (RequestParameterLoggerMiddleware)  
-_logger.LogInformation("Request completed - RequestInfo: {@RequestInfo}", requestInfo);
-```
-
-### 最佳實務
-- **結構化日誌**: 使用 `{@RequestInfo}` 格式記錄結構化資料
-- **統一格式**: 所有請求資訊記錄使用相同的資料結構
-- **效能考量**: 只有在需要時才擷取請求本文，避免不必要的處理
-- **可擴展性**: 透過靜態方法設計，便於在不同中介軟體中重用
-
-## Middleware 錯誤處理原則
-
-### 統一錯誤處理
-- **集中處理**: 所有未處理錯誤統一交給 `ExceptionHandlingMiddleware` 集中處理並記錄
+### 錯誤處理原則
+#### 分層錯誤處理
+- **業務邏輯錯誤**: 在 Handler 層使用 Result Pattern 處理，回傳適當的 HTTP 狀態碼
+- **系統層級例外**: 交給 `ExceptionHandlingMiddleware` 處理，統一記錄與回應
 - **避免重複**: 避免在其他 Middleware 中攔截錯誤後再次拋出，造成重複記錄
 
-### 建議做法
+#### 建議做法
 ```csharp
 // ✅ 建議：讓錯誤自然流向 ExceptionHandlingMiddleware
 await _next(context);
 ```
 
-### 避免的做法
+#### 避免的做法
 ```csharp
 // ❌ 避免：攔截錯誤後再次拋出
 try
@@ -296,6 +263,39 @@ catch (Exception ex)
 }
 ```
 
-### 特殊情況
+### 實作要點
+- **簡化設計**: 統一使用 500 Internal Server Error，避免複雜的狀態碼映射邏輯
+- **完整日誌**: 記錄例外的完整資訊，包含堆疊追蹤與內容資訊
+- **安全回應**: 不洩露內部實作細節給客戶端
+- **追蹤整合**: 自動整合 TraceContext 資訊到錯誤回應中
+- **JSON 序列化**: 使用專案統一的 JsonSerializerOptions 設定
+
+### 實作細節範例
+```csharp
+// 使用方式
+var requestInfo = await RequestInfoExtractor.ExtractRequestInfoAsync(context, jsonOptions);
+
+// 例外時記錄 (ExceptionHandlingMiddleware)
+_logger.LogError(exception, "Unhandled exception - RequestInfo: {@RequestInfo}", requestInfo);
+
+// 正常完成時記錄 (RequestParameterLoggerMiddleware)  
+_logger.LogInformation("Request completed - RequestInfo: {@RequestInfo}", requestInfo);
+```
+
+### 開發守則與最佳實務
+- **系統例外集中處理**: 僅將系統層級未處理例外交由 ExceptionHandlingMiddleware 統一處理
+- **業務錯誤分離**: 業務邏輯錯誤應在 Handler 層使用 Result Pattern 處理，不應流到 ExceptionHandlingMiddleware
+- **必須記錄請求參數**: ExceptionHandlingMiddleware 捕捉例外時，必須記錄完整請求資訊供除錯
+- **保持中介軟體整潔**: ExceptionHandlingMiddleware 專注於系統例外處理，不包含業務邏輯
+- **一致性回應**: 確保所有系統例外都轉換為相同格式的 Failure 回應
+- **追蹤完整性**: 確保例外處理過程中 TraceId 的連續性與可追蹤性
+- **結構化日誌**: 使用 `{@RequestInfo}` 格式記錄結構化資料
+- **統一格式**: 所有請求資訊記錄使用相同的資料結構
+- **效能考量**: 只有在需要時才擷取請求本文，避免不必要的處理
+- **可擴展性**: 透過靜態方法設計，便於在不同中介軟體中重用
+- **敏感資訊過濾**: 自動排除 Authorization、Cookie、x-api-key 等敏感標頭
+- **錯誤容錯**: 記錄過程中發生錯誤不影響業務邏輯執行
+
+### 特殊情況處理
 - 若特定 Middleware 確實需要攔截錯誤處理特殊業務邏輯，可以例外處理
 - 但應謹慎評估是否真的必要，優先考慮在業務層處理
