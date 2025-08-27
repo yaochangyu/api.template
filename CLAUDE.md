@@ -90,7 +90,7 @@
 - 透過 DI 容器注入 TraceContext，而非直接傳遞參數
 
 ### 用戶資訊管理
-- **不可變性原則**: 確保物件的不可變，例如身分驗證後的用戶資訊，存放在 TraceContext
+- **不可變性原則**: 確保物件的不可變，例如身分驗證後的用戶資訊，存放在 TraceContext (詳細說明見「追蹤內容管理」章節)
 - **集中處理**: 集中在 Middleware 處理，例如 TraceContextMiddleware
 - **依賴注入**: 透過 IContextSetter 設定用戶資訊
 - **資訊取得**: 透過 IContextGetter 取得用戶資訊
@@ -98,7 +98,7 @@
 ## 追蹤內容管理 (TraceContext)
 
 ### 集中式管理架構
-- **統一處理點**: 所有追蹤內容與使用者資訊統一在 `TraceContextMiddleware` 中處理
+- **統一處理點**: 所有追蹤內容與使用者資訊統一在 `TraceContextMiddleware` 中處理 (中介軟體實作詳情見「中介軟體架構與實作」)
 - **不可變性**: `TraceContext` 使用 record 定義，包含 `TraceId` 與 `UserId` 等不可變屬性
 - **身分驗證整合**: 在 `TraceContextMiddleware` 中統一處理使用者身分驗證
 
@@ -109,7 +109,7 @@
 - **回應標頭**: 自動將 TraceId 加入回應標頭供追蹤使用
 
 ### 日誌增強與整合
-- **自動增強**: 自動將 TraceId 與 UserId 附加到結構化日誌中
+- **自動增強**: 自動將 TraceId 與 UserId 附加到結構化日誌中 (詳見「日誌與安全指引」章節)
 - **追蹤完整性**: 確保追蹤資訊在整個請求處理過程中的連續性
 - **錯誤追蹤**: 在錯誤處理中自動包含 TraceId 資訊
 
@@ -128,7 +128,7 @@
 - **回傳類型**: 使用 `Result<TSuccess, TFailure>` 作為回傳類型
 - **驗證鏈**: 使用連續驗證模式，遇到失敗時立即回傳
 - **例外處理**: 統一捕捉例外並轉換為 `Failure` 物件
-- **追蹤資訊**: 在 `Failure` 物件中包含 TraceId 用於日誌追蹤
+- **追蹤資訊**: 在 `Failure` 物件中包含 TraceId 用於日誌追蹤 (關於 TraceId 生成與管理，參閱「追蹤內容管理」)
 
 ### FailureCode 定義與 Failure 物件結構
 
@@ -151,7 +151,7 @@ public enum FailureCode
 #### Failure 物件結構
 - **Code**: 錯誤代碼，使用 `nameof(FailureCode.*)` 定義錯誤碼
 - **Message**: 顯示例外的原始訊息，供開發除錯使用
-- **TraceId**: 追蹤識別碼，用於日誌關聯與問題追蹤
+- **TraceId**: 追蹤識別碼，用於日誌關聯與問題追蹤 (由 TraceContextMiddleware 統一管理)
 - **Exception**: 原始例外物件，不會序列化到客戶端回應
 - **Data**: 包含例外類型與時間戳記的結構化資料
 
@@ -164,8 +164,8 @@ public enum FailureCode
 
 #### 系統層級例外處理 (ExceptionHandlingMiddleware)
 - 僅捕捉未處理的系統層級例外（如資料庫連線失敗、記憶體不足等）
-- 使用結構化日誌記錄例外詳細資訊與完整請求參數
-- 將系統例外轉換為標準化的 `Failure` 物件回應
+- 使用結構化日誌記錄例外詳細資訊與完整請求參數 (日誌格式詳見「日誌與安全指引」)
+- 將系統例外轉換為標準化的 `Failure` 物件回應 (中介軟體完整實作見「中介軟體架構與實作」)
 - 統一設定為 500 Internal Server Error
 - 序列化 `Failure` 物件為 JSON 格式回傳
 
@@ -187,7 +187,7 @@ var failure = new Failure
 - **包含追蹤資訊**: 確保所有 Failure 物件都包含 TraceId
 - **結構化資料**: 將相關資料存放在 Failure.Data 中供除錯使用
 - **安全回應**: 不洩露內部實作細節給客戶端，根據環境決定訊息詳細程度
-- **追蹤整合**: 自動整合 TraceContext 資訊到錯誤回應中
+- **追蹤整合**: 自動整合 TraceContext 資訊到錯誤回應中 (完整 TraceContext 管理機制見「追蹤內容管理」)
 - **分離關注點**: 業務錯誤與系統例外分別在不同層級處理
 
 ## 中介軟體架構與實作
@@ -205,7 +205,7 @@ var failure = new Failure
 #### 職責分離原則
 - **例外處理**: 僅在 `ExceptionHandlingMiddleware` 捕捉系統例外，業務邏輯錯誤在 Handler 層處理
 - **追蹤管理**: 所有 TraceContext 相關處理集中在 `TraceContextMiddleware`
-- **日誌記錄**: 分別在例外情況和正常完成時記錄，避免重複
+- **日誌記錄**: 分別在例外情況和正常完成時記錄，避免重複 (詳細策略見「日誌與安全指引」)
 - **請求資訊**: 使用 `RequestInfoExtractor` 統一擷取請求參數
 
 ### 請求資訊擷取機制
@@ -263,15 +263,18 @@ catch (Exception ex)
 
 ### 集中式日誌管理
 
-#### 日誌記錄原則
+#### 日誌記錄核心原則
 - **集中處理**: 所有日誌記錄集中在 Middleware 層，避免在 Handler 層重複記錄
 - **結構化日誌**: 使用 Serilog 結構化日誌格式，統一包含 TraceId 與 UserId
 - **請求追蹤**: 記錄請求進入、處理時間、回應狀態等關鍵資訊
 - **錯誤日誌**: 統一捕捉並記錄例外與錯誤資訊，包含完整的錯誤堆疊
+- **自動增強**: 自動將 TraceId 與 UserId 附加到結構化日誌中
+- **追蹤完整性**: 確保追蹤資訊在整個請求處理過程中的連續性
 
-#### 日誌記錄策略
+#### 分層日誌記錄策略
 - **例外情況**: 在 `ExceptionHandlingMiddleware` 中記錄所有請求資訊與例外詳細資訊
 - **正常完成**: 在 `RequestParameterLoggerMiddleware` 中記錄請求資訊
+- **錯誤追蹤**: 在錯誤處理中自動包含 TraceId 資訊供問題追蹤
 - **避免重複**: 透過中介軟體管線控制，確保同一請求不會重複記錄
 
 ### 安全考量與敏感資訊過濾
