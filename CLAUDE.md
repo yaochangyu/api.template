@@ -321,3 +321,923 @@ else
 - **結構化格式**: 使用 `{@RequestInfo}` 格式記錄結構化資料
 - **自動過濾**: 系統自動排除敏感標頭，無需手動處理
 - **追蹤完整性**: 確保 TraceId 在整個處理過程中的連續性
+
+## 效能最佳化與快取策略
+
+專案採用多層快取架構，結合記憶體快取與分散式快取，提供高效能的資料存取。
+
+### 快取架構設計
+
+#### 多層快取策略
+- **L1 快取 (記憶體內快取)**: 使用 `IMemoryCache` 存放頻繁存取的小型資料
+- **L2 快取 (分散式快取)**: 使用 Redis 作為分散式快取，支援多實例共用
+- **快取備援**: 當 Redis 不可用時，自動降級至記憶體快取
+- **快取預熱**: 應用程式啟動時預載常用資料
+
+```csharp
+// CacheProviderFactory 使用範例
+public class MemberService
+{
+    private readonly ICacheProvider _cache;
+    
+    public MemberService(ICacheProviderFactory cacheFactory)
+    {
+        _cache = cacheFactory.Create();
+    }
+    
+    public async Task<Member> GetMemberAsync(int id)
+    {
+        var cacheKey = $"member:{id}";
+        return await _cache.GetOrSetAsync(cacheKey, 
+            () => _repository.GetMemberAsync(id),
+            TimeSpan.FromMinutes(30));
+    }
+}
+```
+
+#### 快取失效策略
+- **時間過期 (TTL)**: 設定合理的快取過期時間
+- **版本控制**: 使用版本號管理快取一致性
+- **標籤快取**: 支援批次清除相關快取項目
+- **事件驅動**: 資料異動時主動清除對應快取
+
+### ASP.NET Core 效能最佳化
+
+#### 回應壓縮與靜態檔案
+```csharp
+// Program.cs 設定
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
+
+// 靜態檔案快取
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=31536000");
+    }
+});
+```
+
+#### 連線池與資料庫最佳化
+- **EF Core 連線池**: 使用 `AddDbContextPool` 重用 DbContext 實例
+- **查詢最佳化**: 使用 `AsNoTracking()` 避免不必要的異動追蹤
+- **批次操作**: 使用 `BulkInsert` / `BulkUpdate` 處理大量資料
+- **索引策略**: 建立適當的資料庫索引以加速查詢
+
+#### 非同步程式設計最佳實務
+```csharp
+// ✅ 正確的非同步模式
+public async Task<Result<Member, Failure>> CreateMemberAsync(CreateMemberRequest request)
+{
+    // 使用 ConfigureAwait(false) 避免死鎖
+    var existingMember = await _repository.FindByEmailAsync(request.Email)
+        .ConfigureAwait(false);
+    
+    if (existingMember != null)
+        return Failure.DuplicateEmail();
+    
+    // 非同步資料庫操作
+    var member = await _repository.CreateAsync(request).ConfigureAwait(false);
+    
+    // 非同步快取更新
+    await _cache.SetAsync($"member:{member.Id}", member, TimeSpan.FromHours(1))
+        .ConfigureAwait(false);
+    
+    return member;
+}
+
+// ❌ 避免的反模式
+public Member CreateMember(CreateMemberRequest request)
+{
+    // 不要在同步方法中呼叫 .Result 或 .Wait()
+    return CreateMemberAsync(request).Result; // 可能造成死鎖
+}
+```
+
+### 記憶體管理與垃圾收集
+- **物件池**: 使用 `ObjectPool<T>` 重用昂貴物件
+- **Span<T> 與 Memory<T>**: 減少記憶體配置的現代化 API
+- **字串最佳化**: 使用 `StringBuilder` 與字串插值最佳化
+- **大物件堆積 (LOH)**: 避免頻繁配置大型物件
+
+## API 設計與安全性強化
+
+建立標準化、安全且易維護的 Web API 設計原則。
+
+### RESTful API 設計原則
+
+#### API 版本控制策略
+```csharp
+// API 版本控制設定
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new UrlSegmentApiVersionReader(),
+        new HeaderApiVersionReader("X-API-Version")
+    );
+});
+
+// 控制器版本宣告
+[ApiController]
+[Route("api/v{version:apiVersion}/[controller]")]
+[ApiVersion("1.0")]
+[ApiVersion("2.0")]
+public class MemberController : ControllerBase
+{
+    [HttpGet("{id}")]
+    [MapToApiVersion("1.0")]
+    public async Task<ActionResult<MemberV1Response>> GetMemberV1(int id) { }
+    
+    [HttpGet("{id}")]
+    [MapToApiVersion("2.0")]
+    public async Task<ActionResult<MemberV2Response>> GetMemberV2(int id) { }
+}
+```
+
+#### 內容協商與媒體類型
+- **Accept 標頭處理**: 支援多種回應格式 (JSON, XML, MessagePack)
+- **內容壓縮**: 自動 Gzip/Brotli 壓縮
+- **語言本地化**: 根據 Accept-Language 回傳在地化內容
+- **API 文件**: 整合 Swagger/OpenAPI 3.0 規格
+
+### API 安全性防護
+
+#### 輸入驗證與清理
+```csharp
+// 模型驗證
+public class CreateMemberRequest
+{
+    [Required(ErrorMessage = "姓名為必填欄位")]
+    [StringLength(50, MinimumLength = 2, ErrorMessage = "姓名長度需介於 2-50 字元")]
+    [RegularExpression(@"^[\u4e00-\u9fa5a-zA-Z\s]+$", ErrorMessage = "姓名只能包含中文、英文和空格")]
+    public string Name { get; set; }
+    
+    [Required(ErrorMessage = "電子郵件為必填欄位")]
+    [EmailAddress(ErrorMessage = "請輸入有效的電子郵件格式")]
+    public string Email { get; set; }
+    
+    [Phone(ErrorMessage = "請輸入有效的電話號碼格式")]
+    public string? Phone { get; set; }
+}
+
+// 自訂驗證屬性
+public class NoScriptInjectionAttribute : ValidationAttribute
+{
+    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+    {
+        if (value is string stringValue && ContainsScriptTags(stringValue))
+        {
+            return new ValidationResult("輸入內容包含不安全的腳本標籤");
+        }
+        return ValidationResult.Success;
+    }
+    
+    private static bool ContainsScriptTags(string input) =>
+        input.Contains("<script", StringComparison.OrdinalIgnoreCase) ||
+        input.Contains("javascript:", StringComparison.OrdinalIgnoreCase);
+}
+```
+
+#### CORS 與跨來源安全
+```csharp
+// CORS 政策設定
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ProductionPolicy", policy =>
+    {
+        policy.WithOrigins("https://yourdomain.com", "https://api.yourdomain.com")
+              .WithMethods("GET", "POST", "PUT", "DELETE")
+              .WithHeaders("Content-Type", "Authorization", "X-API-Key")
+              .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
+    });
+    
+    options.AddPolicy("DevelopmentPolicy", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+// 環境區分 CORS 使用
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("DevelopmentPolicy");
+}
+else
+{
+    app.UseCors("ProductionPolicy");
+}
+```
+
+#### HTTPS 強制與安全標頭
+```csharp
+// HTTPS 重新導向與 HSTS
+app.UseHttpsRedirection();
+app.UseHsts(); // 僅生產環境
+
+// 安全標頭中介軟體
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    context.Response.Headers.Append("Content-Security-Policy", 
+        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'");
+    
+    await next();
+});
+```
+
+### API 限流與頻率控制
+```csharp
+// 使用 AspNetCoreRateLimit 套件
+builder.Services.AddMemoryCache();
+builder.Services.Configure<IpRateLimitOptions>(options =>
+{
+    options.EnableEndpointRateLimiting = true;
+    options.StackBlockedRequests = false;
+    options.HttpStatusCode = 429;
+    options.GeneralRules = new List<RateLimitRule>
+    {
+        new RateLimitRule
+        {
+            Endpoint = "*",
+            Period = "1m",
+            Limit = 100
+        },
+        new RateLimitRule
+        {
+            Endpoint = "POST:/api/*/members",
+            Period = "1m", 
+            Limit = 10
+        }
+    };
+});
+
+app.UseIpRateLimiting();
+```
+
+## 監控與可觀測性
+
+建立完整的系統監控、效能度量與故障診斷機制，確保生產環境的穩定運行。
+
+### 健康檢查 (Health Checks)
+
+#### 多層健康檢查架構
+```csharp
+// Program.cs 健康檢查設定
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "api" })
+    .AddSqlServer(
+        connectionString: builder.Configuration.GetConnectionString("DefaultConnection"),
+        healthQuery: "SELECT 1;",
+        name: "database",
+        tags: new[] { "database" })
+    .AddRedis(
+        connectionString: builder.Configuration.GetConnectionString("Redis"),
+        name: "redis",
+        tags: new[] { "cache" })
+    .AddUrlGroup(
+        uri: new Uri("https://external-api.example.com/health"),
+        name: "external-service",
+        tags: new[] { "external" });
+
+// 健康檢查端點設定
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    Predicate = _ => true,
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
+
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("database") || check.Tags.Contains("cache")
+});
+
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("api")
+});
+```
+
+#### 自訂健康檢查
+```csharp
+// 自訂健康檢查實作
+public class MemberServiceHealthCheck : IHealthCheck
+{
+    private readonly IMemberService _memberService;
+    
+    public MemberServiceHealthCheck(IMemberService memberService)
+    {
+        _memberService = memberService;
+    }
+    
+    public async Task<HealthCheckResult> CheckHealthAsync(
+        HealthCheckContext context, 
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // 執行簡單的服務檢查
+            var testResult = await _memberService.HealthCheckAsync(cancellationToken);
+            
+            return testResult.IsSuccess 
+                ? HealthCheckResult.Healthy("Member service is working correctly")
+                : HealthCheckResult.Unhealthy("Member service failed health check");
+        }
+        catch (Exception ex)
+        {
+            return HealthCheckResult.Unhealthy(
+                "Member service health check threw exception", ex);
+        }
+    }
+}
+```
+
+### OpenTelemetry 整合
+
+#### 分散式追蹤設定
+```csharp
+// OpenTelemetry 設定
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation(options =>
+        {
+            options.RecordException = true;
+            options.Filter = context => 
+                !context.Request.Path.StartsWithSegments("/health");
+        })
+        .AddEntityFrameworkCoreInstrumentation(options =>
+        {
+            options.SetDbStatementForText = true;
+            options.SetDbStatementForStoredProcedure = true;
+        })
+        .AddRedisInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddJaegerExporter()
+        .AddConsoleExporter())
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddRuntimeInstrumentation()
+        .AddProcessInstrumentation()
+        .AddPrometheusExporter());
+
+// 自訂追蹤活動
+public class MemberService
+{
+    private static readonly ActivitySource ActivitySource = new("JobBank1111.MemberService");
+    
+    public async Task<Member> CreateMemberAsync(CreateMemberRequest request)
+    {
+        using var activity = ActivitySource.StartActivity("CreateMember");
+        activity?.SetTag("member.email", request.Email);
+        activity?.SetTag("operation.type", "create");
+        
+        try
+        {
+            var result = await _repository.CreateAsync(request);
+            activity?.SetTag("member.id", result.Id.ToString());
+            activity?.SetStatus(ActivityStatusCode.Ok);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            throw;
+        }
+    }
+}
+```
+
+### 效能計數器與度量
+
+#### 自訂度量收集
+```csharp
+// 自訂度量提供者
+public class MemberMetrics
+{
+    private readonly Counter<int> _memberCreatedCounter;
+    private readonly Counter<int> _memberLoginCounter;
+    private readonly Histogram<double> _memberOperationDuration;
+    
+    public MemberMetrics(IMeterFactory meterFactory)
+    {
+        var meter = meterFactory.Create("JobBank1111.Member");
+        
+        _memberCreatedCounter = meter.CreateCounter<int>(
+            "member_created_total",
+            description: "Total number of members created");
+            
+        _memberLoginCounter = meter.CreateCounter<int>(
+            "member_login_total", 
+            description: "Total number of member logins");
+            
+        _memberOperationDuration = meter.CreateHistogram<double>(
+            "member_operation_duration_seconds",
+            description: "Duration of member operations");
+    }
+    
+    public void IncrementMemberCreated() => _memberCreatedCounter.Add(1);
+    
+    public void IncrementMemberLogin(string provider) => 
+        _memberLoginCounter.Add(1, new("provider", provider));
+        
+    public void RecordOperationDuration(double seconds, string operation) =>
+        _memberOperationDuration.Record(seconds, new("operation", operation));
+}
+
+// 使用度量
+public class MemberHandler
+{
+    private readonly MemberMetrics _metrics;
+    
+    public async Task<Result<Member, Failure>> CreateMemberAsync(CreateMemberRequest request)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        
+        try
+        {
+            var result = await _memberService.CreateMemberAsync(request);
+            
+            if (result.IsSuccess)
+            {
+                _metrics.IncrementMemberCreated();
+            }
+            
+            return result;
+        }
+        finally
+        {
+            _metrics.RecordOperationDuration(stopwatch.Elapsed.TotalSeconds, "create");
+        }
+    }
+}
+```
+
+### 應用程式效能監控 (APM)
+
+#### Application Insights 整合
+```csharp
+// Application Insights 設定
+builder.Services.AddApplicationInsightsTelemetry(options =>
+{
+    options.ConnectionString = builder.Configuration.GetConnectionString("ApplicationInsights");
+});
+
+// 自訂遙測初始化器
+public class CustomTelemetryInitializer : ITelemetryInitializer
+{
+    private readonly IContextGetter<TraceContext> _contextGetter;
+    
+    public CustomTelemetryInitializer(IContextGetter<TraceContext> contextGetter)
+    {
+        _contextGetter = contextGetter;
+    }
+    
+    public void Initialize(ITelemetry telemetry)
+    {
+        var context = _contextGetter.Get();
+        if (context != null)
+        {
+            telemetry.Context.User.Id = context.UserId?.ToString();
+            telemetry.Context.Operation.Id = context.TraceId;
+        }
+    }
+}
+```
+
+### 日誌聚合與分析
+
+#### Seq 結構化日誌設定
+```csharp
+// Serilog 進階設定
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext()
+    .Enrich.WithMachineName()
+    .Enrich.WithEnvironmentUserName()
+    .Enrich.WithProperty("Application", "JobBank1111.Job.WebAPI")
+    .WriteTo.Console(new JsonFormatter())
+    .WriteTo.File(
+        formatter: new JsonFormatter(),
+        path: "logs/application-.json",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30)
+    .WriteTo.Seq(
+        serverUrl: context.Configuration.GetConnectionString("Seq"),
+        apiKey: context.Configuration["Seq:ApiKey"]));
+
+// 結構化日誌記錄範例
+public class MemberHandler
+{
+    private readonly ILogger<MemberHandler> _logger;
+    
+    public async Task<Result<Member, Failure>> CreateMemberAsync(CreateMemberRequest request)
+    {
+        _logger.LogInformation("Creating member with email {Email}", request.Email);
+        
+        try
+        {
+            var result = await _memberService.CreateMemberAsync(request);
+            
+            _logger.LogInformation("Successfully created member {MemberId} with email {Email}", 
+                result.Value.Id, request.Email);
+                
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create member with email {Email}", request.Email);
+            throw;
+        }
+    }
+}
+```
+
+## 容器化與部署最佳實務
+
+建立標準化的容器化部署流程，確保應用程式在不同環境中的一致性運行。
+
+### Docker 容器化
+
+#### 多階段建置 Dockerfile
+```dockerfile
+# 多階段建置 Dockerfile
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# 複製專案檔案並還原套件
+COPY ["src/be/JobBank1111.Job.WebAPI/JobBank1111.Job.WebAPI.csproj", "JobBank1111.Job.WebAPI/"]
+COPY ["src/be/JobBank1111.Infrastructure/JobBank1111.Infrastructure.csproj", "JobBank1111.Infrastructure/"]
+COPY ["src/be/JobBank1111.Job.DB/JobBank1111.Job.DB.csproj", "JobBank1111.Job.DB/"]
+
+RUN dotnet restore "JobBank1111.Job.WebAPI/JobBank1111.Job.WebAPI.csproj"
+
+# 複製完整原始碼並建置
+COPY src/be/ .
+RUN dotnet build "JobBank1111.Job.WebAPI/JobBank1111.Job.WebAPI.csproj" -c Release -o /app/build
+
+# 發佈階段
+FROM build AS publish
+RUN dotnet publish "JobBank1111.Job.WebAPI/JobBank1111.Job.WebAPI.csproj" -c Release -o /app/publish --no-restore
+
+# 執行時映像
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
+WORKDIR /app
+
+# 建立非 root 使用者
+RUN addgroup -g 1000 appuser && adduser -u 1000 -G appuser -s /bin/sh -D appuser
+USER appuser
+
+# 複製發佈檔案
+COPY --from=publish --chown=appuser:appuser /app/publish .
+
+# 健康檢查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# 設定環境變數
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "JobBank1111.Job.WebAPI.dll"]
+```
+
+#### Docker Compose 開發環境
+```yaml
+# docker-compose.yml
+version: '3.8'
+
+services:
+  webapi:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=JobBankDB;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True
+      - ConnectionStrings__Redis=redis:6379
+      - ConnectionStrings__Seq=http://seq:5341
+    depends_on:
+      - sqlserver
+      - redis
+      - seq
+    networks:
+      - jobbank-network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Passw0rd
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - jobbank-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - jobbank-network
+
+  seq:
+    image: datalust/seq:latest
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - "5341:80"
+    volumes:
+      - seq-data:/data
+    networks:
+      - jobbank-network
+
+volumes:
+  sqlserver-data:
+  redis-data:
+  seq-data:
+
+networks:
+  jobbank-network:
+    driver: bridge
+```
+
+### CI/CD 管線
+
+#### GitHub Actions 工作流程
+```yaml
+# .github/workflows/ci-cd.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: TestPassword123!
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P TestPassword123! -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore src/be/JobBank1111.Job.Management.sln
+      
+    - name: Build
+      run: dotnet build src/be/JobBank1111.Job.Management.sln --no-restore
+      
+    - name: Test
+      run: |
+        dotnet test src/be/JobBank1111.Job.Test/JobBank1111.Job.Test.csproj --no-build --verbosity normal --collect:"XPlat Code Coverage"
+        dotnet test src/be/JobBank1111.Job.IntegrationTest/JobBank1111.Job.IntegrationTest.csproj --no-build --verbosity normal
+      env:
+        ConnectionStrings__DefaultConnection: Server=localhost,1433;Database=JobBankTestDB;User Id=sa;Password=TestPassword123!;TrustServerCertificate=True
+        ConnectionStrings__Redis: localhost:6379
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Log in to Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: |
+          ghcr.io/${{ github.repository }}:latest
+          ghcr.io/${{ github.repository }}:${{ github.sha }}
+        
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - name: Deploy to Azure Container Apps
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        containerAppName: jobbank-api
+        resourceGroup: jobbank-rg
+        imageToDeploy: ghcr.io/${{ github.repository }}:${{ github.sha }}
+```
+
+### 生產環境設定管理
+
+#### 環境變數與機密管理
+```csharp
+// 設定提供者優先順序
+public static class ConfigurationExtensions
+{
+    public static IHostBuilder ConfigureAppSettings(this IHostBuilder builder)
+    {
+        return builder.ConfigureAppConfiguration((context, config) =>
+        {
+            var env = context.HostingEnvironment;
+            
+            config
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+            
+            // Azure Key Vault 整合
+            if (env.IsProduction())
+            {
+                var keyVaultUri = config.Build()["KeyVault:Uri"];
+                if (!string.IsNullOrEmpty(keyVaultUri))
+                {
+                    config.AddAzureKeyVault(new Uri(keyVaultUri), new DefaultAzureCredential());
+                }
+            }
+            
+            // 環境變數 (最高優先順序)
+            config.AddEnvironmentVariables("JOBBANK_");
+            
+            // 開發環境使用 User Secrets
+            if (env.IsDevelopment())
+            {
+                config.AddUserSecrets<Program>();
+            }
+        });
+    }
+}
+
+// Program.cs 使用
+builder.Host.ConfigureAppSettings();
+```
+
+#### Kubernetes 部署配置
+```yaml
+# k8s/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jobbank-api
+  labels:
+    app: jobbank-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: jobbank-api
+  template:
+    metadata:
+      labels:
+        app: jobbank-api
+    spec:
+      containers:
+      - name: webapi
+        image: ghcr.io/your-org/jobbank-api:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: jobbank-secrets
+              key: database-connection
+        - name: ConnectionStrings__Redis
+          valueFrom:
+            configMapKeyRef:
+              name: jobbank-config
+              key: redis-connection
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jobbank-api-service
+spec:
+  selector:
+    app: jobbank-api
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: LoadBalancer
+```
+
+### 效能監控與擴展
+
+#### 水平自動擴展 (HPA)
+```yaml
+# k8s/hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: jobbank-api-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: jobbank-api
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+```
