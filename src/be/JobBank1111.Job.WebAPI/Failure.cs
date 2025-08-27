@@ -17,7 +17,7 @@ public class Failure
     /// <summary>
     /// 錯誤碼
     /// </summary>
-    public string Code { get; init; }
+    public string Code { get; init; } = nameof(FailureCode.Unknown);
 
     /// <summary>
     /// 錯誤訊息
