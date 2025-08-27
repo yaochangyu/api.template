@@ -113,7 +113,7 @@
 - **依賴注入**: 透過 IContextSetter 設定用戶資訊
 - **資訊取得**: 透過 IContextGetter 取得用戶資訊
 
-## Result Pattern 實作指引
+## Result Pattern 與 Failure 物件管理
 
 專案中的方法應套用 Result Pattern，提供明確的成功/失敗處理機制：
 
@@ -121,35 +121,6 @@
 **強制使用** `Result<TSuccess, TFailure>` 作為處理器層回傳類型                                                                             
 **映射規則**: 使用 `FailureCodeMapper` 將錯誤代碼映射至 HTTP 狀態碼                                                                        
 **統一轉換**: 使用 `ResultActionResult<T>` 與擴充方法 `.ToActionResult()` 統一處理成功/失敗回應
-
-### 實作要點
-- **回傳類型**: 使用 `Result<TSuccess, TFailure>` 作為回傳類型
-- **驗證鏈**: 使用連續驗證模式，遇到失敗時立即回傳
-- **例外處理**: 統一捕捉例外並轉換為 `Failure` 物件
-- **追蹤資訊**: 在 `Failure` 物件中包含 TraceId 用於日誌追蹤
-- **結構化日誌**: 使用結構化日誌記錄錯誤資訊
-
-### 最佳實務
-- **不要重複拋出例外**: 處理過的例外不應再次 throw
-- **統一錯誤碼**: 使用 `nameof(FailureCode.*)` 定義錯誤碼
-- **包含追蹤資訊**: 確保所有 Failure 物件都包含 TraceId
-- **結構化資料**: 將相關資料存放在 Failure.Data 中供除錯使用
-
-## 例外處理中介軟體指引
-
-專案實作集中式例外處理機制，統一捕捉、記錄與回應未處理的例外：
-
-### 中介軟體架構
-- **ExceptionHandlingMiddleware**: 最外層中介軟體，捕捉所有未處理例外
-- **TraceContextMiddleware**: 處理使用者身分驗證與追蹤內容設定
-- **LoggerMiddleware**: 記錄請求與回應日誌，例外發生時交由 ExceptionHandlingMiddleware 處理
-
-### 例外處理流程
-1. **捕捉例外**: 在 `ExceptionHandlingMiddleware` 統一捕捉未處理例外
-2. **記錄日誌**: 使用結構化日誌記錄例外詳細資訊，包含 TraceId、UserId、例外類型
-3. **建立回應**: 將例外轉換為標準化的 `Failure` 物件回應
-4. **設定狀態碼**: 統一設定為 500 Internal Server Error
-5. **回傳 JSON**: 序列化 `Failure` 物件為 JSON 格式回傳
 
 ### FailureCode 定義
 ```csharp
@@ -168,11 +139,54 @@ public enum FailureCode
 ```
 
 ### Failure 物件結構
-- **Code**: 錯誤代碼，使用 `nameof(FailureCode.Unknown)` 作為預設值
+- **Code**: 錯誤代碼，使用 `nameof(FailureCode.*)` 定義錯誤碼
 - **Message**: 顯示例外的原始訊息，供開發除錯使用
 - **TraceId**: 追蹤識別碼，用於日誌關聯與問題追蹤
 - **Exception**: 原始例外物件，不會序列化到客戶端回應
 - **Data**: 包含例外類型與時間戳記的結構化資料
+
+### 實作要點
+- **回傳類型**: 使用 `Result<TSuccess, TFailure>` 作為回傳類型
+- **驗證鏈**: 使用連續驗證模式，遇到失敗時立即回傳
+- **例外處理**: 統一捕捉例外並轉換為 `Failure` 物件
+- **追蹤資訊**: 在 `Failure` 物件中包含 TraceId 用於日誌追蹤
+- **結構化日誌**: 使用結構化日誌記錄錯誤資訊
+
+### 安全回應處理
+```csharp
+// 不洩露內部實作細節給客戶端
+var failure = new Failure
+{
+    Code = nameof(FailureCode.InternalServerError),
+    Message = _env.IsDevelopment() ? ex.Message : "內部伺服器錯誤", // 開發環境顯示詳細訊息
+    TraceId = traceContext?.TraceId,
+    Data = _env.IsDevelopment() ? new { ExceptionType = ex.GetType().Name } : null
+};
+```
+
+### 最佳實務
+- **不要重複拋出例外**: 處理過的例外不應再次 throw
+- **統一錯誤碼**: 使用 `nameof(FailureCode.*)` 定義錯誤碼
+- **包含追蹤資訊**: 確保所有 Failure 物件都包含 TraceId
+- **結構化資料**: 將相關資料存放在 Failure.Data 中供除錯使用
+- **安全回應**: 不洩露內部實作細節給客戶端，根據環境決定訊息詳細程度
+- **追蹤整合**: 自動整合 TraceContext 資訊到錯誤回應中
+
+## 例外處理中介軟體指引
+
+專案實作集中式例外處理機制，統一捕捉、記錄與回應未處理的例外：
+
+### 中介軟體架構
+- **ExceptionHandlingMiddleware**: 最外層中介軟體，捕捉所有未處理例外
+- **TraceContextMiddleware**: 處理使用者身分驗證與追蹤內容設定
+- **LoggerMiddleware**: 記錄請求與回應日誌，例外發生時交由 ExceptionHandlingMiddleware 處理
+
+### 例外處理流程
+1. **捕捉例外**: 在 `ExceptionHandlingMiddleware` 統一捕捉未處理例外
+2. **記錄日誌**: 使用結構化日誌記錄例外詳細資訊，包含 TraceId、UserId、例外類型
+3. **建立回應**: 將例外轉換為標準化的 `Failure` 物件回應
+4. **設定狀態碼**: 統一設定為 500 Internal Server Error
+5. **回傳 JSON**: 序列化 `Failure` 物件為 JSON 格式回傳
 
 ### 實作要點
 - **簡化設計**: 統一使用 500 Internal Server Error，避免複雜的狀態碼映射邏輯
@@ -181,9 +195,34 @@ public enum FailureCode
 - **追蹤整合**: 自動整合 TraceContext 資訊到錯誤回應中
 - **JSON 序列化**: 使用專案統一的 JsonSerializerOptions 設定
 
+### 敏感資訊過濾處理
+```csharp
+// 敏感資訊過濾
+private static readonly string[] SensitiveHeaders = 
+{
+    "Authorization", "Cookie", "X-API-Key", "X-Auth-Token", 
+    "Set-Cookie", "Proxy-Authorization"
+};
+
+// 確保敏感資訊不會被記錄
+var headers = context.Request.Headers
+    .Where(h => !SensitiveHeaders.Contains(h.Key, StringComparer.OrdinalIgnoreCase))
+    .ToDictionary(h => h.Key, h => h.Value.ToString());
+
+// 生產環境隱藏堆疊追蹤
+if (_env.IsProduction())
+{
+    _logger.LogError("例外發生 - TraceId: {TraceId}, Type: {ExceptionType}", 
+        traceId, ex.GetType().Name);
+}
+else
+{
+    _logger.LogError(ex, "例外發生 - TraceId: {TraceId}", traceId);
+}
+```
+
 ### 開發守則
-- **集中處理**: 所有未處理例外都應交由 ExceptionHandlingMiddleware 統一處理
-- **不重複處理**: 其他中介軟體記錄例外後應重新拋出，由最外層統一處理
+- **未處理的例外，集中處理**: 所有未處理例外都應交由 ExceptionHandlingMiddleware 統一處理，其他 Middleware 應避免攔截錯誤後再次拋出，造成重複記錄
 - **一致性回應**: 確保所有例外都轉換為相同格式的 Failure 回應
 - **追蹤完整性**: 確保例外處理過程中 TraceId 的連續性與可追蹤性
 
@@ -230,3 +269,33 @@ _logger.LogInformation("Request completed - RequestInfo: {@RequestInfo}", reques
 - **統一格式**: 所有請求資訊記錄使用相同的資料結構
 - **效能考量**: 只有在需要時才擷取請求本文，避免不必要的處理
 - **可擴展性**: 透過靜態方法設計，便於在不同中介軟體中重用
+
+## Middleware 錯誤處理原則
+
+### 統一錯誤處理
+- **集中處理**: 所有未處理錯誤統一交給 `ExceptionHandlingMiddleware` 集中處理並記錄
+- **避免重複**: 避免在其他 Middleware 中攔截錯誤後再次拋出，造成重複記錄
+
+### 建議做法
+```csharp
+// ✅ 建議：讓錯誤自然流向 ExceptionHandlingMiddleware
+await _next(context);
+```
+
+### 避免的做法
+```csharp
+// ❌ 避免：攔截錯誤後再次拋出
+try
+{
+    await _next(context);
+}
+catch (Exception ex)
+{
+    _logger.LogError(ex, "錯誤發生");
+    throw; // 避免這樣做，會造成重複記錄
+}
+```
+
+### 特殊情況
+- 若特定 Middleware 確實需要攔截錯誤處理特殊業務邏輯，可以例外處理
+- 但應謹慎評估是否真的必要，優先考慮在業務層處理
