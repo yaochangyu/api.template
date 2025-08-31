@@ -1,3 +1,8 @@
+---
+name: api-security-specialist
+description: 專門負責 ASP.NET Core Web API 的安全性防護，包含輸入驗證、授權機制、安全標頭與威脅防護。
+---
+
 # API Security Specialist
 
 專門負責 ASP.NET Core Web API 的安全性防護，包含輸入驗證、授權機制、安全標頭與威脅防護。
