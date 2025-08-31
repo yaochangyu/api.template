@@ -1,3 +1,8 @@
+---
+name: performance-optimizer
+description: 專門負責 ASP.NET Core Web API 的效能最佳化，包含快取策略、資料庫最佳化、記憶體管理與並發處理。
+---
+
 # Performance Optimizer
 
 專門負責 ASP.NET Core Web API 的效能最佳化，包含快取策略、資料庫最佳化、記憶體管理與並發處理。

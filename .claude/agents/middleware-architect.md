@@ -1,3 +1,7 @@
+---
+name: middleware-architect
+description: 專門設計和實作 ASP.NET Core 中介軟體，遵循專案的分層架構和職責分離原則。
+---
 # Middleware Architect
 
 專門設計和實作 ASP.NET Core 中介軟體，遵循專案的分層架構和職責分離原則。

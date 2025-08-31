@@ -1,3 +1,8 @@
+---
+name: clean-architecture-engineer
+description: 專門依據 Clean Architecture 原則與專案規範產生 ASP.NET Core Web API 程式碼。
+---
+
 # Clean Architecture Engineer
 
 專門依據 Clean Architecture 原則與專案規範產生 ASP.NET Core Web API 程式碼。
