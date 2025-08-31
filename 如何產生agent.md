@@ -66,6 +66,13 @@
 - Entity Framework 整合
 - 快取機制
 - 錯誤處理模式
+
+## /webapi:models [實體名稱]
+產生 Request/Response 模型類別
+- Insert/Update/Create Request 模型
+- Get/List Response 模型  
+- 包含資料驗證屬性
+- 符合 OpenAPI 規格註解
 ```
 
 ## 方案二：Agent 模式 - 專業代理人
@@ -92,6 +99,7 @@
 2. **錯誤處理**: 統一使用 Failure 物件和 Result Pattern
 3. **追蹤整合**: 自動整合 TraceContext 和日誌記錄
 4. **驗證邏輯**: 實作連續驗證模式
+5. **模型設計**: 產生符合規範的 Request/Response 模型
 
 ## 自動啟用情境
 - 建立新的實體處理邏輯
@@ -145,6 +153,7 @@
 - `/jb:controller` - Controller 產生  
 - `/jb:middleware` - Middleware 產生
 - `/jb:repository` - Repository 產生
+- `/jb:models` - Request/Response 模型產生
 - `/jb:test` - 測試類別產生
 - `/jb:migration` - EF Migration 產生
 
@@ -246,6 +255,110 @@ public class {{name}}Handler(
 }
 ```
 
+### Model 產生器範例
+
+```csharp
+// ModelTemplate.cs
+public static class ModelTemplate
+{
+    public static string GetRequestTemplate(string name, string entity, ModelProperty[] properties) => $$"""
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+namespace JobBank1111.Job.WebAPI.{{entity}};
+
+/// <summary>
+/// {{name}} 請求模型
+/// 注意：這個類別通常是從 OpenAPI 規格自動產生的
+/// </summary>
+public class {{name}}Request
+{
+{{string.Join("\n", properties.Select(p => GenerateProperty(p)))}}
+}
+""";
+
+    public static string GetResponseTemplate(string name, string entity, ModelProperty[] properties) => $$"""
+using System.Text.Json.Serialization;
+
+namespace JobBank1111.Job.WebAPI.{{entity}};
+
+/// <summary>
+/// {{name}} 回應模型
+/// </summary>
+public class {{name}}Response
+{
+{{string.Join("\n", properties.Select(p => GenerateResponseProperty(p)))}}
+}
+""";
+
+    private static string GenerateProperty(ModelProperty property)
+    {
+        var lines = new List<string>();
+        
+        // 加入驗證屬性
+        if (property.IsRequired)
+        {
+            lines.Add($"    [Required(ErrorMessage = \"{property.DisplayName}為必填欄位\")]");
+        }
+        
+        if (property.MaxLength > 0)
+        {
+            var minLength = property.MinLength > 0 ? $"MinimumLength = {property.MinLength}, " : "";
+            lines.Add($"    [StringLength({property.MaxLength}, {minLength}ErrorMessage = \"{property.DisplayName}長度需介於 {property.MinLength}-{property.MaxLength} 字元\")]");
+        }
+        
+        if (property.IsEmail)
+        {
+            lines.Add($"    [EmailAddress(ErrorMessage = \"請輸入有效的電子郵件格式\")]");
+        }
+        
+        if (property.IsRange && property.MinValue.HasValue && property.MaxValue.HasValue)
+        {
+            lines.Add($"    [Range({property.MinValue}, {property.MaxValue}, ErrorMessage = \"{property.DisplayName}必須介於 {property.MinValue} 到 {property.MaxValue}\")]");
+        }
+        
+        // 屬性定義
+        var nullableModifier = property.IsRequired ? "" : "?";
+        lines.Add($"    public {property.Type}{nullableModifier} {property.Name} {{ get; set; }}");
+        lines.Add("");
+        
+        return string.Join("\n", lines);
+    }
+    
+    private static string GenerateResponseProperty(ModelProperty property)
+    {
+        var lines = new List<string>();
+        
+        // 如果是敏感資料，加入 JsonIgnore
+        if (property.IsSensitive)
+        {
+            lines.Add("    [JsonIgnore]");
+        }
+        
+        var nullableModifier = property.IsRequired ? "" : "?";
+        lines.Add($"    public {property.Type}{nullableModifier} {property.Name} {{ get; set; }}");
+        lines.Add("");
+        
+        return string.Join("\n", lines);
+    }
+}
+
+public class ModelProperty
+{
+    public string Name { get; set; }
+    public string Type { get; set; }
+    public string DisplayName { get; set; }
+    public bool IsRequired { get; set; }
+    public int MaxLength { get; set; }
+    public int MinLength { get; set; }
+    public bool IsEmail { get; set; }
+    public bool IsRange { get; set; }
+    public double? MinValue { get; set; }
+    public double? MaxValue { get; set; }
+    public bool IsSensitive { get; set; }
+}
+```
+
 ### Taskfile.yml 整合
 
 ```yaml
@@ -268,6 +381,12 @@ tasks:
     cmds:
       - echo "產生 {{.NAME}}Controller 實作中..."
       - dotnet run --project tools/CodeGenerator -- controller --name {{.NAME}}
+  
+  codegen-models:
+    desc: "生成 Request/Response 模型"
+    cmds:
+      - echo "產生 {{.NAME}} Request/Response 模型中..."
+      - dotnet run --project tools/CodeGenerator -- models --name {{.NAME}} --entity {{.ENTITY}}
 ```
 
 ## 使用方式
@@ -276,9 +395,11 @@ tasks:
 ```bash
 # 使用 Taskfile 指令
 task codegen-handler NAME=Product ENTITY=Product
+task codegen-models NAME=CreateProduct ENTITY=Product
 
 # 或直接使用 Claude Code slash command
 /webapi:handler Product
+/webapi:models Product
 ```
 
 ### Agent 模式使用
@@ -295,6 +416,7 @@ task codegen-handler NAME=Product ENTITY=Product
 # 使用框架指令
 /jb:handler Product
 /jb:controller Product
+/jb:models Product
 /jb:test Product
 
 # 切換行為模式
@@ -311,3 +433,67 @@ task codegen-handler NAME=Product ENTITY=Product
 5. **簡化維護工作**: 標準化的程式碼結構便於維護
 
 透過這套框架，開發團隊可以更專注於業務邏輯的實作，而不需要重複處理基礎設施程式碼的細節。
+
+## 完整範例：產品管理功能
+
+### 產生 Request/Response 模型
+```bash
+# 產生 CreateProductRequest
+task codegen-models NAME=CreateProduct ENTITY=Product
+
+# 產生 UpdateProductRequest  
+task codegen-models NAME=UpdateProduct ENTITY=Product
+
+# 產生 GetProductResponse
+task codegen-models NAME=GetProduct ENTITY=Product --type=Response
+```
+
+產生的模型範例：
+```csharp
+// CreateProductRequest.cs
+using System.ComponentModel.DataAnnotations;
+namespace JobBank1111.Job.WebAPI.Product;
+
+public class CreateProductRequest
+{
+    [Required(ErrorMessage = "產品名稱為必填欄位")]
+    [StringLength(100, MinimumLength = 2, ErrorMessage = "產品名稱長度需介於 2-100 字元")]
+    public string Name { get; set; }
+
+    [StringLength(500, ErrorMessage = "產品描述不能超過 500 字元")]
+    public string? Description { get; set; }
+
+    [Required(ErrorMessage = "產品價格為必填欄位")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "產品價格必須大於 0")]
+    public decimal Price { get; set; }
+}
+
+// GetProductResponse.cs  
+using System.Text.Json.Serialization;
+namespace JobBank1111.Job.WebAPI.Product;
+
+public class GetProductResponse
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string? Description { get; set; }
+    public decimal Price { get; set; }
+    public DateTime CreatedAt { get; set; }
+    
+    [JsonIgnore]
+    public string InternalNotes { get; set; }
+}
+```
+
+### 產生完整功能
+```bash
+# 一次產生所有相關檔案
+task codegen-models NAME=CreateProduct ENTITY=Product
+task codegen-models NAME=UpdateProduct ENTITY=Product  
+task codegen-models NAME=GetProduct ENTITY=Product --type=Response
+task codegen-handler NAME=Product ENTITY=Product
+task codegen-controller NAME=Product
+task codegen-repository NAME=Product ENTITY=Product
+```
+
+這樣就能快速建立符合專案規範的完整 API 功能，包含所有必要的 Request/Response 模型。
