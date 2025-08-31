@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx:*)",
+      "Bash(npm search \"modelcontextprotocol\")",
+      "Bash(dotnet build:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "fetch",
+    "filesystem",
+    "playwright",
+    "memory",
+    "browserbase",
+    "context7",
+    "github"
+  ]
+}

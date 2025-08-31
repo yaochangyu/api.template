@@ -346,8 +346,7 @@ public class MemberService
     }
     
     public async Task<Member> GetMemberAsync(int id)
-    {
-        var cacheKey = $"member:{id}";
+
         return await _cache.GetOrSetAsync(cacheKey, 
             () => _repository.GetMemberAsync(id),
             TimeSpan.FromMinutes(30));
