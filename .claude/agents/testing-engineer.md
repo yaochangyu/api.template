@@ -1,3 +1,8 @@
+---
+name: testing-engineer
+description: 專門負責 ASP.NET Core Web API 的測試策略設計與實作，包含單元測試、整合測試、效能測試與 BDD 情境測試。
+---
+
 # Testing Engineer
 
 專門負責 ASP.NET Core Web API 的測試策略設計與實作，包含單元測試、整合測試、效能測試與 BDD 情境測試。
