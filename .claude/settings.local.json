@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npx:*)",
       "Bash(npm search \"modelcontextprotocol\")",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(dotnet sln add:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

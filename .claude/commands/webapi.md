@@ -10,6 +10,7 @@ description: 產生符合 JobBank1111 API 專案規範的程式碼
 
 支援的子命令：
 - **full [實體名稱]**: 產生完整功能模組（包含所有相關類別）
+- **command [實體名稱]**: 產生 Command 類別（基於 MemberCommand 模式）
 - handler [實體名稱]: 產生 Handler 類別
 - controller [實體名稱]: 產生 Controller 實作類別  
 - middleware [中介軟體名稱]: 產生 Middleware 類別
@@ -81,6 +82,54 @@ description: 產生符合 JobBank1111 API 專案規範的程式碼
 ### 執行順序
 為確保依賴關係正確，檔案會依照以下順序產生：
 1. Request/Response 模型 → 2. Repository → 3. Handler → 4. Controller → 5. 測試
+
+---
+
+## command 子命令
+產生符合專案規範的 Command 類別，基於 MemberCommand 模式
+
+### 功能特色
+- 基於 MemberRepository 分析的標準模式
+- 使用 Result Pattern 錯誤處理
+- 自動整合 TraceContext 追蹤
+- 包含結構化日誌記錄
+- 自動產生對應的 Request/Response Model
+
+### 使用範例
+```
+/webapi command Product
+/webapi command Order
+/webapi command Customer
+```
+
+### 產生內容
+基於 MemberRepository 的方法分析，會產生以下內容：
+
+**主要 Command 類別：**
+- `{Entity}Command.cs` - 主要 Command 類別
+
+**對應的 Request/Response Model：**
+- `Insert{Entity}Request.cs` - 插入請求模型
+- `Insert{Entity}Response.cs` - 插入回應模型
+- `Get{Entity}ByEmailRequest.cs` - Email 查詢請求模型
+- `Get{Entity}ByEmailResponse.cs` - Email 查詢回應模型
+- `Get{Entity}sOffsetRequest.cs` - Offset 分頁請求模型
+- `Get{Entity}sOffsetResponse.cs` - Offset 分頁回應模型
+- `Get{Entity}sCursorRequest.cs` - Cursor 分頁請求模型
+- `Get{Entity}sCursorResponse.cs` - Cursor 分頁回應模型
+
+**標準方法模板：**
+- `Insert{Entity}Async` - 新增實體，包含 Email 重複檢查
+- `Get{Entity}ByEmailAsync` - 透過 Email 查詢實體
+- `Get{Entity}sOffsetAsync` - Offset 分頁查詢
+- `Get{Entity}sCursorAsync` - Cursor 分頁查詢
+
+### 設計模式
+遵循 MemberCommand 的設計模式：
+- 日誌記錄在方法開始和結束
+- 統一的錯誤處理和 Failure 物件建立
+- TraceContext 整合追蹤
+- 業務邏輯驗證（如重複 Email 檢查）
 
 ---
 
