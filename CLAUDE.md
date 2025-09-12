@@ -76,6 +76,626 @@
 4. 執行 `task api-dev` 進行熱重載開發
 5. 使用 BDD 情境的整合測試進行測試
 
+## BDD 開發流程 (行為驅動開發)
+
+專案採用 BDD (Behavior-Driven Development) 開發模式，使用 Docker 容器作為測試替身，確保需求、測試與實作的一致性。
+
+### BDD 開發循環
+
+#### 1. 需求分析階段 (Specification)
+```gherkin
+# 範例：在 IntegrationTest 專案中建立 .feature 檔案
+Feature: 會員註冊功能
+  作為一個新用戶
+  我想要註冊成為會員
+  以便使用系統服務
+
+  Scenario: 成功註冊新會員
+    Given 我有有效的註冊資訊
+    And 電子郵件地址尚未被使用
+    When 我提交註冊請求
+    Then 系統應該建立新的會員帳戶
+    And 回傳成功的註冊確認
+
+  Scenario: 重複電子郵件註冊失敗
+    Given 我有有效的註冊資訊
+    And 電子郵件地址已被其他會員使用
+    When 我提交註冊請求
+    Then 系統應該拒絕註冊
+    And 回傳重複電子郵件錯誤訊息
+```
+
+#### 2. 測試實作階段 (Red Phase)
+```csharp
+// 使用 Reqnroll 與真實 Docker 服務實作測試步驟
+[Binding]
+public class MemberRegistrationSteps : IClassFixture<DockerTestEnvironment>
+{
+    private readonly DockerTestEnvironment _testEnvironment;
+    private readonly HttpClient _client;
+    private CreateMemberRequest _request;
+    private HttpResponseMessage _response;
+
+    public MemberRegistrationSteps(DockerTestEnvironment testEnvironment)
+    {
+        _testEnvironment = testEnvironment;
+        _client = _testEnvironment.CreateClient();
+    }
+
+    [Given(@"我有有效的註冊資訊")]
+    public void GivenValidRegistrationInfo()
+    {
+        _request = new CreateMemberRequest
+        {
+            Name = "測試用戶",
+            Email = $"test-{Guid.NewGuid()}@example.com", // 確保每次測試使用不同信箱
+            Phone = "0912345678"
+        };
+    }
+
+    [Given(@"電子郵件地址尚未被使用")]
+    public async Task GivenEmailNotExists()
+    {
+        // 使用真實資料庫檢查，不使用 Mock
+        var response = await _client.GetAsync($"/api/v1/members/check-email?email={_request.Email}");
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Given(@"電子郵件地址已被其他會員使用")]
+    public async Task GivenEmailAlreadyExists()
+    {
+        // 先在真實資料庫中建立會員
+        var existingMember = new CreateMemberRequest
+        {
+            Name = "既有會員",
+            Email = _request.Email,
+            Phone = "0987654321"
+        };
+        
+        var content = JsonContent.Create(existingMember);
+        var response = await _client.PostAsync("/api/v1/members", content);
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
+    [When(@"我提交註冊請求")]
+    public async Task WhenSubmitRegistration()
+    {
+        var content = JsonContent.Create(_request);
+        _response = await _client.PostAsync("/api/v1/members", content);
+    }
+
+    [Then(@"系統應該建立新的會員帳戶")]
+    public async Task ThenShouldCreateMember()
+    {
+        _response.StatusCode.Should().Be(HttpStatusCode.Created);
+        
+        var responseContent = await _response.Content.ReadAsStringAsync();
+        var member = JsonSerializer.Deserialize<MemberResponse>(responseContent);
+        
+        member.Should().NotBeNull();
+        member.Email.Should().Be(_request.Email);
+        member.Name.Should().Be(_request.Name);
+
+        // 驗證資料確實存在於真實資料庫中
+        var verifyResponse = await _client.GetAsync($"/api/v1/members/{member.Id}");
+        verifyResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Then(@"回傳重複電子郵件錯誤訊息")]
+    public async Task ThenReturnDuplicateEmailError()
+    {
+        _response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        
+        var responseContent = await _response.Content.ReadAsStringAsync();
+        var error = JsonSerializer.Deserialize<Failure>(responseContent);
+        
+        error.Code.Should().Be(nameof(FailureCode.DuplicateEmail));
+        error.Message.Should().Contain("電子郵件地址已被使用");
+    }
+}
+```
+
+#### 3. Docker 測試環境設定
+```csharp
+// 完全基於 Docker 的測試環境，避免使用 Mock
+public class DockerTestEnvironment : IAsyncLifetime
+{
+    private readonly MsSqlContainer _sqlServerContainer;
+    private readonly RedisContainer _redisContainer;
+    private readonly IContainer _seqContainer;
+    private WebApplicationFactory<Program> _factory;
+
+    public DockerTestEnvironment()
+    {
+        // SQL Server 容器
+        _sqlServerContainer = new MsSqlBuilder()
+            .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+            .WithPassword("StrongTestPassword123!")
+            .WithDatabase("JobBankTestDB")
+            .WithPortBinding(1433, true)
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilCommandIsCompleted("/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "StrongTestPassword123!", "-Q", "SELECT 1"))
+            .Build();
+
+        // Redis 容器
+        _redisContainer = new RedisBuilder()
+            .WithImage("redis:7-alpine")
+            .WithPortBinding(6379, true)
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilCommandIsCompleted("redis-cli", "ping"))
+            .Build();
+
+        // Seq 日誌容器
+        _seqContainer = new ContainerBuilder()
+            .WithImage("datalust/seq:latest")
+            .WithEnvironment("ACCEPT_EULA", "Y")
+            .WithPortBinding(5341, true)
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilHttpRequestIsSucceeded(r => r.ForPort(5341)))
+            .Build();
+    }
+
+    public async Task InitializeAsync()
+    {
+        // 並行啟動所有容器以節省時間
+        var tasks = new[]
+        {
+            _sqlServerContainer.StartAsync(),
+            _redisContainer.StartAsync(),
+            _seqContainer.StartAsync()
+        };
+        
+        await Task.WhenAll(tasks);
+
+        // 建立 Web 應用程式工廠，使用真實的 Docker 服務
+        _factory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    // 移除原有的資料庫設定
+                    var dbContextDescriptor = services.SingleOrDefault(
+                        d => d.ServiceType == typeof(DbContextOptions<JobBankDbContext>));
+                    if (dbContextDescriptor != null)
+                        services.Remove(dbContextDescriptor);
+
+                    // 使用真實的 Docker SQL Server
+                    services.AddDbContext<JobBankDbContext>(options =>
+                    {
+                        options.UseSqlServer(_sqlServerContainer.GetConnectionString());
+                    });
+
+                    // 使用真實的 Docker Redis
+                    services.AddStackExchangeRedisCache(options =>
+                    {
+                        options.Configuration = _redisContainer.GetConnectionString();
+                    });
+
+                    // 設定真實的 Seq 日誌
+                    services.Configure<SeqOptions>(options =>
+                    {
+                        options.ServerUrl = $"http://localhost:{_seqContainer.GetMappedPublicPort(5341)}";
+                    });
+                });
+
+                builder.ConfigureAppConfiguration(config =>
+                {
+                    config.AddInMemoryCollection(new Dictionary<string, string>
+                    {
+                        ["ConnectionStrings:DefaultConnection"] = _sqlServerContainer.GetConnectionString(),
+                        ["ConnectionStrings:Redis"] = _redisContainer.GetConnectionString(),
+                        ["ConnectionStrings:Seq"] = $"http://localhost:{_seqContainer.GetMappedPublicPort(5341)}"
+                    });
+                });
+            });
+
+        // 執行資料庫遷移與種子資料
+        await InitializeDatabase();
+    }
+
+    private async Task InitializeDatabase()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<JobBankDbContext>();
+        
+        // 確保資料庫建立並套用遷移
+        await context.Database.EnsureCreatedAsync();
+        
+        // 可選：載入測試基礎資料
+        await SeedTestData(context);
+    }
+
+    private async Task SeedTestData(JobBankDbContext context)
+    {
+        // 建立測試所需的基礎資料
+        // 注意：每個測試情境都應該清理自己的測試資料
+    }
+
+    public HttpClient CreateClient()
+    {
+        return _factory.CreateClient();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await _factory.DisposeAsync();
+        
+        // 並行關閉所有容器
+        var tasks = new[]
+        {
+            _sqlServerContainer.DisposeAsync().AsTask(),
+            _redisContainer.DisposeAsync().AsTask(),
+            _seqContainer.DisposeAsync().AsTask()
+        };
+        
+        await Task.WhenAll(tasks);
+    }
+}
+```
+
+#### 4. 最小實作階段 (Green Phase)
+```csharp
+// 實作最小功能讓測試通過 - 直接使用真實依賴項
+[ApiController]
+[Route("api/v1/[controller]")]
+public class MembersController : ControllerBase
+{
+    private readonly IMemberHandler _memberHandler;
+
+    public MembersController(IMemberHandler memberHandler)
+    {
+        _memberHandler = memberHandler;
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateMember([FromBody] CreateMemberRequest request)
+    {
+        var result = await _memberHandler.CreateMemberAsync(request);
+        return result.ToActionResult();
+    }
+
+    [HttpGet("check-email")]
+    public async Task<IActionResult> CheckEmailExists([FromQuery] string email)
+    {
+        var exists = await _memberHandler.CheckEmailExistsAsync(email);
+        return exists ? Ok() : NotFound();
+    }
+}
+
+// Handler 層實作 - 不使用 Mock，直接整合測試
+public class MemberHandler : IMemberHandler
+{
+    private readonly IMemberRepository _repository;
+    private readonly ILogger<MemberHandler> _logger;
+
+    public MemberHandler(IMemberRepository repository, ILogger<MemberHandler> logger)
+    {
+        _repository = repository;
+        _logger = logger;
+    }
+
+    public async Task<Result<MemberResponse, Failure>> CreateMemberAsync(CreateMemberRequest request)
+    {
+        _logger.LogInformation("正在建立會員，信箱: {Email}", request.Email);
+
+        // 檢查電子郵件是否已存在 - 真實資料庫查詢
+        var existingMember = await _repository.GetByEmailAsync(request.Email);
+        if (existingMember != null)
+        {
+            _logger.LogWarning("建立會員失敗，信箱已存在: {Email}", request.Email);
+            return Failure.Create(FailureCode.DuplicateEmail, "電子郵件地址已被使用");
+        }
+
+        // 建立新會員 - 真實資料庫操作
+        var member = new Member
+        {
+            Name = request.Name,
+            Email = request.Email,
+            Phone = request.Phone,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var created = await _repository.CreateAsync(member);
+        _logger.LogInformation("成功建立會員，ID: {MemberId}, 信箱: {Email}", created.Id, created.Email);
+
+        return new MemberResponse
+        {
+            Id = created.Id,
+            Name = created.Name,
+            Email = created.Email,
+            Phone = created.Phone
+        };
+    }
+
+    public async Task<bool> CheckEmailExistsAsync(string email)
+    {
+        var member = await _repository.GetByEmailAsync(email);
+        return member != null;
+    }
+}
+```
+
+### Docker 優先測試策略
+
+#### 核心原則
+- **真實環境**: 使用 Docker 容器提供真實的資料庫、快取、訊息佇列等服務
+- **避免 Mock**: 只有在無法使用 Docker 替身的外部服務才考慮 Mock
+- **隔離測試**: 每個測試使用獨立的資料，測試完成後自動清理
+- **並行執行**: 利用 Docker 容器的隔離特性支援測試並行執行
+
+#### 測試資料管理
+```csharp
+// 測試基底類別提供資料清理功能
+public abstract class BddTestBase : IClassFixture<DockerTestEnvironment>
+{
+    protected readonly DockerTestEnvironment TestEnvironment;
+    protected readonly HttpClient Client;
+    private readonly List<string> _testEmails = new();
+
+    public BddTestBase(DockerTestEnvironment testEnvironment)
+    {
+        TestEnvironment = testEnvironment;
+        Client = testEnvironment.CreateClient();
+    }
+
+    // 建立測試專用信箱，測試結束時自動清理
+    protected string CreateTestEmail(string prefix = "test")
+    {
+        var email = $"{prefix}-{Guid.NewGuid()}@example.com";
+        _testEmails.Add(email);
+        return email;
+    }
+
+    // 測試完成後清理資料
+    protected async Task CleanupTestData()
+    {
+        foreach (var email in _testEmails)
+        {
+            try
+            {
+                await Client.DeleteAsync($"/api/v1/members/by-email/{email}");
+            }
+            catch (Exception ex)
+            {
+                // 記錄清理失敗，但不影響測試結果
+                Console.WriteLine($"清理測試資料失敗 {email}: {ex.Message}");
+            }
+        }
+        _testEmails.Clear();
+    }
+}
+
+// 使用範例
+[Binding]
+public class MemberRegistrationSteps : BddTestBase
+{
+    public MemberRegistrationSteps(DockerTestEnvironment testEnvironment) 
+        : base(testEnvironment) { }
+
+    [Given(@"我有有效的註冊資訊")]
+    public void GivenValidRegistrationInfo()
+    {
+        _request = new CreateMemberRequest
+        {
+            Name = "測試用戶",
+            Email = CreateTestEmail("registration"), // 自動管理測試資料
+            Phone = "0912345678"
+        };
+    }
+
+    [AfterScenario]
+    public async Task Cleanup()
+    {
+        await CleanupTestData();
+    }
+}
+```
+
+#### 外部服務整合測試
+```csharp
+// 當需要測試外部 API 呼叫時，使用 WireMock 容器而非程式內 Mock
+public class ExternalServiceTestContainer
+{
+    private readonly IContainer _wireMockContainer;
+
+    public ExternalServiceTestContainer()
+    {
+        _wireMockContainer = new ContainerBuilder()
+            .WithImage("wiremock/wiremock:latest")
+            .WithPortBinding(8080, true)
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilHttpRequestIsSucceeded(r => r.ForPort(8080).ForPath("/__admin")))
+            .Build();
+    }
+
+    public async Task StartAsync()
+    {
+        await _wireMockContainer.StartAsync();
+        await SetupMockResponses();
+    }
+
+    private async Task SetupMockResponses()
+    {
+        var client = new HttpClient();
+        var baseUrl = $"http://localhost:{_wireMockContainer.GetMappedPublicPort(8080)}";
+        
+        // 設定模擬的外部 API 回應
+        var mockSetup = new
+        {
+            request = new { method = "POST", url = "/api/external/validate" },
+            response = new { status = 200, body = new { isValid = true } }
+        };
+
+        await client.PostAsJsonAsync($"{baseUrl}/__admin/mappings", mockSetup);
+    }
+
+    public string GetUrl() => $"http://localhost:{_wireMockContainer.GetMappedPublicPort(8080)}";
+
+    public async Task DisposeAsync() => await _wireMockContainer.DisposeAsync();
+}
+```
+
+### BDD 工作流程指令
+
+#### 測試執行命令
+- **啟動測試環境**: 自動透過 Testcontainers 啟動 Docker 容器
+- **執行所有 BDD 測試**: `dotnet test src/be/JobBank1111.Job.IntegrationTest/ --filter Category=BDD`
+- **執行特定功能測試**: `dotnet test src/be/JobBank1111.Job.IntegrationTest/ --filter DisplayName~Member`
+- **並行執行測試**: `dotnet test --parallel` (利用 Docker 隔離特性)
+
+#### 開發循環檢查清單
+1. ✅ **Red**: 撰寫基於真實 Docker 服務的失敗測試情境
+2. ✅ **Green**: 實作最小功能讓測試通過，使用真實依賴項
+3. ✅ **Refactor**: 重構程式碼但保持測試通過，持續使用 Docker 服務驗證
+4. ✅ **Integrate**: 整合到主分支前確保所有基於 Docker 的測試通過
+
+### 測試策略分層與原則
+
+#### 核心測試原則
+- **BDD 優先**: 所有控制器功能必須優先使用 BDD 情境測試，不得直接進行控制器單元測試
+- **禁止單獨測試控制器**: 不應直接實例化控制器進行單元測試
+- **強制使用 WebApplicationFactory**: 所有測試必須透過完整的 Web API 管線與 Docker 測試環境
+- **情境驅動開發**: 從使用者行為情境出發，透過 Gherkin 語法定義測試案例
+
+#### 測試分層架構
+1. **BDD 驗收測試 (最高優先級)**
+   - 完整的端到端測試，使用真實的基礎設施
+   - 從使用者角度驗證業務需求
+   - 確保實作符合業務價值且在真實環境中運作正常
+   - 所有控制器測試都必須通過 BDD 情境進行
+
+2. **整合測試 (Integration Tests with Docker)**
+   - 使用真實的 Docker 容器服務 (SQL Server, Redis, 外部 API Mock)
+   - 驗證系統各元件間的協作
+   - 使用 Testcontainers 提供一致且隔離的測試環境
+
+3. **單元測試 (Unit Tests - 限制範圍)**
+   - 僅測試純函數與業務邏輯運算
+   - 避免測試涉及外部依賴的類別
+   - 專注於演算法與驗證邏輯
+
+### API 控制器測試指引
+
+#### BDD 情境範例 (API 層)
+```gherkin
+# 專門針對 API 控制器的 BDD 情境
+Feature: 會員管理 API
+  作為一個 API 用戶
+  我想要透過 HTTP 請求管理會員資料
+  以便整合到我的應用程式中
+
+  Background:
+    Given API 服務已經啟動
+    And 資料庫已經初始化
+
+  Scenario: 成功建立新會員
+    Given 我有有效的會員建立請求
+    When 我發送 POST 請求到 "/api/v1/members"
+    Then 回應狀態碼應該是 201 Created
+    And 回應內容包含新建立的會員資訊
+    And 會員資料已儲存到資料庫中
+
+  Scenario: 建立會員時電子郵件重複
+    Given 資料庫中已存在會員使用 "existing@example.com"
+    When 我使用相同電子郵件發送 POST 請求到 "/api/v1/members"
+    Then 回應狀態碼應該是 409 Conflict
+    And 錯誤訊息指出電子郵件地址已被使用
+```
+
+#### API 測試步驟實作
+```csharp
+// API 控制器的 BDD 測試步驟實作
+[Binding]
+public class MembersApiSteps : BddTestBase
+{
+    private CreateMemberRequest _createRequest;
+    private HttpResponseMessage _response;
+    private MemberResponse _memberResponse;
+
+    public MembersApiSteps(DockerTestEnvironment testEnvironment) 
+        : base(testEnvironment) { }
+
+    [Given(@"我有有效的會員建立請求")]
+    public void GivenValidCreateRequest()
+    {
+        _createRequest = new CreateMemberRequest
+        {
+            Name = "BDD 測試用戶",
+            Email = CreateTestEmail("bdd-test"),
+            Phone = "0912345678"
+        };
+    }
+
+    [When(@"我發送 POST 請求到 ""(.*)""")]
+    public async Task WhenPostRequest(string endpoint)
+    {
+        // 透過真實的 HTTP 請求測試整個控制器管線
+        _response = await Client.PostAsJsonAsync(endpoint, _createRequest);
+    }
+
+    [Then(@"回應狀態碼應該是 (\d+) (.*)")]
+    public void ThenStatusCodeShouldBe(int statusCode, string statusText)
+    {
+        ((int)_response.StatusCode).Should().Be(statusCode);
+    }
+
+    [Then(@"會員資料已儲存到資料庫中")]
+    public async Task ThenMemberStoredInDatabase()
+    {
+        // 透過 API 驗證資料確實存在於真實資料庫
+        var verifyResponse = await Client.GetAsync($"/api/v1/members/{_memberResponse.Id}");
+        verifyResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+}
+```
+
+#### 禁止的測試模式
+```csharp
+// ❌ 錯誤做法：直接測試控制器實例
+[TestFixture]
+public class MembersControllerTests
+{
+    [Test]
+    public async Task CreateMember_ValidRequest_ReturnsCreated()
+    {
+        // 這種做法被明確禁止：
+        // 1. 跳過了中介軟體管線
+        // 2. 跳過了模型驗證
+        // 3. 跳過了路由處理
+        // 4. 使用 Mock 而非真實服務
+        var mockHandler = new Mock<IMemberHandler>();
+        var controller = new MembersController(mockHandler.Object);
+        
+        var result = await controller.CreateMember(request);
+        // 這不是真實的 API 行為測試
+    }
+}
+
+// ✅ 正確做法：BDD 情境測試
+// 在 .feature 檔案中定義情境，透過真實 HTTP 請求測試完整的 API 行為
+```
+
+#### 測試執行命令
+```bash
+# 執行所有 BDD 測試
+dotnet test --filter Category=BDD
+
+# 執行特定功能的 BDD 測試
+dotnet test --filter "DisplayName~Members&Category=BDD"
+
+# 並行執行 BDD 測試（利用 Docker 隔離）
+dotnet test --parallel
+```
+
+### 持續改進原則
+- **BDD 優先**: 所有新功能都必須先寫 BDD 情境，再實作程式碼
+- **真實性優先**: 測試環境盡可能接近生產環境
+- **容器化測試**: 所有外部依賴都透過 Docker 容器提供
+- **自動化清理**: 測試資料自動建立與清理，確保測試獨立性
+- **情境獨立**: 每個 BDD 情境都應該能獨立執行，不依賴其他情境
+- **快速回饋**: 雖使用真實服務，但透過容器化確保測試執行效率
+- **活文檔維護**: 保持 BDD 情境與實際需求同步，作為活的規格文檔
+
 ## 核心開發原則
 
 ### 不可變物件設計 (Immutable Objects)
@@ -1240,3 +1860,4 @@ spec:
         value: 10
         periodSeconds: 60
 ```
+
