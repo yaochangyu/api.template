@@ -53,6 +53,13 @@
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_TOKEN>"
       }
+    },
+	 "drawio": {
+      "command": "npm",
+      "args": [
+		"exec", 
+		"drawio-mcp-server"
+		]
     }
   }
 }
