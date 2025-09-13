@@ -38,6 +38,15 @@
 ### 測試專案
 - **JobBank1111.Job.Test**: 使用 xUnit 的單元測試
 - **JobBank1111.Job.IntegrationTest**: 使用 xUnit、Testcontainers 與 Reqnroll (BDD) 的整合測試
+  - **測試框架**: xUnit 2.9.2 + MSTest (混合框架支援)
+  - **BDD 測試**: Reqnroll.xUnit 2.1.1 (Gherkin 語法與步驟定義)
+  - **容器化測試**: Testcontainers 3.10.0 (Docker 測試環境)
+  - **斷言庫**: FluentAssertions 6.12.1 + FluentAssertions.Json 6.1.0
+  - **HTTP 測試**: Microsoft.AspNetCore.Mvc.Testing 8.0.10
+  - **JSON 工具**: SystemTextJson.JsonDiffPatch.Xunit 2.0.0 + JsonPath.Net 1.1.6
+  - **HTTP 客戶端**: Flurl 4.0.0 (流暢的 HTTP API)
+  - **時間模擬**: Microsoft.Extensions.TimeProvider.Testing 8.10.0
+  - **覆蓋率收集**: coverlet.collector 6.0.2
 - **JobBank1111.Testing.Common**: 共享測試工具與模擬伺服器協助器
 
 ### 主要架構模式
@@ -52,7 +61,7 @@
 - **資料庫**: Entity Framework Core 與 SQL Server
 - **快取**: Redis 搭配 `CacheProviderFactory` 的記憶體內快取備援
 - **日誌記錄**: Serilog 結構化日誌輸出至控制台、檔案與 Seq
-- **測試**: xUnit、FluentAssertions、Testcontainers 整合測試
+- **測試**: xUnit 2.9.2、FluentAssertions 6.12.1、Testcontainers 3.10.0、Reqnroll.xUnit 2.1.1 (BDD)
 - **API 文件**: Swagger/OpenAPI 搭配 ReDoc 與 Scalar 檢視器
 - **程式碼產生**: 客戶端使用 Refitter，伺服器控制器使用 NSwag
 
@@ -72,9 +81,47 @@
 ### 開發工作流程
 1. 更新 `doc/openapi.yml` 中的 OpenAPI 規格
 2. 執行 `task codegen-api` 重新產生客戶端/伺服器端程式碼
-3. 在處理器與儲存庫中實作商業邏輯
-4. 執行 `task api-dev` 進行熱重載開發
-5. 使用 BDD 情境的整合測試進行測試
+3. **設計功能循序圖**: 使用 Mermaid 語法繪製功能互動流程，展示各層之間的呼叫關係
+4. 在處理器與儲存庫中實作商業邏輯
+5. 執行 `task api-dev` 進行熱重載開發
+6. 使用 BDD 情境的整合測試進行測試
+
+### 功能設計要求
+
+#### 功能循序圖規範
+- **必須提供**: 所有新功能實作前必須提供 Mermaid 循序圖
+- **展示範圍**: 從 API 請求進入到回應返回的完整流程
+- **包含層級**: 控制器 → 處理器 → 儲存庫 → 資料庫 → 快取 → 外部服務
+- **錯誤處理**: 包含異常狀況與錯誤處理分支
+- **範例格式**:
+```mermaid
+sequenceDiagram
+    participant C as Controller
+    participant H as Handler
+    participant R as Repository
+    participant DB as Database
+    participant Cache as Redis
+
+    C->>H: CreateMemberAsync(request)
+    H->>R: GetByEmailAsync(email)
+    R->>DB: SELECT * FROM Members WHERE Email = ?
+    DB-->>R: Member or null
+
+    alt Email exists
+        R-->>H: Existing member
+        H-->>C: Failure(DuplicateEmail)
+    else Email not exists
+        H->>R: CreateAsync(member)
+        R->>DB: INSERT INTO Members
+        DB-->>R: Created member
+        H->>Cache: SetAsync(key, member)
+        Cache-->>H: Success
+        R-->>H: Created member
+        H-->>C: Success(MemberResponse)
+    end
+
+    C-->>Client: HTTP Response
+```
 
 ## BDD 開發流程 (行為驅動開發)
 
