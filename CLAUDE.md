@@ -796,7 +796,7 @@ dotnet test --parallel
 
 #### Web API 層
 - **映射規則**: 使用 `FailureCodeMapper` 將錯誤代碼映射至 HTTP 狀態碼
-- **統一轉換**: 使用 `ResultActionResult<T>` 與擴充方法 `.ToActionResult()` 統一處理成功/失敗回應
+- **Action 方法**: 使用 `ResultActionResult<T>` 與擴充方法 `.ToActionResult()` 統一處理成功/失敗回應
 
 #### 實作要點
 - **回傳類型**: 使用 `Result<TSuccess, TFailure>` 作為回傳類型

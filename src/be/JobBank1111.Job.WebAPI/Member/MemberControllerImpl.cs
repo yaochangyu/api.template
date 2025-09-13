@@ -15,7 +15,7 @@ public class MemberControllerImpl(
         var pageSize = this.TryGetPageSize();
         var nextPageToken = this.TryGetPageToken();
         var result = await memberHandler.GetMembersCursorAsync(pageSize, nextPageToken, noCache, cancellationToken);
-        return result.ToApiResult();
+        return result.ToActionResult();
     }
 
     public async Task<ActionResult<GetMemberResponsePaginatedList>> GetMemberOffsetAsync(
@@ -42,7 +42,7 @@ public class MemberControllerImpl(
         }
 
         var result = await memberHandler.GetMemberOffsetAsync(pageIndex, pageSize, noCache, cancellationToken);
-        return result.ToApiResult();
+        return result.ToActionResult();
     }
 
     public async Task<IActionResult> InsertMember2Async(Contract.InsertMemberRequest body,

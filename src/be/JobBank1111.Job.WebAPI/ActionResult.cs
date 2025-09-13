@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JobBank1111.Job.WebAPI;
 
-public class ApiActionResult<TSuccess, TFailure> : ActionResult
+public class ActionResult<TSuccess, TFailure> : ActionResult
     where TFailure : class
 {
     private readonly Result<TSuccess, TFailure> _result;
 
-    public ApiActionResult(Result<TSuccess, TFailure> result)
+    public ActionResult(Result<TSuccess, TFailure> result)
     {
         _result = result;
     }
@@ -41,18 +41,18 @@ public class ApiActionResult<TSuccess, TFailure> : ActionResult
 
 public static class ResultExtensions
 {
-    public static ApiActionResult<TSuccess, TFailure> ToApiResult<TSuccess, TFailure>(
+    public static ActionResult<TSuccess, TFailure> ToActionResult<TSuccess, TFailure>(
         this Result<TSuccess, TFailure> result)
         where TFailure : class
     {
-        return new ApiActionResult<TSuccess, TFailure>(result);
+        return new ActionResult<TSuccess, TFailure>(result);
     }
 
     public static ObjectResult ToSuccessResult<TSuccess, TFailure>(
         this Result<TSuccess, TFailure> result)
         where TFailure : class
     {
-        var apiActionResult = new ApiActionResult<TSuccess, TFailure>(result);
+        var apiActionResult = new ActionResult<TSuccess, TFailure>(result);
         return apiActionResult.CreateSuccessResult(result.Value);
     }
 
@@ -60,7 +60,7 @@ public static class ResultExtensions
         this Result<TSuccess, TFailure> result)
         where TFailure : class
     {
-        var apiActionResult = new ApiActionResult<TSuccess, TFailure>(result);
+        var apiActionResult = new ActionResult<TSuccess, TFailure>(result);
         return apiActionResult.CreateFailureResult(result.Error);
     }
 }
