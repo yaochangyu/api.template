@@ -60,6 +60,8 @@
 - **框架**: ASP.NET Core 8.0 with minimal APIs
 - **資料庫**: Entity Framework Core 與 SQL Server
 - **快取**: Redis 搭配 `CacheProviderFactory` 的記憶體內快取備援
+- **錯誤處理**: CSharpFunctionalExtensions 3.1.0 (Result Pattern)
+- **驗證**: FluentValidation 11.10.0
 - **日誌記錄**: Serilog 結構化日誌輸出至控制台、檔案與 Seq
 - **測試**: xUnit 2.9.2、FluentAssertions 6.12.1、Testcontainers 3.10.0、Reqnroll.xUnit 2.1.1 (BDD)
 - **API 文件**: Swagger/OpenAPI 搭配 ReDoc 與 Scalar 檢視器
@@ -786,8 +788,13 @@ dotnet test --parallel
 
 ### Result Pattern 設計
 
+#### 基礎設施層 (Infrastructure Layer)
+- **Result 套件**: 使用 `CSharpFunctionalExtensions` 3.1.0 套件提供的 `Result<T>` 類型
+- **應用範圍**: Repository 層和 Handler 層必須使用 `Result<TSuccess, TFailure>` 作為回傳類型
+- **Repository 層**: 資料存取操作回傳 `Result<T>` 封裝資料庫操作結果與錯誤
+- **Handler 層**: 業務邏輯處理回傳 `Result<T>` 封裝處理結果與業務錯誤
+
 #### Web API 層
-- **強制使用** `Result<TSuccess, TFailure>` 作為處理器層回傳類型
 - **映射規則**: 使用 `FailureCodeMapper` 將錯誤代碼映射至 HTTP 狀態碼
 - **統一轉換**: 使用 `ResultActionResult<T>` 與擴充方法 `.ToActionResult()` 統一處理成功/失敗回應
 
@@ -795,6 +802,7 @@ dotnet test --parallel
 - **回傳類型**: 使用 `Result<TSuccess, TFailure>` 作為回傳類型
 - **驗證鏈**: 使用連續驗證模式，遇到失敗時立即回傳
 - **例外處理**: 統一捕捉例外並轉換為 `Failure` 物件
+- **例外封裝**: 捕捉到的例外必須寫入 `Failure.Exception` 屬性中保存
 - **追蹤資訊**: 在 `Failure` 物件中包含 TraceId 用於日誌追蹤 (關於 TraceId 生成與管理，參閱「追蹤內容管理」)
 
 ### FailureCode 定義與 Failure 物件結構
@@ -851,11 +859,13 @@ var failure = new Failure
 ### 最佳實務原則
 - **不要重複拋出例外**: 處理過的例外不應再次 throw
 - **統一錯誤碼**: 使用 `nameof(FailureCode.*)` 定義錯誤碼
+- **例外封裝規則**: 所有捕捉到的例外都必須寫入 `Failure.Exception` 屬性
 - **包含追蹤資訊**: 確保所有 Failure 物件都包含 TraceId
 - **結構化資料**: 將相關資料存放在 Failure.Data 中供除錯使用
 - **安全回應**: 不洩露內部實作細節給客戶端，根據環境決定訊息詳細程度
 - **追蹤整合**: 自動整合 TraceContext 資訊到錯誤回應中 (完整 TraceContext 管理機制見「追蹤內容管理」)
 - **分離關注點**: 業務錯誤與系統例外分別在不同層級處理
+- **載體日誌職責**: 業務邏輯層不記錄錯誤日誌，由應用程式載體 (Middleware) 從 `Failure.Exception` 讀取並記錄
 
 ## 中介軟體架構與實作
 
