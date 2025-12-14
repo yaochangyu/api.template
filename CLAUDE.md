@@ -4,11 +4,17 @@
 
 ## 開發指令
 
+### Taskfile 使用原則
+- **優先使用 Taskfile**: 所有重複執行的開發指令應盡可能透過 `task` 命令執行，而非直接執行 dotnet/npm/docker 指令
+- **命令集中管理**: 複雜的多步驟指令應寫入 `Taskfile.yml`，提供簡潔的 `task` 別名
+- **提醒與建議**: 在建議執行長指令時，應提醒用戶「建議將此命令添加到 Taskfile.yml」供日後重複使用
+- **可讀性優先**: Taskfile 中的任務描述與變數定義應清晰，便於團隊協作與維護
+
 ### 建置與執行
 - **開發模式執行 API**: `task api-dev` (使用 watch 模式與 --local 參數)
-- **建置解決方案**: `dotnet build src/be/JobBank1111.Job.Management.sln`
-- **執行單元測試**: `dotnet test src/be/JobBank1111.Job.Test/JobBank1111.Job.Test.csproj`
-- **執行整合測試**: `dotnet test src/be/JobBank1111.Job.IntegrationTest/JobBank1111.Job.IntegrationTest.csproj`
+- **建置解決方案**: `task build` 或 `dotnet build src/be/JobBank1111.Job.Management.sln`
+- **執行單元測試**: `task test-unit` 或 `dotnet test src/be/JobBank1111.Job.Test/JobBank1111.Job.Test.csproj`
+- **執行整合測試**: `task test-integration` 或 `dotnet test src/be/JobBank1111.Job.IntegrationTest/JobBank1111.Job.IntegrationTest.csproj`
 
 ### 程式碼產生
 - **產生 API 客戶端與伺服器端程式碼**: `task codegen-api`
@@ -20,6 +26,43 @@
 - **啟動 Redis**: `task redis-start`
 - **啟動 Redis 管理介面**: `task redis-admin-start`
 - **初始化開發環境**: `task dev-init`
+
+### 專案範本初始化
+在建立新的 API 專案範本時，**必須詢問以下問題**：
+
+1. **快取需求**: 
+   - 是否需要 Redis 快取?
+   - 選項: `是` / `否` (預設: `是`)
+   - 影響: 決定是否在 docker-compose.yml 中包含 Redis 服務、appsettings.json 快取配置
+
+2. **資料庫選擇**:
+   - 需要哪一種資料庫?
+   - 選項: 
+     - `SQL Server` (預設，適合企業應用)
+     - `PostgreSQL` (開源，輕量)
+     - `MySQL` (開源，廣泛支援)
+   - 影響: 決定 EF Core DbContext、連線字串、Testcontainers 容器映像、遷移腳本
+
+#### 初始化流程
+1. 使用互動式腳本或問卷蒐集用戶選擇
+2. 根據選擇自動產生:
+   - `docker-compose.yml` (包含所選資料庫與可選的 Redis)
+   - `appsettings.json` (資料庫與快取連線字串)
+   - `env/local.env` (本地開發環境變數)
+   - `Dockerfile` (多階段建置配置)
+3. 更新 `.csproj` 依賴項 (EF Core 提供者)
+4. 修改測試環境配置 (Testcontainers 容器選擇)
+
+#### 配置儲存位置
+- 用戶選擇存儲在: `env/.template-config.json`
+- 格式:
+```json
+{
+  "useRedis": true,
+  "database": "SQL Server",
+  "createdAt": "2025-12-14T00:00:00Z"
+}
+```
 
 ### 文件
 - **產生 API 文件**: `task codegen-api-doc`
