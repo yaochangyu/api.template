@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 此檔案為 Claude Code (claude.ai/code) 在此專案中工作時的指導文件。
-
+接下來的回覆、文件描述，均使用台灣用語的繁體中文
 ## 開發指令
 
 ### Taskfile 使用原則
@@ -20,7 +20,24 @@
 - **產生 API 客戶端與伺服器端程式碼**: `task codegen-api`
 - **僅產生 API 客戶端程式碼**: `task codegen-api-client`
 - **僅產生 API 伺服器端程式碼**: `task codegen-api-server`
-- **產生 EF Core 實體**: `task ef-codegen`
+- **從資料庫反向工程產生 EF Core 實體**: `task ef-codegen`
+  - **強制使用 Taskfile**: 必須透過 `task ef-codegen` 執行，不應直接執行 `dotnet ef dbcontext scaffold` 指令
+  - **統一管理**: 資料庫連線字串、輸出路徑、命名空間等參數統一在 Taskfile.yml 中管理
+  - **可追溯性**: 確保團隊成員使用相同的產生指令與參數
+  - **環境變數整合**: 自動從 `env/local.env` 載入資料庫連線字串變數
+
+### EF Core Migrations（Code First）
+- **建立新的 Migration 檔案**: `task ef-migration-add NAME=<MigrationName>`
+- **更新資料庫至最新版本**: `task ef-database-update`
+- **回復至特定 Migration**: `task ef-database-update MIGRATION=<MigrationName>`
+- **移除最後一個 Migration**: `task ef-migration-remove`
+- **檢視 Migration 清單**: `task ef-migration-list`
+- **產生 SQL 腳本**: `task ef-migration-script`
+- **強制使用 Taskfile**: 
+  - 必須透過 `task ef-migration-*` 執行，不應直接執行 `dotnet ef migrations` 或 `dotnet ef database update` 指令
+  - 統一管理專案路徑、輸出目錄、連線字串等參數
+  - 確保團隊成員使用一致的 Migration 流程
+  - 自動從 `env/local.env` 載入環境變數
 
 ### 基礎設施
 - **啟動 Redis**: `task redis-start`
@@ -43,6 +60,22 @@
      - `MySQL` (開源，廣泛支援)
    - 影響: 決定 EF Core DbContext、連線字串、Testcontainers 容器映像、遷移腳本
 
+3. **程式碼組織方式**:
+   - 程式碼分層（Controller → Handler → Repository）要分散到多個專案，還是集中在 Web API 專案內用資料夾區分？
+   - 選項:
+     - `單一專案` (預設，推薦用於中小型應用)
+       - 所有程式碼集中在 `JobBank1111.Job.WebAPI` 專案
+       - 使用資料夾區分：`Controllers/`、`Handlers/`、`Repositories/`、`Middleware/`
+       - 優點：結構簡單、快速開發、依賴管理容易
+       - 缺點：專案變大時結構複雜度增加
+     - `多專案` (推薦用於大型企業應用或 3+ 團隊成員)
+       - `JobBank1111.Job.WebAPI`: 控制器層 + 中介軟體
+       - `JobBank1111.Job.Handler`: 獨立專案，包含所有業務邏輯處理器
+       - `JobBank1111.Job.Repository`: 獨立專案，包含所有儲存庫與資料存取邏輯
+       - 優點：層級清晰分離、易於獨立測試、利於團隊協作、循環依賴風險低
+       - 缺點：專案數多、檔案配置較複雜
+   - 影響: 決定專案結構、命名空間、專案參考關係、DI 註冊方式
+
 #### 初始化流程
 1. 使用互動式腳本或問卷蒐集用戶選擇
 2. 根據選擇自動產生:
@@ -60,7 +93,8 @@
 {
   "useRedis": true,
   "database": "SQL Server",
-  "createdAt": "2025-12-14T00:00:00Z"
+  "projectOrganization": "single-project",
+  "createdAt": "2025-12-15T00:00:00Z"
 }
 ```
 
@@ -77,6 +111,178 @@
 - **JobBank1111.Infrastructure**: 跨領域基礎設施服務 (快取、工具、追蹤內容)
 - **JobBank1111.Job.DB**: Entity Framework Core 資料存取層，包含自動產生的實體
 - **JobBank1111.Job.Contract**: 從 OpenAPI 規格自動產生的 API 客戶端合約
+
+### 程式碼分層架構
+
+#### 分層模式（Controller → Handler → Repository）
+專案採用三層分層架構，確保關注點分離與程式碼可維護性：
+- **Controller 層**: 處理 HTTP 請求/回應、路由、請求驗證、HTTP 狀態碼對應
+- **Handler 層**: 實作核心業務邏輯、流程協調、錯誤處理與結果封裝
+- **Repository 層**: 資料存取邏輯、EF Core 操作、資料庫查詢封裝
+
+#### 組織方式（根據專案範本初始化選擇）
+
+專案組織方式根據範本初始化時的選擇決定（參見「專案範本初始化」章節）：
+
+**方案 A：單一專案結構（預設）**
+```
+JobBank1111.Job.WebAPI/
+├── Controllers/          # 控制器層
+├── Handlers/            # 業務邏輯處理器
+├── Repositories/        # 儲存庫與資料存取
+├── Middleware/          # 中介軟體
+├── Models/              # DTO 與 Request/Response 模型
+└── Extensions/          # 擴充方法
+```
+
+**方案 B：多專案結構**
+```
+JobBank1111.Job.WebAPI/        # 控制器層 + 中介軟體
+JobBank1111.Job.Handler/       # 業務邏輯處理器（獨立專案）
+JobBank1111.Job.Repository/    # 儲存庫（獨立專案）
+JobBank1111.Job.DB/            # EF Core 資料存取層
+JobBank1111.Infrastructure/    # 跨領域基礎設施
+```
+
+#### 分層職責規範
+
+##### Controller 層職責
+```csharp
+// 單一專案：JobBank1111.Job.WebAPI/Controllers/MembersController.cs
+// 多專案：JobBank1111.Job.WebAPI/Controllers/MembersController.cs
+
+[ApiController]
+[Route("api/v1/[controller]")]
+public class MembersController : ControllerBase
+{
+    private readonly IMemberHandler _handler;
+    
+    public MembersController(IMemberHandler handler)
+    {
+        _handler = handler;
+    }
+    
+    // Controller 負責：
+    // 1. HTTP 請求/回應映射
+    // 2. 路由與 HTTP 動詞對應
+    // 3. 請求模型繫結與驗證
+    // 4. 結果轉換為 HTTP 回應（200, 201, 400, 404 等）
+    
+    [HttpPost]
+    public async Task<IActionResult> CreateMember([FromBody] CreateMemberRequest request)
+    {
+        var result = await _handler.CreateMemberAsync(request);
+        return result.ToActionResult();
+    }
+}
+```
+
+##### Handler 層職責
+```csharp
+// 單一專案：JobBank1111.Job.WebAPI/Handlers/MemberHandler.cs
+// 多專案：JobBank1111.Job.Handler/MemberHandler.cs
+
+public interface IMemberHandler
+{
+    Task<Result<MemberResponse, Failure>> CreateMemberAsync(CreateMemberRequest request);
+}
+
+public class MemberHandler : IMemberHandler
+{
+    private readonly IMemberRepository _repository;
+    private readonly IValidator<CreateMemberRequest> _validator;
+    private readonly ILogger<MemberHandler> _logger;
+    
+    // Handler 負責：
+    // 1. 業務邏輯實作與流程協調
+    // 2. 驗證與業務規則檢查
+    // 3. 呼叫 Repository 進行資料存取
+    // 4. 錯誤處理與 Result Pattern 封裝
+    
+    public async Task<Result<MemberResponse, Failure>> CreateMemberAsync(CreateMemberRequest request)
+    {
+        // 1. 驗證
+        var validationResult = await _validator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+            return Failure.ValidationError(validationResult.Errors);
+        
+        // 2. 業務規則檢查
+        var existing = await _repository.GetByEmailAsync(request.Email);
+        if (existing != null)
+            return Failure.DuplicateEmail();
+        
+        // 3. 資料存取
+        var member = new Member { Name = request.Name, Email = request.Email };
+        return await _repository.CreateAsync(member);
+    }
+}
+```
+
+##### Repository 層職責
+```csharp
+// 單一專案：JobBank1111.Job.WebAPI/Repositories/MemberRepository.cs
+// 多專案：JobBank1111.Job.Repository/MemberRepository.cs
+
+public interface IMemberRepository
+{
+    Task<Result<Member, Failure>> CreateAsync(Member member);
+    Task<Member?> GetByEmailAsync(string email);
+}
+
+public class MemberRepository : IMemberRepository
+{
+    private readonly JobBankDbContext _dbContext;
+    
+    // Repository 負責：
+    // 1. EF Core DbContext 操作與查詢封裝
+    // 2. 資料庫異常處理與轉換為 Result Pattern
+    // 3. 查詢最佳化（AsNoTracking、Include 等）
+    // 4. 事務管理
+    
+    public async Task<Result<Member, Failure>> CreateAsync(Member member)
+    {
+        try
+        {
+            _dbContext.Members.Add(member);
+            await _dbContext.SaveChangesAsync();
+            return member;
+        }
+        catch (DbUpdateException ex)
+        {
+            return Failure.DbError("建立會員失敗", ex);
+        }
+    }
+}
+```
+
+#### 依賴注入配置
+
+```csharp
+// Program.cs - 兩種方案的 DI 註冊方式相同
+
+// 手動註冊
+services
+    .AddScoped<IMemberHandler, MemberHandler>()
+    .AddScoped<IMemberRepository, MemberRepository>();
+
+// 自動掃描註冊（推薦）
+services.Scan(scan => scan
+    .FromAssembliesOf(typeof(Program))  // 單一專案
+    // .FromAssembliesOf(typeof(IMemberHandler), typeof(IMemberRepository))  // 多專案
+    .AddClasses(classes => classes.AssignableTo<IMemberHandler>())
+    .AsImplementedInterfaces()
+    .WithScopedLifetime()
+    .AddClasses(classes => classes.AssignableTo<IMemberRepository>())
+    .AsImplementedInterfaces()
+    .WithScopedLifetime());
+```
+
+#### 分層通訊規範
+
+- **Controller ↔ Handler**: 透過介面，使用 Request/Response DTO
+- **Handler ↔ Repository**: 使用 Result Pattern 傳遞結果與錯誤
+- **Repository ↔ Database**: 使用 EF Core DbContext
+- **依賴方向**: 單向依賴，避免循環參考（Controller → Handler → Repository → DB）
 
 ### 測試專案
 - **JobBank1111.Job.Test**: 使用 xUnit 的單元測試
@@ -127,19 +333,139 @@
 - 禁止將任何機密值提交到 Git；定期輪替憑證與密碼，並在程式中記錄來源（非內容）。
 
 ### 程式碼產生工作流程
-專案使用 OpenAPI-first 開發方式：
+專案使用 OpenAPI-first 與 Database-first 開發方式：
 1. API 規格維護在 `doc/openapi.yml`
 2. 使用 Refitter 產生客戶端程式碼至 `JobBank1111.Job.Contract`
 3. 使用 NSwag 產生伺服器控制器至 `JobBank1111.Job.WebAPI/Contract`
-4. 使用 EF Core 反向工程產生資料庫實體
+4. 使用 EF Core 反向工程產生資料庫實體至 `JobBank1111.Job.DB`
+
+#### EF Core 反向工程規範
+
+**強制使用 Taskfile 執行**：
+- **必須執行**: `task ef-codegen`
+- **禁止直接執行**: 不應直接執行 `dotnet ef dbcontext scaffold` 指令
+- **原因**: 
+  - 統一管理產生參數（連線字串、輸出路徑、命名空間、資料表選擇）
+  - 自動從 `env/local.env` 載入環境變數
+  - 確保團隊成員使用相同的產生指令
+  - 便於版本控制與追溯變更
+
+**Taskfile 範例**：
+```yaml
+ef-codegen:
+  desc: EF Core 反向工程產生實體
+  cmds:
+    - task: ef-codegen-member
+
+ef-codegen-member:
+  desc: EF Core 反向工程產生 MemberDbContext EF Entities
+  dir: "src/be/JobBank1111.Job.DB"
+  cmds:
+    - dotnet ef dbcontext scaffold "$SYS_DATABASE_CONNECTION_STRING" Microsoft.EntityFrameworkCore.SqlServer -o AutoGenerated/Entities -c MemberDbContext --context-dir AutoGenerated/ -n JobBank1111.Job.DB -t Member --force --no-onconfiguring --use-database-names
+```
+
+**工作流程**：
+1. 在資料庫中建立或修改資料表結構
+2. 執行 `task ef-codegen` 更新 Entity Model
+3. 檢查產生的實體類別與 DbContext
+4. 提交產生的程式碼到版本控制
+
+#### EF Core Migrations 規範（Code First 開發模式）
+
+**強制使用 Taskfile 執行**：
+- **必須執行**: `task ef-migration-add NAME=InitialCreate` 或 `task ef-database-update`
+- **禁止直接執行**: 不應直接執行 `dotnet ef migrations add` 或 `dotnet ef database update` 指令
+- **原因**:
+  - 統一管理專案路徑與輸出目錄
+  - 自動從 `env/local.env` 載入資料庫連線字串
+  - 確保團隊成員使用一致的 Migration 流程
+  - 便於 CI/CD 整合與自動化部署
+
+**Taskfile 範例**：
+```yaml
+ef-migration-add:
+  desc: 建立新的 EF Core Migration 檔案
+  dir: "src/be/JobBank1111.Job.DB"
+  cmds:
+    - dotnet ef migrations add {{.NAME}} --project . --startup-project ../JobBank1111.Job.WebAPI --output-dir Migrations --context JobBankDbContext
+
+ef-database-update:
+  desc: 更新資料庫至最新或指定的 Migration 版本
+  dir: "src/be/JobBank1111.Job.DB"
+  cmds:
+    - dotnet ef database update {{.MIGRATION | default "latest"}} --project . --startup-project ../JobBank1111.Job.WebAPI --context JobBankDbContext
+
+ef-migration-remove:
+  desc: 移除最後一個 Migration 檔案
+  dir: "src/be/JobBank1111.Job.DB"
+  cmds:
+    - dotnet ef migrations remove --project . --startup-project ../JobBank1111.Job.WebAPI --context JobBankDbContext
+
+ef-migration-list:
+  desc: 列出所有 Migration 版本
+  dir: "src/be/JobBank1111.Job.DB"
+  cmds:
+    - dotnet ef migrations list --project . --startup-project ../JobBank1111.Job.WebAPI --context JobBankDbContext
+
+ef-migration-script:
+  desc: 產生 SQL 腳本（FROM → TO）
+  dir: "src/be/JobBank1111.Job.DB"
+  cmds:
+    - dotnet ef migrations script {{.FROM | default "0"}} {{.TO | default ""}} --project . --startup-project ../JobBank1111.Job.WebAPI --context JobBankDbContext --output ./Migrations/Scripts/migration_{{.FROM}}_to_{{.TO}}.sql
+```
+
+**Code First 工作流程**：
+1. 在程式碼中修改或建立 Entity 類別與 DbContext 配置
+2. 執行 `task ef-migration-add NAME=DescriptiveMigrationName` 建立 Migration 檔案
+3. 檢查產生的 Migration 檔案（Up 與 Down 方法）
+4. 執行 `task ef-database-update` 套用 Migration 至資料庫
+5. 測試資料庫結構變更是否正確
+6. 提交 Migration 檔案到版本控制
+
+**常用情境**：
+```bash
+# 建立初始 Migration
+task ef-migration-add NAME=InitialCreate
+
+# 更新資料庫至最新版本
+task ef-database-update
+
+# 回復至特定 Migration
+task ef-database-update MIGRATION=AddMemberTable
+
+# 移除最後一個尚未套用的 Migration
+task ef-migration-remove
+
+# 檢視所有 Migration 清單
+task ef-migration-list
+
+# 產生 SQL 腳本供生產環境部署
+task ef-migration-script FROM=InitialCreate TO=AddMemberTable
+```
+
+**最佳實務**：
+- **描述性命名**: Migration 名稱應清楚描述變更內容（如 `AddMemberEmailIndex`）
+- **小步提交**: 每次 Migration 專注於單一變更，避免過於複雜
+- **測試先行**: 在開發環境測試 Migration 後才提交至版本控制
+- **SQL 審查**: 檢查產生的 SQL 腳本，確保符合預期
+- **向下相容**: 確保 Down 方法能正確回復變更
+- **生產部署**: 使用 `ef-migration-script` 產生 SQL 腳本，由 DBA 審核後執行
 
 ### 開發工作流程
 1. 更新 `doc/openapi.yml` 中的 OpenAPI 規格
 2. 執行 `task codegen-api` 重新產生客戶端/伺服器端程式碼
-3. **設計功能循序圖**: 使用 Mermaid 語法繪製功能互動流程，展示各層之間的呼叫關係
-4. 在處理器與儲存庫中實作商業邏輯
-5. 執行 `task api-dev` 進行熱重載開發
-6. 使用 BDD 情境的整合測試進行測試
+3. **資料庫結構變更時**: 執行 `task ef-codegen` 從資料庫反向工程更新 Entity Model
+4. **設計功能循序圖**: 使用 Mermaid 語法繪製功能互動流程，展示各層之間的呼叫關係
+5. 在處理器與儲存庫中實作商業邏輯
+6. 執行 `task api-dev` 進行熱重載開發
+7. 使用 BDD 情境的整合測試進行測試
+
+#### 標準開發流程（概要）
+1. 撰寫／更新 OpenAPI 規格檔（doc/openapi.yml）
+2. 透過工具產生 Controller 合約（必須使用 Taskfile：`task codegen-api` 或 `task codegen-api-server`）
+3. 依合約實作 Controller
+4. Controller 依賴 Handler（注入業務處理層）
+5. Handler 實作業務流程，並依賴 Repository 或 Adapter
 
 ### 功能設計要求
 
@@ -777,18 +1103,6 @@ public class MembersControllerTests
 // 在 .feature 檔案中定義情境，透過真實 HTTP 請求測試完整的 API 行為
 ```
 
-#### 測試執行命令
-```bash
-# 執行所有 BDD 測試
-dotnet test --filter Category=BDD
-
-# 執行特定功能的 BDD 測試
-dotnet test --filter "DisplayName~Members&Category=BDD"
-
-# 並行執行 BDD 測試（利用 Docker 隔離）
-dotnet test --parallel
-```
-
 ### 持續改進原則
 - **BDD 優先**: 所有新功能都必須先寫 BDD 情境，再實作程式碼
 - **真實性優先**: 測試環境盡可能接近生產環境
@@ -909,7 +1223,7 @@ var failure = new Failure
 };
 ```
 
-### 最佳實務原則
+### 錯誤處理最佳實務原則
 - **不要重複拋出例外**: 處理過的例外不應再次 throw
 - **統一錯誤碼**: 使用 `nameof(FailureCode.*)` 定義錯誤碼
 - **例外封裝規則**: 所有捕捉到的例外都必須寫入 `Failure.Exception` 屬性
@@ -981,7 +1295,7 @@ catch (Exception ex)
 }
 ```
 
-### 最佳實務原則
+### 中介軟體最佳實務原則
 - **專一職責**: 每個中介軟體專注於單一關注點
 - **避免重複**: 透過管線設計避免重複處理和記錄
 - **統一格式**: 所有請求資訊記錄使用相同的資料結構
