@@ -116,6 +116,16 @@
 - Redis 與 Seq 日誌伺服器的 Docker Compose 設定
 - `Taskfile.yml` 中的任務執行器設定
 
+#### 機敏設定安全規範
+- 機敏性資料不應放在 appsettings.json（例如：資料庫連線字串、帳號密碼、API Key）。
+- 統一改用安全來源與環境變數管理設定：
+    - 開發環境：使用 `.NET user-secrets` 與 `env/local.env`（不提交版本控制）。
+    - 容器環境：透過 `docker-compose.yml` 的環境變數或 secrets 檔傳入。
+    - 雲端／生產：使用雲端機密管理服務（例如 Azure Key Vault）並於啟動時載入。
+- 設定覆寫優先順序：環境變數 > 使用者機密 > appsettings.*.json（appsettings 僅保留非機敏的預設值）。
+- 連線字串建議以環境變數提供，例如 `ConnectionStrings__Default`，避免出現在原始碼或設定檔。
+- 禁止將任何機密值提交到 Git；定期輪替憑證與密碼，並在程式中記錄來源（非內容）。
+
 ### 程式碼產生工作流程
 專案使用 OpenAPI-first 開發方式：
 1. API 規格維護在 `doc/openapi.yml`
