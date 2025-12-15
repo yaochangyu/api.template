@@ -3,6 +3,93 @@
 此檔案為 Claude Code (claude.ai/code) 在此專案中工作時的指導文件。
 接下來的回覆、文件描述，均使用台灣用語的繁體中文
 
+## 目錄 (Table of Contents)
+
+### 核心指引
+- [AI 助理使用規則](#ai-助理使用規則)
+  - [專案狀態檢測機制](#專案狀態檢測機制)
+- [開發指令](#開發指令)
+  - [Taskfile 使用原則](#taskfile-使用原則)
+  - [建置與執行](#建置與執行)
+  - [程式碼產生](#程式碼產生)
+  - [EF Core Migrations（Code First）](#ef-core-migrationsCode-first)
+  - [基礎設施](#基礎設施)
+  - [文件](#文件)
+
+### 架構與設計
+- [架構概述](#架構概述)
+  - [核心專案](#核心專案)
+  - [程式碼分層架構](#程式碼分層架構)
+  - [主要架構模式](#主要架構模式)
+  - [技術堆疊](#技術堆疊)
+  - [程式碼產生工作流程](#程式碼產生工作流程)
+  - [開發工作流程](#開發工作流程)
+  - [功能設計要求](#功能設計要求)
+
+### 開發實踐
+- [BDD 開發流程 (行為驅動開發)](#bdd-開發流程-行為驅動開發)
+  - [BDD 開發循環](#bdd-開發循環)
+  - [Docker 優先測試策略](#docker-優先測試策略)
+  - [測試策略分層與原則](#測試策略分層與原則)
+  - [API 控制器測試指引](#api-控制器測試指引)
+- [核心開發原則](#核心開發原則)
+  - [不可變物件設計](#不可變物件設計-immutable-objects)
+  - [架構守則](#架構守則)
+  - [用戶資訊管理](#用戶資訊管理)
+- [專案最佳實踐 (Best Practices)](#專案最佳實踐-best-practices)
+  - [程式碼組織與命名規範](#1-程式碼組織與命名規範)
+  - [依賴注入最佳實踐](#2-依賴注入最佳實踐)
+  - [非同步程式設計最佳實踐](#3-非同步程式設計最佳實踐)
+  - [EF Core 查詢最佳化](#4-ef-core-查詢最佳化)
+  - [快取策略最佳實踐](#5-快取策略最佳實踐)
+  - [日誌記錄最佳實踐](#6-日誌記錄最佳實踐)
+  - [安全最佳實踐](#7-安全最佳實踐)
+  - [程式碼產生與維護最佳實踐](#8-程式碼產生與維護最佳實踐)
+  - [開發工作流程最佳實踐](#9-開發工作流程最佳實踐)
+  - [常見錯誤與陷阱](#10-常見錯誤與陷阱)
+  - [效能監控檢查點](#11-效能監控檢查點)
+  - [文件維護原則](#12-文件維護原則)
+
+### 技術深入
+- [追蹤內容管理 (TraceContext)](#追蹤內容管理-tracecontext)
+- [錯誤處理與回應管理](#錯誤處理與回應管理)
+  - [Result Pattern 設計](#result-pattern-設計)
+  - [FailureCode 定義與 Failure 物件結構](#failurecode-定義與-failure-物件結構)
+  - [分層錯誤處理策略](#分層錯誤處理策略)
+  - [安全回應處理](#安全回應處理)
+- [中介軟體架構與實作](#中介軟體架構與實作)
+  - [中介軟體管線架構與職責](#中介軟體管線架構與職責)
+  - [請求資訊擷取機制](#請求資訊擷取機制)
+  - [中介軟體實作指引](#中介軟體實作指引)
+- [日誌與安全指引](#日誌與安全指引)
+  - [集中式日誌管理](#集中式日誌管理)
+  - [安全考量與敏感資訊過濾](#安全考量與敏感資訊過濾)
+
+### 效能與安全
+- [效能最佳化與快取策略](#效能最佳化與快取策略)
+  - [快取架構設計](#快取架構設計)
+  - [ASP.NET Core 效能最佳化](#aspnet-core-效能最佳化)
+  - [記憶體管理與垃圾收集](#記憶體管理與垃圾收集)
+- [API 設計與安全性強化](#api-設計與安全性強化)
+  - [RESTful API 設計原則](#restful-api-設計原則)
+  - [API 安全性防護](#api-安全性防護)
+  - [API 限流與頻率控制](#api-限流與頻率控制)
+
+### 營運與部署
+- [監控與可觀測性](#監控與可觀測性)
+  - [健康檢查 (Health Checks)](#健康檢查-health-checks)
+  - [OpenTelemetry 整合](#opentelemetry-整合)
+  - [效能計數器與度量](#效能計數器與度量)
+  - [應用程式效能監控 (APM)](#應用程式效能監控-apm)
+  - [日誌聚合與分析](#日誌聚合與分析)
+- [容器化與部署最佳實務](#容器化與部署最佳實務)
+  - [Docker 容器化](#docker-容器化)
+  - [CI/CD 管線](#cicd-管線)
+  - [生產環境設定管理](#生產環境設定管理)
+  - [效能監控與擴展](#效能監控與擴展)
+
+---
+
 ## AI 助理使用規則
 
 ### 專案狀態檢測機制
@@ -1167,6 +1254,498 @@ public class MembersControllerTests
 - **依賴注入**: 透過 IContextSetter 設定用戶資訊
 - **資訊取得**: 透過 IContextGetter 取得用戶資訊
 
+## 專案最佳實踐 (Best Practices)
+
+本章節總結專案開發過程中驗證過的最佳實踐，所有開發者都應遵循這些原則以確保程式碼品質與專案一致性。
+
+### 1. 程式碼組織與命名規範
+
+#### 命名規範
+- **Handler**: `{Feature}Handler.cs` (例如: `MemberHandler.cs`)
+- **Repository**: `{Feature}Repository.cs` (例如: `MemberRepository.cs`)
+- **Controller**: `{Feature}Controller.cs` 或 `{Feature}ControllerImpl.cs`
+- **Request/Response DTO**: `{Action}{Feature}Request.cs` / `{Feature}Response.cs`
+
+#### 檔案組織
+```
+WebAPI/
+  ├── {Feature}/              # 功能模組資料夾
+  │   ├── {Feature}Controller.cs
+  │   ├── {Feature}Handler.cs
+  │   ├── {Feature}Repository.cs
+  │   ├── {Feature}Chain.cs   # 選用: 複雜流程的責任鏈
+  │   ├── {Request/Response DTOs}.cs
+  │   └── {Feature}.cs        # 領域模型
+  └── Contract/               # 自動產生的程式碼
+      └── AutoGenerated/
+```
+
+### 2. 依賴注入最佳實踐
+
+#### 主建構函式注入 (Primary Constructor)
+使用 C# 12 的主建構函式簡化依賴注入：
+
+```csharp
+// ✅ 現代化寫法：使用主建構函式
+public class MemberHandler(
+    MemberRepository repository,
+    IContextGetter<TraceContext?> traceContextGetter,
+    ILogger<MemberHandler> logger)
+{
+    // 直接使用參數名稱，無需宣告欄位
+    public async Task<Result<Member, Failure>> InsertAsync(InsertMemberRequest request)
+    {
+        var traceContext = traceContextGetter.Get();
+        logger.LogInformation("處理會員新增請求");
+        return await repository.InsertAsync(request);
+    }
+}
+
+// ❌ 舊式寫法：手動宣告欄位
+public class MemberHandler
+{
+    private readonly MemberRepository _repository;
+    private readonly ILogger<MemberHandler> _logger;
+
+    public MemberHandler(MemberRepository repository, ILogger<MemberHandler> logger)
+    {
+        _repository = repository;
+        _logger = logger;
+    }
+}
+```
+
+#### 服務生命週期選擇指南
+- **Singleton**: 無狀態服務、快取提供者、設定物件
+- **Scoped**: Handler、Repository、DbContext Factory 使用者
+- **Transient**: 避免使用（除非確實需要每次都建立新實例）
+
+```csharp
+// Program.cs 服務註冊範例
+builder.Services.AddScoped<MemberHandler>();        // 業務邏輯：Scoped
+builder.Services.AddScoped<MemberRepository>();     // Repository：Scoped
+builder.Services.AddSingleton<ICacheProvider, RedisCacheProvider>();  // 快取：Singleton
+builder.Services.AddDbContextFactory<MemberDbContext>();  // DbContext Factory：Singleton
+```
+
+#### DbContextFactory 模式
+使用 `IDbContextFactory<T>` 而非直接注入 `DbContext`：
+
+```csharp
+// ✅ 正確：使用 DbContextFactory
+public class MemberRepository(IDbContextFactory<MemberDbContext> dbContextFactory)
+{
+    public async Task<Result<Member, Failure>> QueryAsync(string email)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var member = await dbContext.Members
+            .Where(x => x.Email == email)
+            .FirstOrDefaultAsync();
+        return Result.Success<Member, Failure>(member);
+    }
+}
+
+// ❌ 錯誤：直接注入 DbContext（會有生命週期問題）
+public class MemberRepository(MemberDbContext dbContext) 
+{
+    // 在 Scoped 服務中直接使用 DbContext 可能導致記憶體洩漏
+}
+```
+
+### 3. 非同步程式設計最佳實踐
+
+#### 全面使用非同步
+所有 I/O 操作都必須使用 async/await：
+
+```csharp
+// ✅ 正確：完整的非同步鏈
+public async Task<Result<Member, Failure>> InsertAsync(
+    InsertMemberRequest request, 
+    CancellationToken cancel = default)
+{
+    var queryResult = await _repository.QueryEmailAsync(request.Email, cancel);
+    if (queryResult.IsFailure) return queryResult;
+    
+    return await _repository.InsertAsync(request, cancel);
+}
+
+// ❌ 錯誤：阻塞式呼叫
+public Result<Member, Failure> Insert(InsertMemberRequest request)
+{
+    var queryResult = _repository.QueryEmailAsync(request.Email).Result;  // ❌ 死鎖風險
+    return _repository.InsertAsync(request).Result;  // ❌
+}
+```
+
+#### CancellationToken 傳遞
+所有非同步方法都應支援取消：
+
+```csharp
+// ✅ 正確：傳遞 CancellationToken
+public async Task<Result<Member, Failure>> QueryEmailAsync(
+    string email, 
+    CancellationToken cancel = default)
+{
+    await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancel);
+    var member = await dbContext.Members
+        .Where(x => x.Email == email)
+        .FirstOrDefaultAsync(cancel);  // 傳遞 cancel token
+    
+    return Result.Success<Member, Failure>(member);
+}
+```
+
+### 4. EF Core 查詢最佳化
+
+```csharp
+// ✅ 使用 AsNoTracking 提升唯讀查詢效能
+public async Task<PaginatedList<Member>> GetMembersAsync(int pageIndex, int pageSize)
+{
+    await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+    
+    var query = dbContext.Members
+        .AsNoTracking()  // 唯讀查詢不需要追蹤
+        .OrderBy(x => x.CreatedAt);
+    
+    var totalCount = await query.CountAsync();
+    var items = await query
+        .Skip(pageIndex * pageSize)
+        .Take(pageSize)
+        .ToListAsync();
+    
+    return new PaginatedList<Member>(items, totalCount, pageIndex, pageSize);
+}
+
+// ❌ 避免 N+1 查詢問題
+public async Task<List<MemberWithOrders>> GetMembersWithOrders()
+{
+    var members = await dbContext.Members.ToListAsync();
+    foreach (var member in members)
+    {
+        member.Orders = await dbContext.Orders  // ❌ N+1 問題
+            .Where(o => o.MemberId == member.Id)
+            .ToListAsync();
+    }
+    return members;
+}
+
+// ✅ 使用 Include 或 Join 避免 N+1
+public async Task<List<MemberWithOrders>> GetMembersWithOrders()
+{
+    return await dbContext.Members
+        .Include(m => m.Orders)  // ✅ 單一查詢載入關聯資料
+        .ToListAsync();
+}
+```
+
+### 5. 快取策略最佳實踐
+
+#### 快取鍵命名規範
+- 使用冒號分隔命名空間：`{feature}:{operation}:{parameters}`
+- 範例：`members:page:0:10`, `member:email:test@example.com`
+- 包含影響結果的所有參數
+
+#### 快取失效策略
+```csharp
+// 資料更新時清除相關快取
+public async Task<Result<int, Failure>> InsertAsync(InsertMemberRequest request)
+{
+    var result = await dbContext.SaveChangesAsync();
+    
+    // 清除列表快取
+    await cache.RemoveByPrefixAsync("members:page:");
+    
+    return Result.Success<int, Failure>(result);
+}
+```
+
+📖 **快取實作詳情請參閱**：[效能最佳化與快取策略](#效能最佳化與快取策略) 章節
+
+### 6. 日誌記錄最佳實踐
+
+#### 集中式日誌策略
+**核心原則**: 日誌記錄集中在 Middleware 層，業務邏輯層不記錄錯誤日誌。
+
+```csharp
+// ✅ 正確：在 Handler 層不記錄錯誤日誌，只回傳 Failure
+public class MemberHandler
+{
+    public async Task<Result<Member, Failure>> InsertAsync(InsertMemberRequest request)
+    {
+        try
+        {
+            return await _repository.InsertAsync(request);
+        }
+        catch (Exception ex)
+        {
+            // ✅ 封裝為 Failure，由 Middleware 記錄
+            return Result.Failure<Member, Failure>(new Failure
+            {
+                Code = nameof(FailureCode.Unknown),
+                Message = "處理失敗",
+                Exception = ex  // 保存例外供 Middleware 記錄
+            });
+        }
+    }
+}
+
+// ❌ 錯誤：在 Handler 層記錄錯誤日誌（重複記錄）
+public class MemberHandler(ILogger<MemberHandler> logger)
+{
+    public async Task<Result<Member, Failure>> InsertAsync(InsertMemberRequest request)
+    {
+        try
+        {
+            return await _repository.InsertAsync(request);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "新增會員失敗");  // ❌ 會與 Middleware 重複記錄
+            throw;
+        }
+    }
+}
+```
+
+#### 結構化日誌格式
+使用 Serilog 的結構化日誌，自動包含 TraceId：
+
+```csharp
+// ✅ 使用結構化日誌格式
+_logger.LogInformation("處理會員新增請求 - Email: {Email}, TraceId: {TraceId}", 
+    request.Email, traceContext?.TraceId);
+
+// ❌ 使用字串插值（無法被日誌系統解析）
+_logger.LogInformation($"處理會員新增請求 - Email: {request.Email}");
+```
+
+📖 **日誌詳細設定請參閱**：[日誌與安全指引](#日誌與安全指引) 章節
+
+### 7. 安全最佳實踐
+
+#### 機敏性設定管理
+**核心原則**: 不要在 `appsettings.json` 儲存機密。
+
+- ❌ **禁止**: 在 `appsettings.json`/`appsettings.*.json` 放入機密（連線字串、金鑰、權杖）
+- ✅ **改用**: 環境變數、.NET User Secrets（本機開發）、Docker/K8s Secrets（容器）、雲端祕密管家（如 Azure Key Vault）
+
+```csharp
+// Program.cs 設定提供者範例
+var builder = WebApplication.CreateBuilder(args);
+
+// 依序載入設定：appsettings → User Secrets(Dev) → 環境變數
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>(optional: true);
+}
+
+builder.Configuration.AddEnvironmentVariables();
+
+// 以環境變數為準（例如：SYS_DATABASE_CONNECTION_STRING）
+var connectionString = builder.Configuration["SYS_DATABASE_CONNECTION_STRING"];
+```
+
+**快速檢查清單**:
+- [ ] 機密不出現在 Git 版控檔案
+- [ ] 本機使用 User Secrets 或 `env/local.env`
+- [ ] 容器化使用 Docker/K8s Secrets 注入
+- [ ] 生產環境使用雲端祕密管家（如 Azure Key Vault）
+
+📖 **安全詳細指引請參閱**：[API 設計與安全性強化](#api-設計與安全性強化) 章節
+
+### 8. 程式碼產生與維護最佳實踐
+
+#### 自動產生程式碼隔離
+**核心原則**: 所有自動產生的程式碼都放在 `AutoGenerated` 資料夾中，不可手動編輯。
+
+```
+專案結構：
+├── Contract/
+│   └── AutoGenerated/          # Refitter 產生的 API 客戶端（不可編輯）
+│       └── JobClient.cs
+├── DB/
+│   └── AutoGenerated/          # EF Core 反向工程產生的實體（不可編輯）
+│       ├── MemberDbContext.cs
+│       └── Entities/
+│           └── Member.cs
+└── Member/                     # 手動編寫的業務邏輯（可編輯）
+    ├── MemberController.cs
+    ├── MemberHandler.cs
+    └── MemberRepository.cs
+```
+
+#### 重新產生程式碼流程
+```bash
+# 1. 修改 OpenAPI 規格
+vim doc/openapi.yml
+
+# 2. 重新產生 API 程式碼
+task codegen-api
+
+# 3. 修改資料庫結構後重新產生實體
+task ef-codegen
+
+# 4. 執行測試確保變更不影響現有功能
+task test-integration
+```
+
+### 9. 開發工作流程最佳實踐
+
+#### 標準開發流程
+```
+1. 需求分析
+   ↓
+2. 撰寫 BDD 情境 (.feature 檔案)
+   ↓
+3. 更新 OpenAPI 規格 (doc/openapi.yml)
+   ↓
+4. 產生程式碼 (task codegen-api)
+   ↓
+5. 實作 Handler 業務邏輯
+   ↓
+6. 實作 Repository 資料存取
+   ↓
+7. 實作 BDD 測試步驟
+   ↓
+8. 執行測試 (task test-integration)
+   ↓
+9. 手動測試 (Scalar UI)
+   ↓
+10. Code Review 與合併
+```
+
+#### Git Commit 訊息規範
+```
+feat: 新增會員管理 API
+fix: 修正電子郵件驗證邏輯
+test: 新增會員註冊 BDD 測試
+refactor: 重構 MemberHandler 驗證鏈
+docs: 更新 API 文件
+chore: 更新套件版本
+```
+
+#### Pull Request 檢查清單
+- [ ] OpenAPI 規格已更新
+- [ ] 程式碼已透過 `task codegen-api` 產生
+- [ ] 所有 BDD 測試通過
+- [ ] 無編譯警告
+- [ ] 已手動測試 API 功能
+- [ ] 文件已更新（如需要）
+- [ ] 已進行 Code Review
+
+### 10. 常見錯誤與陷阱
+
+#### ❌ 錯誤模式清單
+
+**錯誤 1: 直接測試 Controller**
+```csharp
+// ❌ 禁止的測試方式
+[Test]
+public async Task CreateMember_ReturnsCreated()
+{
+    var mockHandler = new Mock<IMemberHandler>();
+    var controller = new MemberController(mockHandler.Object);
+    var result = await controller.InsertMember(request);
+    // ❌ 跳過了 Middleware 管線
+}
+```
+
+**錯誤 2: 不使用 Result Pattern**
+```csharp
+// ❌ 不要拋出業務邏輯例外
+public async Task<Member> InsertAsync(InsertMemberRequest request)
+{
+    if (await EmailExists(request.Email))
+        throw new DuplicateEmailException();  // ❌
+}
+
+// ✅ 使用 Result Pattern
+public async Task<Result<Member, Failure>> InsertAsync(InsertMemberRequest request)
+{
+    if (await EmailExists(request.Email))
+        return Result.Failure<Member, Failure>(new Failure { Code = nameof(FailureCode.DuplicateEmail) });
+}
+```
+
+**錯誤 3: 未保存原始例外**
+```csharp
+// ❌ 遺失例外資訊
+catch (Exception ex)
+{
+    return Result.Failure<Member, Failure>(new Failure
+    {
+        Code = nameof(FailureCode.DbError),
+        Message = "操作失敗"
+        // ❌ 缺少 Exception 屬性，Middleware 無法記錄完整資訊
+    });
+}
+
+// ✅ 保存完整例外
+catch (Exception ex)
+{
+    return Result.Failure<Member, Failure>(new Failure
+    {
+        Code = nameof(FailureCode.DbError),
+        Message = "操作失敗",
+        Exception = ex  // ✅ 保存例外供 Middleware 記錄
+    });
+}
+```
+
+**錯誤 4: 忘記傳遞 CancellationToken**
+```csharp
+// ❌ 未傳遞 CancellationToken
+public async Task<Member> GetMemberAsync(string id)
+{
+    return await dbContext.Members.FirstOrDefaultAsync(m => m.Id == id);  // ❌
+}
+
+// ✅ 正確傳遞
+public async Task<Member> GetMemberAsync(string id, CancellationToken cancel = default)
+{
+    return await dbContext.Members.FirstOrDefaultAsync(m => m.Id == id, cancel);  // ✅
+}
+```
+
+### 11. 效能監控檢查點
+
+定期檢查以下效能指標：
+
+- ✅ API 回應時間 < 500ms (P95)
+- ✅ 資料庫查詢時間 < 100ms (P95)
+- ✅ 快取命中率 > 80%
+- ✅ 記憶體使用量穩定（無洩漏）
+- ✅ 無 N+1 查詢問題
+- ✅ 所有 I/O 操作使用非同步
+
+### 12. 文件維護原則
+
+#### 保持文件同步
+- ✅ 每次 API 變更後更新 OpenAPI 規格
+- ✅ BDD 情境作為活文檔，與實作保持同步
+- ✅ 重要決策記錄在 CLAUDE.md
+- ✅ 複雜業務邏輯提供 Mermaid 循序圖
+
+#### 程式碼註解原則
+- ✅ 註解「為什麼」而非「做什麼」
+- ✅ 複雜演算法提供註解說明
+- ✅ 公開 API 提供 XML 文件註解
+- ❌ 避免過時或冗餘的註解
+
+---
+
+📖 **相關章節連結**：
+- 分層架構詳細說明：[架構概述](#架構概述)
+- 錯誤處理模式：[錯誤處理與回應管理](#錯誤處理與回應管理)
+- 追蹤管理：[追蹤內容管理 (TraceContext)](#追蹤內容管理-tracecontext)
+- 測試策略：[BDD 開發流程](#bdd-開發流程-行為驅動開發)
+- 快取實作：[效能最佳化與快取策略](#效能最佳化與快取策略)
+- 安全指引：[API 設計與安全性強化](#api-設計與安全性強化)
+
 ## 追蹤內容管理 (TraceContext)
 
 ### 集中式管理架構
@@ -1434,7 +2013,7 @@ public class MemberService
 }
 ```
 
-#### 快取失效策略
+#### 快取失效與管理策略
 - **時間過期 (TTL)**: 設定合理的快取過期時間
 - **版本控制**: 使用版本號管理快取一致性
 - **標籤快取**: 支援批次清除相關快取項目
@@ -1951,7 +2530,7 @@ public class MemberHandler
 
 #### 多階段建置 Dockerfile
 ```dockerfile
-# 多階段建置 Dockerfile
+# Dockerfile - 多階段建置範例
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
