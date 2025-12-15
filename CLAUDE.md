@@ -2,6 +2,96 @@
 
 此檔案為 Claude Code (claude.ai/code) 在此專案中工作時的指導文件。
 接下來的回覆、文件描述，均使用台灣用語的繁體中文
+
+## AI 助理使用規則
+
+### 專案狀態檢測機制
+當 Claude CLI、GitHub Copilot CLI 或其他 AI 助理首次接觸此專案時，**必須優先檢測專案狀態**：
+
+#### 檢測條件（滿足以下任一條件視為空白專案）
+1. **不存在** `env/.template-config.json` 配置檔案
+2. **不存在** `.sln` 解決方案檔案
+3. **不存在** `src/` 目錄或該目錄為空
+4. **不存在** `appsettings.json` 或 `docker-compose.yml`
+
+#### 檢測流程
+```mermaid
+graph TD
+    A[AI 助理啟動] --> B{檢查 env/.template-config.json}
+    B -->|存在| C{驗證專案結構完整性}
+    B -->|不存在| D[觸發初始化對話]
+    C -->|完整| E[正常工作模式]
+    C -->|不完整| D
+    D --> F[詢問專案配置問題]
+    F --> G[根據回答產生專案結構]
+    G --> H[儲存配置到 env/.template-config.json]
+    H --> E
+```
+
+#### 必要行為規範
+1. **禁止假設**: 不應假設專案已完成初始化，必須先執行檢測
+2. **優先詢問**: 發現空白專案時，停止其他操作，優先進行互動式配置
+3. **配置優先**: 詢問所有必要問題後，才開始產生程式碼或檔案
+4. **記錄選擇**: 將用戶選擇寫入 `env/.template-config.json` 供後續參考
+
+#### 初始化對話範例
+```
+AI: 偵測到這是一個空白的 API 專案範本，我需要先了解幾個配置選項：
+
+1. **資料庫類型**（必選）
+   - SQL Server (適合企業應用，預設)
+   - PostgreSQL (開源、輕量)
+   - MySQL (開源、廣泛支援)
+   - 不使用資料庫 (僅記憶體操作)
+   
+   您的選擇：[等待用戶輸入]
+
+2. **是否使用 Entity Framework Core**（依據資料庫選擇）
+   - 是（預設，Code First + Migrations）
+   - 否（使用 Dapper 或其他 ORM）
+   
+   您的選擇：[等待用戶輸入]
+
+3. **資料庫版本**（依據資料庫類型）
+   - SQL Server: 2019 | 2022 (預設) | 2025
+   - PostgreSQL: 15 | 16 (預設) | 17
+   - MySQL: 8.0 | 8.4 (預設) | 9.0
+   
+   您的選擇：[等待用戶輸入]
+
+4. **快取需求**
+   - 是 (使用 Redis，預設)
+   - 否 (不使用快取)
+   
+   您的選擇：[等待用戶輸入]
+
+5. **程式碼組織方式**
+   - 單一專案（預設，所有層級在同一專案內用資料夾區分）
+   - 多專案（Controller、Handler、Repository 各自獨立專案）
+   
+   您的選擇：[等待用戶輸入]
+
+確認後，我將自動產生專案結構、配置檔案與必要的依賴項。
+```
+
+#### 配置檔案格式（env/.template-config.json）
+```json
+{
+  "database": {
+    "type": "SQL Server",
+    "version": "2022",
+    "useEfCore": true
+  },
+  "cache": {
+    "useRedis": true,
+    "version": "7-alpine"
+  },
+  "projectOrganization": "single-project",
+  "createdAt": "2025-12-15T14:22:22.741Z",
+  "createdBy": "Claude CLI"
+}
+```
+
 ## 開發指令
 
 ### Taskfile 使用原則
@@ -43,60 +133,6 @@
 - **啟動 Redis**: `task redis-start`
 - **啟動 Redis 管理介面**: `task redis-admin-start`
 - **初始化開發環境**: `task dev-init`
-
-### 專案範本初始化
-在建立新的 API 專案範本時，**必須詢問以下問題**：
-
-1. **快取需求**: 
-   - 是否需要 Redis 快取?
-   - 選項: `是` / `否` (預設: `是`)
-   - 影響: 決定是否在 docker-compose.yml 中包含 Redis 服務、appsettings.json 快取配置
-
-2. **資料庫選擇**:
-   - 需要哪一種資料庫?
-   - 選項: 
-     - `SQL Server` (預設，適合企業應用)
-     - `PostgreSQL` (開源，輕量)
-     - `MySQL` (開源，廣泛支援)
-   - 影響: 決定 EF Core DbContext、連線字串、Testcontainers 容器映像、遷移腳本
-
-3. **程式碼組織方式**:
-   - 程式碼分層（Controller → Handler → Repository）要分散到多個專案，還是集中在 Web API 專案內用資料夾區分？
-   - 選項:
-     - `單一專案` (預設，推薦用於中小型應用)
-       - 所有程式碼集中在 `JobBank1111.Job.WebAPI` 專案
-       - 使用資料夾區分：`Controllers/`、`Handlers/`、`Repositories/`、`Middleware/`
-       - 優點：結構簡單、快速開發、依賴管理容易
-       - 缺點：專案變大時結構複雜度增加
-     - `多專案` (推薦用於大型企業應用或 3+ 團隊成員)
-       - `JobBank1111.Job.WebAPI`: 控制器層 + 中介軟體
-       - `JobBank1111.Job.Handler`: 獨立專案，包含所有業務邏輯處理器
-       - `JobBank1111.Job.Repository`: 獨立專案，包含所有儲存庫與資料存取邏輯
-       - 優點：層級清晰分離、易於獨立測試、利於團隊協作、循環依賴風險低
-       - 缺點：專案數多、檔案配置較複雜
-   - 影響: 決定專案結構、命名空間、專案參考關係、DI 註冊方式
-
-#### 初始化流程
-1. 使用互動式腳本或問卷蒐集用戶選擇
-2. 根據選擇自動產生:
-   - `docker-compose.yml` (包含所選資料庫與可選的 Redis)
-   - `appsettings.json` (資料庫與快取連線字串)
-   - `env/local.env` (本地開發環境變數)
-   - `Dockerfile` (多階段建置配置)
-3. 更新 `.csproj` 依賴項 (EF Core 提供者)
-4. 修改測試環境配置 (Testcontainers 容器選擇)
-
-#### 配置儲存位置
-- 用戶選擇存儲在: `env/.template-config.json`
-- 格式:
-```json
-{
-  "useRedis": true,
-  "database": "SQL Server",
-  "projectOrganization": "single-project",
-  "createdAt": "2025-12-15T00:00:00Z"
-}
-```
 
 ### 文件
 - **產生 API 文件**: `task codegen-api-doc`
