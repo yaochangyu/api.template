@@ -12,7 +12,7 @@
   - [Taskfile 使用原則](#taskfile-使用原則)
   - [建置與執行](#建置與執行)
   - [程式碼產生](#程式碼產生)
-  - [EF Core Migrations（Code First）](#ef-core-migrationsCode-first)
+  - [EF Core Migrations（Code First）](#ef-core-migrationscode-first)
   - [基礎設施](#基礎設施)
   - [文件](#文件)
 
