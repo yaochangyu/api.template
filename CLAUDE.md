@@ -92,7 +92,33 @@
 
 ## AI 助理使用規則
 
+### 核心互動原則
+
+AI 助理在與使用者互動時，必須遵循以下核心原則：
+
+1. **強制互動確認**
+   - **Claude CLI**: 使用 `AskUserQuestion` 工具進行結構化詢問
+   - **GitHub Copilot CLI / Cursor / 其他 AI**: 使用結構化的文字列表詢問
+   - 在所有需要使用者決策的情境下，都必須明確詢問，不得擅自執行
+   - 提供清晰的選項說明，幫助使用者做出明智選擇
+
+2. **不得擅自假設**
+   - 即使文件標註「預設」值，仍須詢問使用者確認
+   - 例外：使用者已在對話中明確指定（如「使用 SQL Server」）
+   - 所有 AI 助理都必須遵守此原則
+
+3. **分階段互動**
+   - 單次詢問最多 3-4 個問題，避免資訊過載
+   - 複雜流程應分階段進行，根據前一階段的回答決定後續問題
+   - 適用於所有 AI 助理
+
+4. **完整性優先**
+   - 必須收集所有必要資訊後才開始執行
+   - 不可因「加速開發」而省略必要的互動步驟
+   - 適用於所有 AI 助理
+
 ### 專案狀態檢測機制
+
 當 Claude CLI、GitHub Copilot CLI 或其他 AI 助理首次接觸此專案時，**必須優先檢測專案狀態**：
 
 #### 檢測條件（滿足以下任一條件視為空白專案）
@@ -109,7 +135,7 @@ graph TD
     B -->|不存在| D[觸發初始化對話]
     C -->|完整| E[正常工作模式]
     C -->|不完整| D
-    D --> F[詢問專案配置問題]
+    D --> F[使用 AskUserQuestion 詢問配置]
     F --> G[根據回答產生專案結構]
     G --> H[儲存配置到 env/.template-config.json]
     H --> E
@@ -120,46 +146,6 @@ graph TD
 2. **優先詢問**: 發現空白專案時，停止其他操作，優先進行互動式配置
 3. **配置優先**: 詢問所有必要問題後，才開始產生程式碼或檔案
 4. **記錄選擇**: 將用戶選擇寫入 `env/.template-config.json` 供後續參考
-
-#### 初始化對話範例
-```
-AI: 偵測到這是一個空白的 API 專案範本，我需要先了解幾個配置選項：
-
-1. **資料庫類型**（必選）
-   - SQL Server (適合企業應用，預設)
-   - PostgreSQL (開源、輕量)
-   - MySQL (開源、廣泛支援)
-   - 不使用資料庫 (僅記憶體操作)
-   
-   您的選擇：[等待用戶輸入]
-
-2. **是否使用 Entity Framework Core**（依據資料庫選擇）
-   - 是（預設，Code First + Migrations）
-   - 否（使用 Dapper 或其他 ORM）
-   
-   您的選擇：[等待用戶輸入]
-
-3. **資料庫版本**（依據資料庫類型）
-   - SQL Server: 2019 | 2022 (預設) | 2025
-   - PostgreSQL: 15 | 16 (預設) | 17
-   - MySQL: 8.0 | 8.4 (預設) | 9.0
-   
-   您的選擇：[等待用戶輸入]
-
-4. **快取需求**
-   - 是 (使用 Redis，預設)
-   - 否 (不使用快取)
-   
-   您的選擇：[等待用戶輸入]
-
-5. **程式碼組織方式**
-   - 單一專案（預設，所有層級在同一專案內用資料夾區分）
-   - 多專案（Controller、Handler、Repository 各自獨立專案）
-   
-   您的選擇：[等待用戶輸入]
-
-確認後，我將自動產生專案結構、配置檔案與必要的依賴項。
-```
 
 #### 配置檔案格式（env/.template-config.json）
 ```json
@@ -177,6 +163,379 @@ AI: 偵測到這是一個空白的 API 專案範本，我需要先了解幾個�
   "createdAt": "2025-12-15T14:22:22.741Z",
   "createdBy": "Claude CLI"
 }
+```
+
+### 強制詢問情境
+
+以下情境中，AI 助理**必須先詢問使用者**，不得擅自決定：
+
+#### 1. 專案初始化與配置
+
+**觸發條件**：
+- 使用者提到「初始化」、「建立專案」、「設定專案」
+- 使用者執行或詢問 `task dev-init`
+- 專案狀態檢測判定為空白專案
+
+**必須詢問的內容**：
+
+##### 方案 A：Claude CLI（使用 AskUserQuestion 工具）
+
+**第一階段：基礎配置**
+```json
+{
+  "questions": [
+    {
+      "question": "請選擇資料庫類型",
+      "header": "資料庫",
+      "options": [
+        {"label": "SQL Server", "description": "企業應用首選，.NET 生態系完整整合"},
+        {"label": "PostgreSQL", "description": "開源、輕量、功能完整"},
+        {"label": "MySQL", "description": "開源、廣泛支援、社群資源豐富"}
+      ],
+      "multiSelect": false
+    },
+    {
+      "question": "是否需要 Redis 快取？",
+      "header": "快取需求",
+      "options": [
+        {"label": "是", "description": "使用 Redis 作為分散式快取（生產環境推薦）"},
+        {"label": "否", "description": "僅使用記憶體快取（開發測試用）"}
+      ],
+      "multiSelect": false
+    },
+    {
+      "question": "請選擇專案結構組織方式",
+      "header": "專案結構",
+      "options": [
+        {"label": "單一專案", "description": "適合 3 人以下團隊，結構簡單快速開發"},
+        {"label": "多專案", "description": "適合大型團隊，層級清晰分離易於協作"}
+      ],
+      "multiSelect": false
+    }
+  ]
+}
+```
+
+##### 方案 B：其他 AI 助理（GitHub Copilot CLI / Cursor / Gemini 等）
+
+使用結構化文字詢問：
+
+```
+在開始初始化專案前，我需要確認幾個配置選項：
+
+1️⃣ **資料庫類型**
+   a. SQL Server - 企業應用首選，.NET 生態系完整整合
+   b. PostgreSQL - 開源、輕量、功能完整
+   c. MySQL - 開源、廣泛支援、社群資源豐富
+
+   您的選擇：[請輸入 a/b/c]
+
+2️⃣ **快取需求**
+   a. 是 - 使用 Redis 作為分散式快取（生產環境推薦）
+   b. 否 - 僅使用記憶體快取（開發測試用）
+
+   您的選擇：[請輸入 a/b]
+
+3️⃣ **專案結構組織方式**
+   a. 單一專案 - 適合 3 人以下團隊，結構簡單快速開發
+   b. 多專案 - 適合大型團隊，層級清晰分離易於協作
+
+   您的選擇：[請輸入 a/b]
+
+請一次提供所有選擇（例如：a, a, b），我將根據您的選擇進行配置。
+```
+
+**執行後續動作**：
+- 根據選擇生成對應的配置檔案
+- 更新 `docker-compose.yml`
+- 設定 `appsettings.json`
+- 建立 `env/local.env`
+- 儲存配置到 `env/.template-config.json`
+
+#### 2. 資料庫相關操作
+
+**觸發條件**：
+- 使用者提到「migration」、「遷移」、「scaffold」、「反向工程」
+- 使用者要求產生實體或資料庫變更
+
+**必須詢問**：
+
+**第一階段：選擇開發模式**
+```json
+{
+  "questions": [
+    {
+      "question": "請選擇資料庫開發模式",
+      "header": "開發模式",
+      "options": [
+        {"label": "Code First", "description": "從程式碼定義資料模型，自動產生 Migration"},
+        {"label": "Database First", "description": "從現有資料庫反向工程產生實體"}
+      ],
+      "multiSelect": false
+    }
+  ]
+}
+```
+
+**如果選擇 Code First**，第二階段詢問：
+```json
+{
+  "questions": [
+    {
+      "question": "請輸入 Migration 名稱（使用描述性命名，如 AddMemberTable）",
+      "header": "Migration 名稱",
+      "options": []
+    },
+    {
+      "question": "是否立即套用到資料庫？",
+      "header": "套用 Migration",
+      "options": [
+        {"label": "是", "description": "執行 task ef-database-update"},
+        {"label": "否", "description": "僅建立 Migration 檔案，稍後手動套用"}
+      ],
+      "multiSelect": false
+    }
+  ]
+}
+```
+
+**如果選擇 Database First**，第二階段詢問：
+```json
+{
+  "questions": [
+    {
+      "question": "請選擇要產生實體的資料表範圍",
+      "header": "資料表範圍",
+      "options": [
+        {"label": "所有資料表", "description": "產生資料庫中所有資料表的實體"},
+        {"label": "特定資料表", "description": "僅產生指定的資料表（需在下一步提供資料表名稱）"}
+      ],
+      "multiSelect": false
+    }
+  ]
+}
+```
+
+#### 3. 功能實作
+
+**觸發條件**：
+- 使用者要求「實作」、「新增功能」、「開發」新的 API 或功能
+
+**必須詢問**：
+```json
+{
+  "questions": [
+    {
+      "question": "是否已定義 OpenAPI 規格？",
+      "header": "API 規格",
+      "options": [
+        {"label": "是", "description": "已在 doc/openapi.yml 中定義"},
+        {"label": "否", "description": "需要協助定義 API 規格"}
+      ],
+      "multiSelect": false
+    },
+    {
+      "question": "此功能需要實作哪些層級？",
+      "header": "分層架構",
+      "options": [
+        {"label": "Controller", "description": "HTTP 請求處理與路由"},
+        {"label": "Handler", "description": "業務邏輯處理與流程協調"},
+        {"label": "Repository", "description": "資料存取與資料庫操作"}
+      ],
+      "multiSelect": true
+    },
+    {
+      "question": "是否需要同時建立 BDD 測試？",
+      "header": "測試",
+      "options": [
+        {"label": "是", "description": "建立 .feature 檔案與測試步驟（推薦）"},
+        {"label": "否", "description": "稍後再補測試"}
+      ],
+      "multiSelect": false
+    }
+  ]
+}
+```
+
+#### 4. 效能最佳化
+
+**觸發條件**：
+- 使用者提到「快取」、「效能優化」、「慢」、「加速」、「優化」
+
+**必須詢問**：
+```json
+{
+  "questions": [
+    {
+      "question": "請選擇要優化的面向（可複選）",
+      "header": "優化面向",
+      "options": [
+        {"label": "資料庫查詢", "description": "優化 EF Core 查詢、索引與 N+1 問題"},
+        {"label": "快取策略", "description": "實作或調整快取機制（Redis/Memory Cache）"},
+        {"label": "非同步處理", "description": "改善非同步程式碼與 CancellationToken 使用"},
+        {"label": "記憶體使用", "description": "減少記憶體配置與 GC 壓力"}
+      ],
+      "multiSelect": true
+    }
+  ]
+}
+```
+
+### 禁止的行為 ❌
+
+AI 助理在任何情況下都**不得**執行以下行為：
+
+1. **擅自使用預設值**
+   - ❌ 錯誤：「我將使用預設的 SQL Server 資料庫」
+   - ✅ 正確：
+     - **Claude CLI**: 使用 AskUserQuestion 工具詢問
+     - **其他 AI**: 使用結構化文字列表詢問使用者選擇
+
+2. **跳過詢問步驟**
+   - ❌ 錯誤：「為了加速開發，我直接使用單一專案結構」
+   - ✅ 正確：即使有推薦選項，仍須明確詢問確認
+   - 適用於所有 AI 助理
+
+3. **一次詢問過多問題**
+   - ❌ 錯誤：一次詢問 7-8 個問題
+   - ✅ 正確：分階段詢問，每次最多 3-4 個問題
+   - 適用於所有 AI 助理
+
+4. **提供不明確的選項**
+   - ❌ 錯誤：「請問您要使用 SQL Server 還是 PostgreSQL？」（未說明差異）
+   - ✅ 正確：
+     - **Claude CLI**: 使用 AskUserQuestion 提供 description 欄位
+     - **其他 AI**: 在文字選項中加入說明（如「a. SQL Server - 企業應用首選」）
+
+### 正確的互動流程範例 ✅
+
+#### 範例 1：專案初始化（Claude CLI）
+
+**使用者**: 「幫我初始化專案」
+
+**Claude CLI 正確回應**:
+```
+我將協助您初始化專案。首先，讓我了解您的基礎配置需求。
+
+[使用 AskUserQuestion 工具詢問：資料庫類型、快取需求、專案結構]
+
+--- 等待使用者在 UI 中選擇 ---
+
+收到您的選擇後，我將執行以下步驟：
+1. 根據選擇生成對應的配置檔案
+2. 更新 docker-compose.yml
+3. 設定 appsettings.json
+4. 建立 env/local.env
+5. 儲存配置到 env/.template-config.json
+
+--- 使用者完成選擇後 ---
+
+✅ 專案已初始化完成！
+
+配置摘要：
+- 資料庫: SQL Server 2022
+- 快取: Redis 7-alpine
+- 結構: 單一專案
+
+接下來您可以執行 `task api-dev` 啟動開發環境。
+```
+
+#### 範例 2：專案初始化（其他 AI 助理）
+
+**使用者**: 「幫我初始化專案」
+
+**GitHub Copilot CLI / Cursor / Gemini 正確回應**:
+```
+我將協助您初始化專案。在開始前，我需要確認幾個配置選項：
+
+1️⃣ **資料庫類型**
+   a. SQL Server - 企業應用首選，.NET 生態系完整整合
+   b. PostgreSQL - 開源、輕量、功能完整
+   c. MySQL - 開源、廣泛支援、社群資源豐富
+
+2️⃣ **快取需求**
+   a. 是 - 使用 Redis 作為分散式快取（生產環境推薦）
+   b. 否 - 僅使用記憶體快取（開發測試用）
+
+3️⃣ **專案結構組織方式**
+   a. 單一專案 - 適合 3 人以下團隊，結構簡單快速開發
+   b. 多專案 - 適合大型團隊，層級清晰分離易於協作
+
+請提供您的選擇（例如：a, a, b）
+
+--- 使用者回應：a, a, a ---
+
+✅ 收到您的選擇，我將進行以下配置：
+- 資料庫: SQL Server
+- 快取: Redis
+- 結構: 單一專案
+
+開始執行初始化...
+
+[執行初始化步驟...]
+
+✅ 專案已初始化完成！接下來您可以執行 `task api-dev` 啟動開發環境。
+```
+
+#### 範例 3：資料庫操作（Claude CLI）
+
+**使用者**: 「我需要加入新的資料表」
+
+**Claude CLI 正確回應**:
+```
+了解，讓我先確認您想要使用的開發模式。
+
+[使用 AskUserQuestion 工具詢問：Code First 或 Database First]
+
+--- 使用者選擇 Code First ---
+
+好的，我們使用 Code First 模式。接下來請提供 Migration 相關資訊。
+
+[使用 AskUserQuestion 工具詢問：Migration 名稱、是否立即套用]
+
+--- 使用者完成選擇後 ---
+
+✅ 將執行以下指令：
+1. task ef-migration-add NAME=AddProductTable
+2. task ef-database-update
+
+是否繼續？
+```
+
+#### 範例 4：資料庫操作（其他 AI 助理）
+
+**使用者**: 「我需要加入新的資料表」
+
+**其他 AI 正確回應**:
+```
+了解，讓我先確認您想要使用的開發模式：
+
+1️⃣ **資料庫開發模式**
+   a. Code First - 從程式碼定義資料模型，自動產生 Migration
+   b. Database First - 從現有資料庫反向工程產生實體
+
+請選擇：[輸入 a 或 b]
+
+--- 使用者回應：a ---
+
+好的，使用 Code First 模式。接下來需要：
+
+2️⃣ **Migration 名稱**（請使用描述性命名，如 AddProductTable）
+   您的 Migration 名稱：[請輸入]
+
+3️⃣ **是否立即套用到資料庫？**
+   a. 是 - 執行 task ef-database-update
+   b. 否 - 僅建立 Migration 檔案
+
+請選擇：[輸入 a 或 b]
+
+--- 使用者回應：AddProductTable, a ---
+
+✅ 將執行以下指令：
+1. task ef-migration-add NAME=AddProductTable
+2. task ef-database-update
+
+開始執行...
 ```
 
 ## 開發指令
