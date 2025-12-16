@@ -350,7 +350,192 @@ AI 應詢問：
 - **Controller**: `{Feature}Controller.cs` 或 `{Feature}ControllerImpl.cs`
 - **Request/Response DTO**: `{Action}{Feature}Request.cs` / `{Feature}Response.cs`
 
-### 2. 依賴注入最佳實踐
+### 2. Repository Pattern 設計哲學
+
+#### 核心原則：以需求為導向，而非資料表
+
+**❌ 錯誤的思維：資料表導向**
+```
+資料表: Members, Orders, OrderItems
+Repository: MemberRepository, OrderRepository, OrderItemRepository
+問題: 業務邏輯分散、跨表操作複雜、難以維護
+```
+
+**✅ 正確的思維：需求導向**
+```
+業務需求: 會員管理、訂單處理、庫存管理
+Repository: MemberRepository, OrderManagementRepository, InventoryRepository
+優點: 封裝完整業務邏輯、減少跨層呼叫、更易維護
+```
+
+#### 設計策略選擇
+
+**策略 A：簡單資料表導向（適合小型專案）**
+- 專案規模小（< 10 個資料表）
+- 業務邏輯簡單
+- 團隊人數少（1-3 人）
+- 快速開發優先
+- **範例**: `MemberRepository` 對應 `Members` 資料表
+
+**策略 B：業務需求導向（推薦用於中大型專案）**
+- 專案規模中等以上（> 10 個資料表）
+- 複雜業務邏輯
+- 需要跨表操作
+- 長期維護考量
+- **範例**: `OrderManagementRepository` 處理訂單、訂單明細、付款等相關操作
+
+**策略 C：混合模式（實務常見）**
+- 核心業務使用需求導向（如訂單處理）
+- 簡單主檔使用資料表導向（如會員、產品）
+- 根據複雜度靈活調整
+- **本專案採用此策略**
+
+#### 實務範例對比
+
+**資料表導向 Repository**
+```csharp
+// ❌ 問題：業務邏輯分散在多個 Repository 和 Handler
+public class OrderRepository { /* 只處理 Orders 表 */ }
+public class OrderItemRepository { /* 只處理 OrderItems 表 */ }
+public class PaymentRepository { /* 只處理 Payments 表 */ }
+
+// Handler 需要協調多個 Repository
+public class OrderHandler(
+    OrderRepository orderRepo,
+    OrderItemRepository itemRepo,
+    PaymentRepository paymentRepo)
+{
+    public async Task<Result> CreateOrder(...)
+    {
+        // 複雜的跨 Repository 協調邏輯
+        await orderRepo.InsertAsync(...);
+        await itemRepo.BulkInsertAsync(...);
+        await paymentRepo.InsertAsync(...);
+    }
+}
+```
+
+**需求導向 Repository**
+```csharp
+// ✅ 優勢：封裝完整的業務操作
+public class OrderManagementRepository
+{
+    public async Task<Result<OrderDetail>> CreateCompleteOrderAsync(
+        CreateOrderRequest request, 
+        CancellationToken cancel = default)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancel);
+        
+        try
+        {
+            // 1. 建立訂單主檔
+            var order = new Order { ... };
+            dbContext.Orders.Add(order);
+            
+            // 2. 建立訂單明細
+            var items = request.Items.Select(i => new OrderItem { ... });
+            dbContext.OrderItems.AddRange(items);
+            
+            // 3. 建立付款記錄
+            var payment = new Payment { ... };
+            dbContext.Payments.Add(payment);
+            
+            // 4. 更新庫存
+            foreach (var item in request.Items)
+            {
+                var product = await dbContext.Products.FindAsync(item.ProductId);
+                product.Stock -= item.Quantity;
+            }
+            
+            await dbContext.SaveChangesAsync(cancel);
+            await transaction.CommitAsync(cancel);
+            
+            return Result.Success<OrderDetail, Failure>(orderDetail);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancel);
+            return Result.Failure<OrderDetail, Failure>(new Failure { ... });
+        }
+    }
+    
+    public async Task<Result<OrderDetail>> GetOrderDetailAsync(Guid orderId, CancellationToken cancel = default)
+    {
+        // 一次查詢取得完整訂單資訊（訂單 + 明細 + 付款）
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancel);
+        
+        var orderDetail = await dbContext.Orders
+            .Where(o => o.Id == orderId)
+            .Select(o => new OrderDetail
+            {
+                Order = o,
+                Items = o.OrderItems.ToList(),
+                Payment = o.Payment
+            })
+            .AsNoTracking()
+            .FirstOrDefaultAsync(cancel);
+            
+        return Result.Success<OrderDetail, Failure>(orderDetail);
+    }
+}
+
+// Handler 變得非常簡潔
+public class OrderHandler(OrderManagementRepository orderRepo)
+{
+    public async Task<Result<OrderDetail>> CreateOrder(CreateOrderRequest request, CancellationToken cancel)
+    {
+        // 直接呼叫 Repository 的業務方法
+        return await orderRepo.CreateCompleteOrderAsync(request, cancel);
+    }
+}
+```
+
+#### 命名規範建議
+
+**資料表導向命名**
+- `{TableName}Repository` - 例如：`MemberRepository`, `ProductRepository`
+- 適用於簡單 CRUD 操作
+
+**需求導向命名**
+- `{BusinessDomain}Repository` - 例如：`OrderManagementRepository`, `InventoryRepository`
+- `{AggregateRoot}Repository` - 例如：`ShoppingCartRepository`, `UserAccountRepository`
+- 適用於複雜業務邏輯
+
+#### 設計決策檢查清單
+
+在設計 Repository 時，應詢問自己：
+
+**✅ 需求導向的判斷標準**
+- [ ] 此業務操作涉及 3 個以上資料表？
+- [ ] 操作需要交易一致性保證？
+- [ ] 業務邏輯複雜，需要多步驟協調？
+- [ ] 多個 API 端點共用此業務邏輯？
+- [ ] 未來可能擴展更多相關功能？
+
+**如果以上有 2 個以上為「是」，建議使用需求導向 Repository**
+
+**❌ 資料表導向的適用場景**
+- [ ] 僅單一資料表的簡單 CRUD
+- [ ] 無複雜業務邏輯
+- [ ] 不需要跨表操作
+- [ ] 查詢條件簡單明確
+
+#### 本專案的實作策略
+
+本專案採用**混合模式**：
+- **簡單主檔**：使用資料表導向（如 `MemberRepository`）
+- **複雜業務**：視需求採用業務導向（如未來的訂單管理）
+- **靈活調整**：根據實際需求演進
+
+**重要原則**: 
+- 設計初期可以從簡單的資料表導向開始
+- 當發現業務邏輯分散、難以維護時，重構為需求導向
+- 不要過度設計，根據實際複雜度調整
+
+📝 **實作參考**: [src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs](src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs)
+
+### 3. 依賴注入最佳實踐
 
 #### 主建構函式注入 (Primary Constructor)
 使用 C# 12 的主建構函式簡化依賴注入，直接使用參數名稱，無需宣告欄位。
@@ -358,21 +543,19 @@ AI 應詢問：
 #### DbContextFactory 模式
 使用 `IDbContextFactory<T>` 而非直接注入 `DbContext`，避免生命週期問題。
 
-📝 **Repository 實作參考**: [src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs](src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs)
-
-### 3. 非同步程式設計最佳實踐
+### 4. 非同步程式設計最佳實踐
 
 #### 核心原則
 - 所有 I/O 操作都必須使用 async/await
 - 所有非同步方法都應支援 CancellationToken
 - 避免使用 `.Result` 或 `.Wait()`（死鎖風險）
 
-### 4. EF Core 查詢最佳化
+### 5. EF Core 查詢最佳化
 - 使用 `AsNoTracking()` 提升唯讀查詢效能
 - 使用 `Include` 或 `Join` 避免 N+1 查詢問題
 - 適當使用分頁查詢
 
-### 5. 快取策略最佳實踐
+### 6. 快取策略最佳實踐
 
 #### 快取鍵命名規範
 - 使用冒號分隔命名空間：`{feature}:{operation}:{parameters}`
@@ -380,7 +563,7 @@ AI 應詢問：
 
 📝 **快取實作參考**: [src/be/JobBank1111.Infrastructure/Caching/](src/be/JobBank1111.Infrastructure/Caching/)
 
-### 6. 日誌記錄最佳實踐
+### 7. 日誌記錄最佳實踐
 
 #### 集中式日誌策略
 **核心原則**: 日誌記錄集中在 Middleware 層，業務邏輯層不記錄錯誤日誌，只回傳 Failure。
@@ -392,7 +575,7 @@ AI 應詢問：
 - [src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs](src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs)
 - [src/be/JobBank1111.Job.WebAPI/RequestParameterLoggerMiddleware.cs](src/be/JobBank1111.Job.WebAPI/RequestParameterLoggerMiddleware.cs)
 
-### 7. 安全最佳實踐
+### 8. 安全最佳實踐
 
 #### 機敏設定管理
 **核心原則**: 不要在 `appsettings.json` 儲存機密。
@@ -400,11 +583,11 @@ AI 應詢問：
 - ❌ **禁止**: 在 `appsettings.json` 放入連線字串、金鑰、權杖
 - ✅ **改用**: 環境變數、.NET User Secrets（本機）、Docker Secrets（容器）、雲端祕密管家
 
-### 8. 程式碼產生與維護
+### 9. 程式碼產生與維護
 
 **核心原則**: 所有自動產生的程式碼都放在 `AutoGenerated` 資料夾中，不可手動編輯。
 
-### 9. 開發工作流程
+### 10. 開發工作流程
 
 #### 標準開發流程
 ```
@@ -430,13 +613,15 @@ AI 應詢問：
 - 根據使用者的選擇決定是否執行步驟 3、8、9、10
 - 如果使用者選擇「暫不實作測試」，應跳過測試相關步驟，但需在 Code Review 時提醒
 
-### 10. 常見錯誤與陷阱
+### 11. 常見錯誤與陷阱
 
 #### ❌ 禁止的模式
 1. **直接測試 Controller** - 必須透過 BDD 情境測試
 2. **不使用 Result Pattern** - 不要拋出業務邏輯例外
 3. **未保存原始例外** - 必須將例外寫入 `Failure.Exception`
 4. **忘記傳遞 CancellationToken** - 所有非同步方法都應支援
+5. **過度設計 Repository** - 從簡單開始，需要時再重構為需求導向
+6. **Repository 中實作業務規則** - 複雜業務邏輯應在 Handler 層處理
 
 ---
 
