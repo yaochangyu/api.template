@@ -207,8 +207,8 @@ graph TD
       "question": "請選擇專案結構組織方式",
       "header": "專案結構",
       "options": [
-        {"label": "單一專案", "description": "適合 3 人以下團隊，結構簡單快速開發"},
-        {"label": "多專案", "description": "適合大型團隊，層級清晰分離易於協作"}
+        {"label": "單一專案", "description": "所有功能（Controller/Handler/Repository）寫在 Web API 專案內，適合小型團隊快速開發"},
+        {"label": "多專案", "description": "Controller、Handler、Repository 各自獨立專案，適合大型團隊分工協作"}
       ],
       "multiSelect": false
     }
@@ -237,8 +237,8 @@ graph TD
    您的選擇：[請輸入 a/b]
 
 3️⃣ **專案結構組織方式**
-   a. 單一專案 - 適合 3 人以下團隊，結構簡單快速開發
-   b. 多專案 - 適合大型團隊，層級清晰分離易於協作
+   a. 單一專案 - 所有功能（Controller/Handler/Repository）寫在 Web API 專案內，適合小型團隊快速開發
+   b. 多專案 - Controller、Handler、Repository 各自獨立專案，適合大型團隊分工協作
 
    您的選擇：[請輸入 a/b]
 
@@ -458,8 +458,8 @@ AI 助理在任何情況下都**不得**執行以下行為：
    b. 否 - 僅使用記憶體快取（開發測試用）
 
 3️⃣ **專案結構組織方式**
-   a. 單一專案 - 適合 3 人以下團隊，結構簡單快速開發
-   b. 多專案 - 適合大型團隊，層級清晰分離易於協作
+   a. 單一專案 - 所有功能（Controller/Handler/Repository）寫在 Web API 專案內，適合小型團隊快速開發
+   b. 多專案 - Controller、Handler、Repository 各自獨立專案，適合大型團隊分工協作
 
 請提供您的選擇（例如：a, a, b）
 
@@ -604,27 +604,42 @@ AI 助理在任何情況下都**不得**執行以下行為：
 
 #### 組織方式（根據專案範本初始化選擇）
 
-專案組織方式根據範本初始化時的選擇決定（參見「專案範本初始化」章節）：
+專案組織方式根據範本初始化時的選擇決定。**建立專案時必須明確詢問使用者選擇**：
 
-**方案 A：單一專案結構（預設）**
+**方案 A：單一專案結構**
+- **特點**: 所有功能層（Controller、Handler、Repository）都寫在 `JobBank1111.Job.WebAPI` 專案內
+- **適用**: 小型團隊（3 人以下）、快速開發、結構簡單
+- **優點**: 編譯快速、部署簡單、適合快速迭代
+- **缺點**: 程式碼耦合度較高、大型團隊協作較困難
+
 ```
-JobBank1111.Job.WebAPI/
-├── Controllers/          # 控制器層
-├── Handlers/            # 業務邏輯處理器
-├── Repositories/        # 儲存庫與資料存取
-├── Middleware/          # 中介軟體
-├── Models/              # DTO 與 Request/Response 模型
-└── Extensions/          # 擴充方法
+JobBank1111.Job.WebAPI/              # 所有功能都在此專案內
+├── Controllers/                     # HTTP 請求處理
+├── Handlers/                        # 業務邏輯處理
+├── Repositories/                    # 資料存取層
+├── Middleware/                      # 中介軟體
+├── Models/                          # DTO 與模型
+└── Extensions/                      # 擴充方法
 ```
 
 **方案 B：多專案結構**
+- **特點**: Controller、Handler、Repository 各自獨立為不同專案
+- **適用**: 大型團隊、明確分工、長期維護
+- **優點**: 職責清晰分離、便於團隊協作、易於測試
+- **缺點**: 專案結構較複雜、編譯時間較長
+
 ```
-JobBank1111.Job.WebAPI/        # 控制器層 + 中介軟體
-JobBank1111.Job.Handler/       # 業務邏輯處理器（獨立專案）
-JobBank1111.Job.Repository/    # 儲存庫（獨立專案）
-JobBank1111.Job.DB/            # EF Core 資料存取層
-JobBank1111.Infrastructure/    # 跨領域基礎設施
+JobBank1111.Job.WebAPI/              # 僅包含 Controller + Middleware
+JobBank1111.Job.Handler/             # 業務邏輯處理器（獨立專案）
+JobBank1111.Job.Repository/          # 儲存庫（獨立專案）
+JobBank1111.Job.DB/                  # EF Core 資料存取層
+JobBank1111.Infrastructure/          # 跨領域基礎設施
 ```
+
+**重要提醒**：
+- ✅ 建立專案時**必須使用 AskUserQuestion 工具**（Claude CLI）或**結構化文字詢問**（其他 AI）
+- ❌ 不得擅自假設或使用預設值
+- 📝 選擇結果儲存於 `env/.template-config.json` 的 `projectOrganization` 欄位
 
 #### 分層職責規範
 
