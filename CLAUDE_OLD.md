@@ -367,7 +367,8 @@ graph TD
         {"label": "是", "description": "建立 .feature 檔案與測試步驟（推薦）"},
         {"label": "否", "description": "稍後再補測試"}
       ],
-      "multiSelect": false
+      "multiSelect": false,
+      "note": "【重要】API 端點測試必須使用 BDD 方法。測試替身優先使用 Testcontainers (Docker 容器)，僅在無法使用時才考慮 Mock。禁止對 Controller 進行單元測試。"
     }
   ]
   ```
@@ -1490,6 +1491,10 @@ public class ExternalServiceTestContainer
 
 #### 核心測試原則
 - **BDD 優先**: 所有控制器功能必須優先使用 BDD 情境測試，不得直接進行控制器單元測試
+- **API 端點測試方法**: 所有 API 端點測試必須使用 BDD 測試方法（透過 Reqnroll 實作 .feature 檔案）
+- **測試替身策略**: 
+  1. 優先使用 Testcontainers（Docker 容器）作為資料庫、Redis 的測試替身
+  2. 僅在無法使用 Testcontainers 時才考慮使用 Mock（例如：第三方 API、外部服務）
 - **禁止單獨測試控制器**: 不應直接實例化控制器進行單元測試
 - **強制使用 WebApplicationFactory**: 所有測試必須透過完整的 Web API 管線與 Docker 測試環境
 - **情境驅動開發**: 從使用者行為情境出發，透過 Gherkin 語法定義測試案例

@@ -178,6 +178,13 @@ graph TD
 - 每次測試動態產生資料
 - 測試後是否需要清理資料？
 
+**e) 測試方法選擇**
+- ✅ **API 端點測試必須使用 BDD 測試方法**（透過 Reqnroll 實作 .feature 檔案）
+- ✅ **測試替身優先順序**：
+  1. 優先使用 Testcontainers（Docker 容器）作為資料庫、Redis 的測試替身
+  2. 僅在無法使用 Testcontainers 時才考慮使用 Mock（例如：第三方 API、外部服務）
+- ✅ **禁止對 Controller 進行單元測試**：所有 API 測試必須透過完整的 Web API 管線執行
+
 **測試決策範例**：
 ```markdown
 使用者請求：「實作會員註冊功能」
@@ -196,9 +203,14 @@ AI 應詢問：
    - [ ] 必填欄位驗證
 
 3. 測試環境：
-   - [ ] 使用 Docker SQL Server 容器
-   - [ ] 使用 Docker Redis 容器
+   - [ ] 使用 Testcontainers (Docker SQL Server 容器)
+   - [ ] 使用 Testcontainers (Docker Redis 容器)
    - [ ] 每次測試後清理資料
+   
+4. 測試方法：
+   - [x] API 端點使用 BDD 測試（.feature 檔案）
+   - [x] 優先使用 Testcontainers 作為測試替身
+   - [ ] 僅在必要時使用 Mock（例如：外部 API）
 ```
 
 #### 5. 效能最佳化
