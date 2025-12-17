@@ -2424,10 +2424,19 @@ var failure = new Failure
 ### 中介軟體管線架構與職責
 
 #### 管線順序與責任劃分
-- **ExceptionHandlingMiddleware**: 最外層中介軟體，專門捕捉系統層級例外
-- **TraceContextMiddleware**: 處理使用者身分驗證與追蹤內容設定
-- **LoggerMiddleware**: 記錄請求與回應日誌
-- **RequestParameterLoggerMiddleware**: 當請求成功完成時記錄請求資訊
+- **MeasurementMiddleware**: 最外層進行度量與計時，包覆整體請求耗時
+- **ExceptionHandlingMiddleware**: 捕捉未處理的系統層級例外，統一回應格式
+- **TraceContextMiddleware**: 設定追蹤內容與身分資訊（如 TraceId、UserId）
+- **RequestParameterLoggerMiddleware**: 在管線尾端於成功完成時記錄請求參數
+
+🧩 程式碼為準（Program.cs）
+```csharp
+// 管線順序：Measurement → ExceptionHandling → TraceContext → RequestParameterLogger
+app.UseMiddleware<MeasurementMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<TraceContextMiddleware>();
+app.UseMiddleware<RequestParameterLoggerMiddleware>();
+```
 
 #### 職責分離原則
 - **例外處理**: 僅在 `ExceptionHandlingMiddleware` 捕捉系統例外，業務邏輯錯誤在 Handler 層處理
