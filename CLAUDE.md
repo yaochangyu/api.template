@@ -76,11 +76,33 @@ graph TD
     B -->|不存在| D[觸發初始化對話]
     C -->|完整| E[正常工作模式]
     C -->|不完整| D
-    D --> F[詢問配置]
-    F --> G[根據回答產生專案結構]
+    D --> T{是否使用 GitHub 範本\nhttps://github.com/yaochangyu/api.template}
+    T -->|是| U[git clone 範本到工作目錄]
+    U --> V[刪除 .git（移除 Git 歷史/遠端設定）]
+    V --> F[詢問配置]
+    T -->|否| F
+    F --> G[根據回答修改/產生專案結構]
     G --> H[儲存配置到 env/.template-config.json]
     H --> E
 ```
+
+#### GitHub 範本套用規則（初始化時）
+
+當專案狀態檢測判定為「空白專案」時，初始化對話的第一個問題必須先詢問：
+
+- 是否要使用 https://github.com/yaochangyu/api.template 作為專案範本
+
+若使用者選擇「是」，AI 助理必須遵循：
+
+1. **安全檢查（不得擅自覆蓋）**：
+   - 僅在「工作目錄為空」或使用者已明確同意覆蓋/清空時，才可執行 clone。
+   - 若工作目錄非空，必須先詢問使用者要「改用子資料夾」或「取消」。
+2. **使用 git clone 下載範本**：
+   - Windows PowerShell 範例（在空目錄中）：`git clone https://github.com/yaochangyu/api.template .`
+3. **刪除 Git 相關資料**：
+   - 刪除 `.git/` 目錄（移除歷史與遠端設定）。
+   - Windows PowerShell 範例：`Remove-Item -Recurse -Force .git`
+4. **接著才進入本專案的互動式配置**（資料庫/快取/專案結構等），並依照互動結果修改專案內容與寫入 `env/.template-config.json`。
 
 #### 配置檔案格式（env/.template-config.json）
 ```json
@@ -126,6 +148,7 @@ graph TD
 - 資料庫類型選擇
 - Redis 快取需求
 - 專案結構組織方式（單一專案 vs 多專案）
+- 是否使用 GitHub 範本（https://github.com/yaochangyu/api.template）
 
 #### 2. 資料庫相關操作
 - Code First vs Database First 模式選擇
