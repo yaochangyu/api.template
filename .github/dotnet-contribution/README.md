@@ -8,7 +8,7 @@
 
 | Agent | 模型 | 描述 |
 |-------|------|------|
-| **api-template-architect** | Sonnet | 專精於此 API Template 的 .NET 架構師，熟悉 BDD 測試流程、分層架構設計、TraceContext 模式、Redis 快取策略、OpenAPI 程式碼產生 |
+| **dotnet-api** | Sonnet | .NET API 開發專家，熟悉 ASP.NET Core、BDD 測試流程、分層架構設計、TraceContext 模式、Redis 快取策略、OpenAPI 程式碼產生 |
 
 ### Skills（技能包）
 
@@ -29,14 +29,25 @@
 - `cache-strategy.md` - 多層快取策略詳解
 - `openapi-codegen.md` - OpenAPI 程式碼產生工作流程
 
-## 🚀 使用方式
+## 🚀 快速開始
+
+### 最簡單的使用方式（VS Code）
+
+1. **開啟 Copilot Chat**：按 `Ctrl + Shift + I`
+2. **輸入指令**：
+   ```
+   @dotnet-api 我要實作會員註冊功能
+   ```
+3. **跟隨互動式問答**完成實作
+
+**完整教學**：[快速開始指南](./QUICK_START.md)
 
 ### GitHub Copilot Chat
 
 在 VS Code 或 Visual Studio 中使用 GitHub Copilot Chat：
 
 ```
-@api-template-architect 我要實作會員註冊功能
+@dotnet-api 我要實作會員註冊功能
 ```
 
 ```
@@ -47,7 +58,7 @@
 
 ```bash
 # 使用 agent
-gh copilot suggest -a api-template-architect "實作會員登入功能"
+gh copilot suggest -a dotnet-api "實作會員登入功能"
 
 # 使用 skill
 gh copilot suggest -s api-template-bdd-guide "如何設計 Repository？"
@@ -57,7 +68,7 @@ gh copilot suggest -s api-template-bdd-guide "如何設計 Repository？"
 
 ```bash
 # 啟動互動式對話
-claude -p "Act as api-template-architect and help me implement member registration"
+claude -p "Act as dotnet-api and help me implement member registration"
 
 # 使用 skill
 claude -p "Use api-template-bdd-guide skill to design a cache strategy"
@@ -127,7 +138,7 @@ Feature: 會員註冊
 ### 範例 1：實作新功能
 
 ```
-User: @api-template-architect 我要實作會員登入功能
+User: @dotnet-api 我要實作會員登入功能
 
 Agent:
 我會協助你實作會員登入功能。首先讓我確認幾個問題：
@@ -147,7 +158,7 @@ Agent:
 ### 範例 2：程式碼審查
 
 ```
-User: @api-template-architect 幫我審查這段程式碼
+User: @dotnet-api 幫我審查這段程式碼
 
 Agent:
 我發現以下問題：

@@ -10,7 +10,7 @@
 .github\dotnet-contribution\
 ├── README.md
 ├── agents\
-│   └── api-template-architect.md
+│   └── dotnet-api.md
 └── skills\
     └── api-template-bdd-guide\
         ├── SKILL.md
@@ -55,7 +55,7 @@
 
 ## ✅ Agent 定義參考
 
-`api-template-architect.md` 中參考：
+`dotnet-api.md` 中參考：
 
 - ✅ CLAUDE.md 中的「AI 助理使用規則」
 - ✅ 專案檔案結構 (src/be/{Project}.WebAPI/ 等)
