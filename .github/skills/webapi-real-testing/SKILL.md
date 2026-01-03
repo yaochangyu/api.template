@@ -28,6 +28,173 @@ Web API 測試實作技能,協助開發者使用 Testcontainers + Reqnroll 撰�
 使用 webapi-testing 撰寫 API 測試
 ```
 
+## 測試專案檢測機制
+
+### 檢測流程
+
+當使用者要求實作 Web API 測試時，**必須優先檢測測試專案狀態**：
+
+#### 檢測條件（滿足以下任一條件視為不存在測試專案）
+
+1. **不存在** `*.IntegrationTest.csproj` 專案檔案
+2. **不存在** `src/be/**/IntegrationTest/` 目錄
+3. **不存在** `BaseStep.cs` 或 `TestServer.cs` 等核心測試檔案
+
+#### 檢測流程圖
+
+```mermaid
+graph TD
+    A[AI 助理啟動] --> B{檢查 *.IntegrationTest.csproj}
+    B -->|存在| C{驗證測試專案結構完整性}
+    B -->|不存在| D[觸發測試專案建立對話]
+    C -->|完整| E[正常測試開發模式]
+    C -->|不完整| D
+    D --> F[詢問測試專案名稱]
+    F --> G[使用 dotnet new 建立測試專案]
+    G --> H[使用 nuget 安裝必要套件]
+    H --> I[建立測試專案核心架構]
+    I --> E
+```
+
+### 強制詢問情境
+
+#### 1. 測試專案名稱
+
+**問題**：
+```
+偵測到專案尚未建立整合測試專案，請提供測試專案名稱：
+
+範例：
+- {ProjectName}.IntegrationTest
+- {ProjectName}.Job.IntegrationTest
+- {SolutionName}.IntegrationTest
+
+請輸入測試專案名稱：
+```
+
+**不得假設**：不可擅自使用預設名稱，必須明確詢問使用者。
+
+#### 2. 測試專案位置
+
+**問題**：
+```
+請選擇測試專案建立位置：
+
+1️⃣ src/be/{ProjectName}.IntegrationTest/（推薦）
+2️⃣ tests/{ProjectName}.IntegrationTest/
+3️⃣ 自訂路徑
+
+請選擇：
+```
+
+### 測試專案建立流程
+
+#### 步驟 1：建立測試專案
+
+使用 `dotnet new` 建立 xUnit 測試專案：
+
+```powershell
+# 建立測試專案
+dotnet new xunit -n {ProjectName}.IntegrationTest -o src/be/{ProjectName}.IntegrationTest
+
+# 加入到解決方案
+dotnet sln add src/be/{ProjectName}.IntegrationTest/{ProjectName}.IntegrationTest.csproj
+
+# 加入專案參考
+dotnet add src/be/{ProjectName}.IntegrationTest/{ProjectName}.IntegrationTest.csproj reference src/be/{ProjectName}.WebAPI/{ProjectName}.WebAPI.csproj
+```
+
+#### 步驟 2：安裝必要套件
+
+使用 `dotnet add package` 安裝必要 NuGet 套件：
+
+```powershell
+# 進入測試專案目錄
+cd src/be/{ProjectName}.IntegrationTest
+
+# 核心測試框架
+dotnet add package xUnit --version 2.9.2
+dotnet add package Microsoft.AspNetCore.Mvc.Testing --version 8.0.0
+
+# BDD 測試框架
+dotnet add package Reqnroll --version 2.1.1
+dotnet add package Reqnroll.xUnit --version 2.1.1
+
+# Docker 測試容器
+dotnet add package Testcontainers --version 3.10.0
+dotnet add package Testcontainers.MsSql --version 3.10.0
+dotnet add package Testcontainers.Redis --version 3.10.0
+
+# HTTP 客戶端與序列化
+dotnet add package Refit --version 8.0.0
+dotnet add package System.Text.Json --version 8.0.0
+
+# JSON 驗證
+dotnet add package JsonDiffPatch.Net --version 2.3.0
+dotnet add package Newtonsoft.Json --version 13.0.3
+
+# 假資料產生
+dotnet add package Bogus --version 35.6.1
+
+# 時間模擬
+dotnet add package Microsoft.Extensions.TimeProvider.Testing --version 8.10.0
+
+# 回到根目錄
+cd ../../..
+```
+
+#### 步驟 3：建立測試專案核心架構
+
+建立以下核心檔案：
+
+1. **BaseStep.cs** - BDD 測試步驟基底類別
+2. **TestServer.cs** - WebApplicationFactory 測試伺服器
+3. **ScenarioContextExtension.cs** - 情境上下文擴充
+4. **DbContextExtensions.cs** - 資料庫測試輔助
+5. **TestContainerFactory.cs** - Docker 容器工廠（可選，若需共用）
+
+**參考檔案**：`src/be/JobBank1111.Job.IntegrationTest/` 目錄下的對應檔案
+
+#### 步驟 4：配置測試環境
+
+建立 `appsettings.Test.json`（若需要）：
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information"
+    }
+  },
+  "TestContainers": {
+    "SqlServer": {
+      "Image": "mcr.microsoft.com/mssql/server:2022-latest",
+      "Port": 1433
+    },
+    "Redis": {
+      "Image": "redis:7-alpine",
+      "Port": 6379
+    }
+  }
+}
+```
+
+### 測試專案結構驗證
+
+建立完成後，驗證以下結構是否正確：
+
+```
+src/be/{ProjectName}.IntegrationTest/
+├── BaseStep.cs
+├── TestServer.cs
+├── ScenarioContextExtension.cs
+├── DbContextExtensions.cs
+├── _01_Demo/
+│   ├── Demo.feature
+│   └── DemoStep.cs
+└── {ProjectName}.IntegrationTest.csproj
+```
+
 ## 核心原則
 
 ### Docker 優先測試策略
@@ -48,6 +215,93 @@ Web API 測試實作技能,協助開發者使用 Testcontainers + Reqnroll 撰�
 2. **測試實作**:實作測試步驟
 3. **功能開發**:實作業務邏輯
 4. **測試驗證**:執行測試確保符合需求
+
+## 互動流程範例
+
+### 完整對話範例
+
+```
+AI: 正在檢測測試專案狀態...
+
+AI: ⚠️ 偵測到專案尚未建立整合測試專案
+
+AI: 【問題 1/2】請提供測試專案名稱：
+
+    範例：
+    - JobBank1111.Job.IntegrationTest（推薦）
+    - {ProjectName}.IntegrationTest
+    - {SolutionName}.IntegrationTest
+
+    請輸入測試專案名稱：
+
+使用者: JobBank1111.Job.IntegrationTest
+
+AI: ✅ 測試專案名稱：JobBank1111.Job.IntegrationTest
+
+AI: 【問題 2/2】請選擇測試專案建立位置：
+
+    1️⃣ src/be/JobBank1111.Job.IntegrationTest/（推薦）
+       - 與主專案同層，結構清晰
+       - 符合 .NET 專案慣例
+
+    2️⃣ tests/JobBank1111.Job.IntegrationTest/
+       - 所有測試集中管理
+       - 適合多個測試專案
+
+    3️⃣ 自訂路徑
+
+使用者: 1
+
+AI: ✅ 測試專案位置：src/be/JobBank1111.Job.IntegrationTest/
+
+AI: 📋 配置摘要：
+    - 測試專案名稱：JobBank1111.Job.IntegrationTest
+    - 建立位置：src/be/JobBank1111.Job.IntegrationTest/
+    - 測試框架：xUnit 2.9.2
+    - BDD 框架：Reqnroll 2.1.1
+    - Docker 容器：Testcontainers 3.10.0
+
+AI: 開始建立測試專案...
+
+AI: 📦 正在建立 xUnit 測試專案...
+    ✅ dotnet new xunit 完成
+
+AI: 🔗 正在加入專案參考...
+    ✅ 已加入到解決方案
+    ✅ 已參考主專案
+
+AI: 📥 正在安裝 NuGet 套件...
+    ✅ xUnit 2.9.2
+    ✅ Microsoft.AspNetCore.Mvc.Testing 8.0.0
+    ✅ Reqnroll.xUnit 2.1.1
+    ✅ Testcontainers 3.10.0
+    ✅ Testcontainers.MsSql 3.10.0
+    ✅ Testcontainers.Redis 3.10.0
+    （共 11 個套件）
+
+AI: 📝 正在建立測試核心架構...
+    ✅ BaseStep.cs
+    ✅ TestServer.cs
+    ✅ ScenarioContextExtension.cs
+    ✅ DbContextExtensions.cs
+    ✅ _01_Demo/Demo.feature
+    ✅ _01_Demo/DemoStep.cs
+
+AI: 🎉 測試專案建立完成！
+
+AI: 📖 下一步建議：
+    1. 執行 `task test-integration` 驗證測試環境
+    2. 參考 `_01_Demo/Demo.feature` 撰寫測試情境
+    3. 使用 `task api-dev` 啟動 API 以便測試
+```
+
+## 禁止的行為 ❌
+
+1. **擅自使用預設專案名稱** - 必須明確詢問使用者
+2. **跳過專案檢測步驟** - 必須先檢測測試專案是否存在
+3. **手動建立專案檔案** - 必須使用 `dotnet new` 建立
+4. **手動編輯 .csproj 安裝套件** - 必須使用 `dotnet add package`
+5. **假設專案位置** - 必須明確詢問使用者選擇
 
 ## 測試架構組成
 
@@ -360,6 +614,161 @@ graph LR
 
 2️⃣ 否,不需要外部 API
    - 此功能不涉及外部 API 呼叫
+```
+
+## 錯誤處理與復原
+
+### 常見錯誤情境
+
+#### 1. 測試專案已存在
+
+**錯誤訊息**：
+```
+⚠️ 警告：測試專案已存在
+
+偵測到以下測試專案：
+- src/be/JobBank1111.Job.IntegrationTest/JobBank1111.Job.IntegrationTest.csproj
+```
+
+**處理方式**：
+```
+請選擇：
+1️⃣ 使用現有測試專案（推薦）
+2️⃣ 建立新的測試專案（需提供不同名稱）
+3️⃣ 取消操作
+
+請選擇：
+```
+
+#### 2. dotnet new 建立專案失敗
+
+**錯誤訊息**：
+```
+❌ 錯誤：建立測試專案失敗
+
+錯誤訊息：The template "xUnit Test Project" could not be found.
+```
+
+**處理方式**：
+```powershell
+# 確認 .NET SDK 已安裝
+dotnet --version
+
+# 重新安裝 xUnit 範本
+dotnet new --install Microsoft.DotNet.Test.ProjectTemplates.8.0
+
+# 重試建立專案
+dotnet new xunit -n {ProjectName}.IntegrationTest
+```
+
+#### 3. NuGet 套件安裝失敗
+
+**錯誤訊息**：
+```
+❌ 錯誤：安裝 NuGet 套件失敗
+
+套件：Testcontainers 3.10.0
+錯誤：Unable to find package 'Testcontainers' with version (>= 3.10.0)
+```
+
+**處理方式**：
+```powershell
+# 清除 NuGet 快取
+dotnet nuget locals all --clear
+
+# 重試安裝
+dotnet add package Testcontainers --version 3.10.0
+
+# 或使用最新版本
+dotnet add package Testcontainers
+```
+
+#### 4. Docker 容器啟動失敗
+
+**錯誤訊息**：
+```
+❌ 錯誤：Docker 容器啟動失敗
+
+容器：mcr.microsoft.com/mssql/server:2022-latest
+錯誤：Docker daemon is not running
+```
+
+**處理方式**：
+```
+請確認：
+1️⃣ Docker Desktop 是否已啟動？
+   - Windows: 檢查系統匣是否有 Docker 圖示
+   - 執行: docker --version
+
+2️⃣ Docker daemon 是否正在執行？
+   - 執行: docker ps
+
+3️⃣ 是否有足夠的系統資源？
+   - Docker Desktop 設定 > Resources
+   - 建議：至少 4GB RAM、2 CPU
+```
+
+#### 5. 測試專案結構不完整
+
+**錯誤訊息**：
+```
+⚠️ 警告：測試專案結構不完整
+
+缺少以下核心檔案：
+- BaseStep.cs
+- TestServer.cs
+```
+
+**處理方式**：
+```
+請選擇：
+1️⃣ 自動補齊缺少的檔案（推薦）
+2️⃣ 手動建立檔案
+3️⃣ 重新建立測試專案
+
+請選擇：
+```
+
+### 驗證與檢查清單
+
+#### 測試專案建立完成後，應執行以下檢查：
+
+**✅ 專案檔案檢查**
+```powershell
+# 檢查專案是否存在
+Test-Path "src/be/{ProjectName}.IntegrationTest/{ProjectName}.IntegrationTest.csproj"
+
+# 檢查是否已加入解決方案
+dotnet sln list | Select-String "IntegrationTest"
+```
+
+**✅ NuGet 套件檢查**
+```powershell
+# 列出已安裝的套件
+dotnet list src/be/{ProjectName}.IntegrationTest package
+
+# 應包含以下關鍵套件：
+# - xUnit
+# - Reqnroll.xUnit
+# - Testcontainers
+# - Microsoft.AspNetCore.Mvc.Testing
+```
+
+**✅ 專案結構檢查**
+```powershell
+# 檢查核心檔案是否存在
+Test-Path "src/be/{ProjectName}.IntegrationTest/BaseStep.cs"
+Test-Path "src/be/{ProjectName}.IntegrationTest/TestServer.cs"
+Test-Path "src/be/{ProjectName}.IntegrationTest/_01_Demo/Demo.feature"
+```
+
+**✅ 測試執行檢查**
+```powershell
+# 執行測試驗證環境
+task test-integration
+
+# 或
+dotnet test src/be/{ProjectName}.IntegrationTest
 ```
 
 ## Gherkin 語法完整範例
