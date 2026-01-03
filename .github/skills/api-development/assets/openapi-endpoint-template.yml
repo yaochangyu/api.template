@@ -1,0 +1,447 @@
+# OpenAPI 端點定義範本
+#
+# 使用說明：
+# 1. 複製此範本到 doc/openapi.yml 的 paths 區段
+# 2. 替換 {resource} 為實際的資源名稱（例如：members、products）
+# 3. 替換 {Resource} 為實際的資源名稱（Pascal Case，例如：Member、Product）
+# 4. 根據需求調整欄位定義
+# 5. 執行 task codegen-api-server 產生 Server Controller
+# 6. 執行 task codegen-api-client 產生 Client SDK
+
+paths:
+  # ==================== 建立資源 ====================
+  /api/v1/{resource}:
+    post:
+      summary: 建立新的 {Resource}
+      description: |
+        建立一個新的 {Resource} 資源。
+
+        ## 驗證規則
+        - email: 必須是有效的 Email 格式
+        - name: 長度必須介於 1-100 字元
+
+        ## 注意事項
+        - Email 不可重複
+        - 建立成功後會回傳 Location 標頭指向新資源
+      operationId: Create{Resource}
+      tags:
+        - {Resource}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Create{Resource}Request'
+            examples:
+              basic:
+                summary: 基本範例
+                value:
+                  email: "user@example.com"
+                  name: "張三"
+              complete:
+                summary: 完整範例（包含選填欄位）
+                value:
+                  email: "user@example.com"
+                  name: "張三"
+                  phone: "0912345678"
+                  birthDate: "1990-01-01"
+      responses:
+        '201':
+          description: 建立成功
+          headers:
+            Location:
+              description: 新建立的資源位置
+              schema:
+                type: string
+                example: /api/v1/{resource}/123e4567-e89b-12d3-a456-426614174000
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/{Resource}Response'
+              examples:
+                success:
+                  value:
+                    id: "123e4567-e89b-12d3-a456-426614174000"
+                    email: "user@example.com"
+                    name: "張三"
+                    phone: "0912345678"
+                    createdAt: "2026-01-03T10:30:00Z"
+        '400':
+          description: 請求驗證失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+              examples:
+                validationError:
+                  summary: Email 格式錯誤
+                  value:
+                    code: "ValidationError"
+                    message: "Email 格式不正確"
+                    traceId: "0HMVD8H3F6A9K:00000001"
+                    data:
+                      errors:
+                        email: ["Email 格式不正確"]
+        '409':
+          description: 資源衝突
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+              examples:
+                duplicateEmail:
+                  summary: Email 已被使用
+                  value:
+                    code: "DuplicateEmail"
+                    message: "此 Email 已被註冊"
+                    traceId: "0HMVD8H3F6A9K:00000002"
+        '500':
+          description: 內部伺服器錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+              examples:
+                serverError:
+                  value:
+                    code: "InternalServerError"
+                    message: "發生未預期的錯誤"
+                    traceId: "0HMVD8H3F6A9K:00000003"
+
+  # ==================== 查詢單一資源（By ID） ====================
+  /api/v1/{resource}/{id}:
+    get:
+      summary: 根據 ID 查詢 {Resource}
+      description: 查詢指定 ID 的 {Resource} 詳細資料
+      operationId: Get{Resource}ById
+      tags:
+        - {Resource}
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: {Resource} 唯一識別碼
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: 查詢成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/{Resource}Response'
+        '404':
+          description: 資源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+              examples:
+                notFound:
+                  value:
+                    code: "NotFound"
+                    message: "{Resource} 不存在"
+                    traceId: "0HMVD8H3F6A9K:00000004"
+        '500':
+          description: 內部伺服器錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+
+    # ==================== 更新資源 ====================
+    put:
+      summary: 更新 {Resource}
+      description: 更新指定 ID 的 {Resource} 資料
+      operationId: Update{Resource}
+      tags:
+        - {Resource}
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: {Resource} 唯一識別碼
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Update{Resource}Request'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/{Resource}Response'
+        '400':
+          description: 請求驗證失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+        '404':
+          description: 資源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+        '409':
+          description: 併發衝突
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+              examples:
+                concurrency:
+                  summary: 資料已被其他使用者修改
+                  value:
+                    code: "DbConcurrency"
+                    message: "資料已被修改，請重新載入後再試"
+                    traceId: "0HMVD8H3F6A9K:00000005"
+        '500':
+          description: 內部伺服器錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+
+    # ==================== 刪除資源 ====================
+    delete:
+      summary: 刪除 {Resource}
+      description: 刪除指定 ID 的 {Resource}
+      operationId: Delete{Resource}
+      tags:
+        - {Resource}
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: {Resource} 唯一識別碼
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: 刪除成功（無回應內容）
+        '404':
+          description: 資源不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+        '500':
+          description: 內部伺服器錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+
+  # ==================== 查詢資源列表（分頁） ====================
+  /api/v1/{resource}/list:
+    get:
+      summary: 查詢 {Resource} 列表
+      description: |
+        分頁查詢 {Resource} 列表
+
+        ## 分頁參數
+        - pageIndex: 頁碼（從 0 開始）
+        - pageSize: 每頁筆數（建議 10-100）
+      operationId: Get{Resource}List
+      tags:
+        - {Resource}
+      parameters:
+        - name: pageIndex
+          in: query
+          required: false
+          description: 頁碼（從 0 開始）
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          example: 0
+        - name: pageSize
+          in: query
+          required: false
+          description: 每頁筆數
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          example: 10
+      responses:
+        '200':
+          description: 查詢成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/{Resource}ListResponse'
+              examples:
+                success:
+                  value:
+                    items:
+                      - id: "123e4567-e89b-12d3-a456-426614174000"
+                        email: "user1@example.com"
+                        name: "張三"
+                      - id: "223e4567-e89b-12d3-a456-426614174001"
+                        email: "user2@example.com"
+                        name: "李四"
+                    pageIndex: 0
+                    pageSize: 10
+                    totalCount: 25
+                    totalPages: 3
+        '400':
+          description: 請求參數錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+        '500':
+          description: 內部伺服器錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+
+# ==================== Schema 定義 ====================
+components:
+  schemas:
+    # 建立請求
+    Create{Resource}Request:
+      type: object
+      required:
+        - email
+        - name
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email 地址
+          example: "user@example.com"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: 姓名
+          example: "張三"
+        phone:
+          type: string
+          pattern: '^\d{10}$'
+          description: 手機號碼（10 碼數字）
+          example: "0912345678"
+        birthDate:
+          type: string
+          format: date
+          description: 生日
+          example: "1990-01-01"
+
+    # 更新請求
+    Update{Resource}Request:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: 姓名
+        phone:
+          type: string
+          pattern: '^\d{10}$'
+          description: 手機號碼
+        birthDate:
+          type: string
+          format: date
+          description: 生日
+
+    # 回應
+    {Resource}Response:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 唯一識別碼
+        email:
+          type: string
+          description: Email 地址
+        name:
+          type: string
+          description: 姓名
+        phone:
+          type: string
+          description: 手機號碼
+        birthDate:
+          type: string
+          format: date
+          description: 生日
+        createdAt:
+          type: string
+          format: date-time
+          description: 建立時間
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新時間
+
+    # 列表回應
+    {Resource}ListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          description: 資料項目列表
+          items:
+            $ref: '#/components/schemas/{Resource}Response'
+        pageIndex:
+          type: integer
+          description: 當前頁碼（從 0 開始）
+          example: 0
+        pageSize:
+          type: integer
+          description: 每頁筆數
+          example: 10
+        totalCount:
+          type: integer
+          description: 總筆數
+          example: 25
+        totalPages:
+          type: integer
+          description: 總頁數
+          example: 3
+
+    # 錯誤回應（應在全域定義，此處僅供參考）
+    Failure:
+      type: object
+      required:
+        - code
+        - message
+        - traceId
+      properties:
+        code:
+          type: string
+          description: 錯誤代碼
+          enum:
+            - ValidationError
+            - DuplicateEmail
+            - NotFound
+            - DbError
+            - DbConcurrency
+            - Unauthorized
+            - InternalServerError
+            - Unknown
+        message:
+          type: string
+          description: 錯誤訊息
+        traceId:
+          type: string
+          description: 追蹤識別碼（用於日誌查詢）
+        data:
+          type: object
+          description: 額外的錯誤資訊
+          additionalProperties: true
