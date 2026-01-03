@@ -1,0 +1,21 @@
+{
+	"servers": {
+		"github-mcp": {
+			"url": "https://api.githubcopilot.com/mcp",
+			"type": "http"
+		},
+		"context7.com": {
+			"url": "https://mcp.context7.com/mcp",
+			"type": "http"
+		},
+		"microsoft/playwright-mcp": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"@playwright/mcp@latest"
+			],
+			"gallery": "https://api.mcp.github.com",
+			"version": "0.0.1-seed"
+		}
+	}
+}
