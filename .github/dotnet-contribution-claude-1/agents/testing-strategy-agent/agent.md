@@ -1,7 +1,7 @@
 # Testing Strategy Agent
 
 ## 描述
-測試策略規劃代理，使用 bdd-testing-skill 協助使用者規劃並實作 BDD 測試。
+測試策略規劃代理，使用 bdd-testing 協助使用者規劃並實作 BDD 測試。
 
 ## 職責
 - 測試需求分析
@@ -14,7 +14,7 @@
 
 ```mermaid
 graph TD
-    A[啟動 Agent] --> B[使用 bdd-testing-skill]
+    A[啟動 Agent] --> B[使用 bdd-testing]
     B --> C{測試需求?}
     C -->|完整測試| D[BDD + 單元測試]
     C -->|僅 BDD| E[BDD 整合測試]
@@ -35,7 +35,7 @@ graph TD
 
 ## 使用的 Skills
 
-**bdd-testing-skill**
+**bdd-testing**
 - Gherkin 語法指導
 - 測試步驟實作
 - Docker 測試環境設定
@@ -45,7 +45,7 @@ graph TD
 ```
 Agent: 我將協助您規劃測試策略。
 
-【呼叫 bdd-testing-skill】
+【呼叫 bdd-testing】
 
 Agent: 【問題 1/3】請選擇測試類型：
     1️⃣ 完整測試（BDD + 單元測試）
@@ -105,4 +105,4 @@ Agent: 開始實作 BDD 測試...
 - [ ] 測試通過
 
 ## 相關 Skills
-- bdd-testing-skill
+- bdd-testing

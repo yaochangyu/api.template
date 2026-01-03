@@ -6,52 +6,52 @@
 
 ### 🎯 Skills (8 個)
 
-#### 1. [project-init-skill](./skills/project-init-skill/)
+#### 1. [project-init](./skills/project-init/)
 **專案初始化與配置**
 - 檢測專案狀態
 - 互動式配置引導
 - GitHub 範本套用
 - 產生配置檔案
 
-#### 2. [api-development-skill](./skills/api-development-skill/)
+#### 2. [api-development](./skills/api-development/)
 **API 開發流程引導**
 - API First vs Code First 選擇
 - OpenAPI 規格管理
 - Controller 骨架產生
 - Client SDK 產生
 
-#### 3. [handler-skill](./skills/handler-skill/)
+#### 3. [handler](./skills/handler/)
 **Handler 業務邏輯實作**
 - 業務邏輯處理
 - Result Pattern 整合
 - 交易管理
 - 錯誤處理
 
-#### 4. [repository-design-skill](./skills/repository-design-skill/)
+#### 4. [repository-design](./skills/repository-design/)
 **Repository 設計指導**
 - 設計策略分析
 - 資料表導向 vs 需求導向
 - 決策檢查清單
 
-#### 5. [error-handling-skill](./skills/error-handling-skill/)
+#### 5. [error-handling](./skills/error-handling/)
 **錯誤處理與 Result Pattern**
 - Result Pattern 應用
 - Failure 物件建立
 - 分層錯誤處理
 
-#### 6. [bdd-testing-skill](./skills/bdd-testing-skill/)
+#### 6. [bdd-testing](./skills/bdd-testing/)
 **BDD 測試實作**
 - Gherkin 語法撰寫
 - 測試步驟實作
 - Docker 測試環境設定
 
-#### 7. [middleware-skill](./skills/middleware-skill/)
+#### 7. [middleware](./skills/middleware/)
 **中介軟體實作**
 - TraceContext 管理
 - Exception Handling
 - Request Logging
 
-#### 8. [ef-core-skill](./skills/ef-core-skill/)
+#### 8. [ef-core](./skills/ef-core/)
 **EF Core 操作與最佳化**
 - DbContextFactory 使用
 - 查詢最佳化
@@ -67,12 +67,12 @@
 
 #### 2. [project-setup-agent](./agents/project-setup-agent/)
 **專案初始化**
-- 使用 project-init-skill
+- 使用 project-init
 - 完整配置流程
 
 #### 3. [testing-strategy-agent](./agents/testing-strategy-agent/)
 **測試策略規劃**
-- 使用 bdd-testing-skill
+- 使用 bdd-testing
 - 測試環境設定
 
 #### 4. [architecture-review-agent](./agents/architecture-review-agent/)
@@ -86,12 +86,12 @@
 
 在 GitHub Copilot 中：
 ```
-@workspace 使用 api-development-skill 開發新的 API
+@workspace 使用 api-development 開發新的 API
 ```
 
 或直接呼叫：
 ```
-使用 project-init-skill 初始化專案
+使用 project-init 初始化專案
 ```
 
 ### 使用 Agent
@@ -119,10 +119,10 @@
 ```
 .github/dotnet-contribution-claude-1/
 ├── skills/                      # Skills 目錄
-│   ├── project-init-skill/
+│   ├── project-init/
 │   │   ├── skill.md            # Skill 定義
 │   │   └── references/         # 參考文件
-│   ├── api-development-skill/
+│   ├── api-development/
 │   │   ├── skill.md
 │   │   ├── references/
 │   │   └── assets/             # 程式碼範本

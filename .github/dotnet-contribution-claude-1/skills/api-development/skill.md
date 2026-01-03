@@ -42,7 +42,7 @@ API 開發流程引導技能，協助開發者選擇合適的開發流程（API 
 
 ### 直接呼叫 Skill
 ```
-使用 api-development-skill 開發 API
+使用 api-development 開發 API
 ```
 
 ## 互動流程
@@ -383,9 +383,9 @@ task codegen-api-client
 ```
 
 ## 相關 Skills
-- `handler-skill` - Handler 業務邏輯實作
-- `error-handling-skill` - Result Pattern 錯誤處理
-- `bdd-testing-skill` - API 端點測試
+- `handler` - Handler 業務邏輯實作
+- `error-handling` - Result Pattern 錯誤處理
+- `bdd-testing` - API 端點測試
 
 ## 相關 Agents
 - `feature-development-agent` - 使用本 skill 的完整功能開發流程

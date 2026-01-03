@@ -15,19 +15,19 @@
 
 ```mermaid
 graph TD
-    A[需求分析] --> B[使用 api-development-skill]
+    A[需求分析] --> B[使用 api-development]
     B --> C{API 開發流程?}
     C -->|API First| D[更新 OpenAPI 規格]
     C -->|Code First| E[直接實作]
     D --> F[產生 Controller 骨架]
-    F --> G[使用 bdd-testing-skill]
+    F --> G[使用 bdd-testing]
     E --> G
     G --> H{測試策略?}
     H -->|需要 BDD| I[撰寫 .feature 檔案]
-    H -->|不需要| J[使用 handler-skill]
+    H -->|不需要| J[使用 handler]
     I --> J
     J --> K[實作業務邏輯]
-    K --> L[使用 repository-design-skill]
+    K --> L[使用 repository-design]
     L --> M{Repository 設計策略?}
     M -->|資料表導向| N[實作簡單 Repository]
     M -->|需求導向| O[實作業務 Repository]
@@ -43,27 +43,27 @@ graph TD
 
 ## 使用的 Skills
 
-1. **api-development-skill**
+1. **api-development**
    - 詢問 API 開發流程（API First / Code First）
    - 協助 OpenAPI 規格管理
    - 產生 Controller 骨架
 
-2. **bdd-testing-skill**
+2. **bdd-testing**
    - 詢問測試策略
    - 協助撰寫 .feature 檔案
    - 實作測試步驟
 
-3. **handler-skill**
+3. **handler**
    - 提供 Handler 實作範本
    - Result Pattern 指導
    - 業務邏輯實作
 
-4. **repository-design-skill**
+4. **repository-design**
    - 分析業務複雜度
    - 建議設計策略
    - 提供 Repository 範本
 
-5. **error-handling-skill**
+5. **error-handling**
    - Result Pattern 應用
    - Failure 物件建立
 
@@ -78,7 +78,7 @@ Agent: 您好！我將協助您開發新功能。請先告訴我功能需求。
 
 Agent: 收到！會員註冊功能。
 
-【呼叫 api-development-skill】
+【呼叫 api-development】
 
 Agent: 【問題 1/4】請選擇 API 開發流程：
 
@@ -99,7 +99,7 @@ Agent: ✅ 已選擇 API First
 ### 第二階段：測試策略
 
 ```
-【呼叫 bdd-testing-skill】
+【呼叫 bdd-testing】
 
 Agent: 【問題 2/4】是否需要實作測試？
 
@@ -116,7 +116,7 @@ Agent: ✅ 將實作 BDD 整合測試
 ### 第三階段：Repository 設計
 
 ```
-【呼叫 repository-design-skill】
+【呼叫 repository-design】
 
 Agent: 【問題 3/4】分析會員註冊功能：
     - 涉及資料表：Members（1 個）
@@ -146,9 +146,9 @@ Agent: 開始實作會員註冊功能...
     ⬜ 步驟 5：撰寫 BDD 測試
     ⬜ 步驟 6：執行測試驗證
 
-【使用 handler-skill 提供的範本實作 MemberHandler】
-【使用 repository-design-skill 提供的範本實作 MemberRepository】
-【使用 bdd-testing-skill 協助撰寫測試】
+【使用 handler 提供的範本實作 MemberHandler】
+【使用 repository-design 提供的範本實作 MemberRepository】
+【使用 bdd-testing 協助撰寫測試】
 ```
 
 ## 使用方式
@@ -179,8 +179,8 @@ Agent: 開始實作會員註冊功能...
 - 不記錄錯誤日誌（由 Middleware 處理）
 
 ## 相關 Skills
-- api-development-skill
-- bdd-testing-skill
-- handler-skill
-- repository-design-skill
-- error-handling-skill
+- api-development
+- bdd-testing
+- handler
+- repository-design
+- error-handling

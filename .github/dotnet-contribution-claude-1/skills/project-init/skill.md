@@ -44,7 +44,7 @@
 
 ### 直接呼叫 Skill
 ```
-使用 project-init-skill 初始化專案
+使用 project-init 初始化專案
 ```
 
 ## 互動流程
@@ -157,7 +157,7 @@ graph TD
   },
   "projectOrganization": "single-project",
   "createdAt": "2026-01-03T10:00:00.000Z",
-  "createdBy": "GitHub Copilot - project-init-skill"
+  "createdBy": "GitHub Copilot - project-init"
 }
 ```
 
@@ -215,8 +215,8 @@ graph TD
 ```
 
 ## 相關 Skills
-- `api-development-skill` - 後續 API 開發流程
-- `bdd-testing-skill` - 測試環境設定
+- `api-development` - 後續 API 開發流程
+- `bdd-testing` - 測試環境設定
 
 ## 相關 Agents
 - `project-setup-agent` - 使用本 skill 的專案設定代理

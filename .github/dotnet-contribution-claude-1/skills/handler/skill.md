@@ -41,7 +41,7 @@ Handler 業務邏輯層實作技能，協助開發者實作符合專案規範的
 
 ### 直接呼叫 Skill
 ```
-使用 handler-skill 實作業務邏輯
+使用 handler 實作業務邏輯
 ```
 
 ## Handler 架構
@@ -256,9 +256,9 @@ catch (Exception ex)
 ```
 
 ## 相關 Skills
-- `repository-design-skill` - Repository 設計與實作
-- `error-handling-skill` - Result Pattern 與錯誤處理
-- `api-development-skill` - Controller 整合
+- `repository-design` - Repository 設計與實作
+- `error-handling` - Result Pattern 與錯誤處理
+- `api-development` - Controller 整合
 
 ## 相關 Agents
 - `feature-development-agent` - 使用本 skill 的完整功能開發流程
