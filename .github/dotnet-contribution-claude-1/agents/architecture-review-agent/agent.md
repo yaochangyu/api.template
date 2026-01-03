@@ -33,10 +33,10 @@ graph TD
 
 ## 使用的 Skills
 
-1. **repository-design-skill** - 檢查 Repository 設計
-2. **error-handling-skill** - 檢查錯誤處理
-3. **middleware-skill** - 檢查中介軟體
-4. **ef-core-skill** - 檢查 EF Core 使用
+1. **repository-design** - 檢查 Repository 設計
+2. **error-handling** - 檢查錯誤處理
+3. **middleware** - 檢查中介軟體
+4. **ef-core** - 檢查 EF Core 使用
 
 ## 檢查項目
 
@@ -127,8 +127,8 @@ graph TD
 - [ ] 使用者可選擇是否修正
 
 ## 相關 Skills
-- repository-design-skill
-- handler-skill
-- error-handling-skill
-- middleware-skill
-- ef-core-skill
+- repository-design
+- handler
+- error-handling
+- middleware
+- ef-core

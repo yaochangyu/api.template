@@ -244,7 +244,7 @@ Write-Host "📋 接下來將進入互動式配置..."
   },
   "projectOrganization": "single-project",
   "createdAt": "2026-01-03T10:30:00.000Z",
-  "createdBy": "GitHub Copilot - project-init-skill"
+  "createdBy": "GitHub Copilot - project-init"
 }
 ```
 

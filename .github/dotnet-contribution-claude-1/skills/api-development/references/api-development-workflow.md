@@ -309,15 +309,15 @@ public class MemberController(
 
 ### 步驟 4：實作 Handler 業務邏輯
 
-詳見 `handler-skill`
+詳見 `handler`
 
 ### 步驟 5：實作 Repository 資料存取
 
-詳見 `repository-design-skill`
+詳見 `repository-design`
 
 ### 步驟 6：執行測試
 
-詳見 `bdd-testing-skill`
+詳見 `bdd-testing`
 
 ### 步驟 7：產生 Client SDK
 

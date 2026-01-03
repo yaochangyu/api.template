@@ -4,14 +4,14 @@
 
 ### ✅ = 已完成 | ⏳ = 進行中 | ⬜ = 待處理
 
-- ✅ **步驟 1**：建立 `project-init-skill` (完整)
-- ✅ **步驟 2**：建立 `api-development-skill` (完整)
-- ✅ **步驟 3**：建立 `handler-skill` (完整)
-- ✅ **步驟 4**：建立 `repository-design-skill` (完整)
-- ✅ **步驟 5**：建立 `error-handling-skill` (skill.md)
-- ✅ **步驟 6**：建立 `bdd-testing-skill` (skill.md)
-- ✅ **步驟 7**：建立 `middleware-skill` (skill.md)
-- ✅ **步驟 8**：建立 `ef-core-skill` (skill.md)
+- ✅ **步驟 1**：建立 `project-init` (完整)
+- ✅ **步驟 2**：建立 `api-development` (完整)
+- ✅ **步驟 3**：建立 `handler` (完整)
+- ✅ **步驟 4**：建立 `repository-design` (完整)
+- ✅ **步驟 5**：建立 `error-handling` (skill.md)
+- ✅ **步驟 6**：建立 `bdd-testing` (skill.md)
+- ✅ **步驟 7**：建立 `middleware` (skill.md)
+- ✅ **步驟 8**：建立 `ef-core` (skill.md)
 
 ## 階段 2：Agent 建立
 
