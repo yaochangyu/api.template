@@ -49,20 +49,108 @@ graph TD
     B -->|不存在| D[觸發測試專案建立對話]
     C -->|完整| E[正常測試開發模式]
     C -->|不完整| D
-    D --> F[詢問測試專案名稱]
-    F --> G[使用 dotnet new 建立測試專案]
-    G --> H[使用 nuget 安裝必要套件]
-    H --> I[建立測試專案核心架構]
-    I --> E
+    D --> F[詢問是否建立測試專案]
+    F -->|是| G[詢問建立方式]
+    F -->|否| H[結束流程]
+    G -->|空白專案| I[詢問測試框架]
+    G -->|複製範本| J[詢問測試專案名稱與位置]
+    I -->|xUnit| K1[詢問測試專案名稱與位置]
+    I -->|NUnit| K2[詢問測試專案名稱與位置]
+    I -->|MSTest| K3[詢問測試專案名稱與位置]
+    K1 --> L1[使用 dotnet new xunit 建立]
+    K2 --> L2[使用 dotnet new nunit 建立]
+    K3 --> L3[使用 dotnet new mstest 建立]
+    J --> M1[從 dotnet-project-template 複製測試專案]
+    L1 --> M2[安裝必要套件]
+    L2 --> M2
+    L3 --> M2
+    M1 --> M3[重新命名與更新命名空間]
+    M2 --> N[建立測試專案核心架構]
+    M3 --> O[驗證複製是否成功]
+    N --> E
+    O --> E
 ```
 
 ### 強制詢問情境
 
-#### 1. 測試專案名稱
+#### 1. 是否建立測試專案
 
 **問題**：
 ```
-偵測到專案尚未建立整合測試專案，請提供測試專案名稱：
+⚠️ 偵測到專案尚未建立整合測試專案
+
+請選擇：
+
+1️⃣ 是，我要建立測試專案
+   - 建立完整的整合測試專案
+   - 包含 BDD 測試架構與 Docker 測試環境
+
+2️⃣ 否，暫時不需要
+   - 稍後再建立測試專案
+   - 可隨時回來建立
+
+請選擇：
+```
+
+**不得假設**：不可擅自假設使用者一定要建立測試專案，必須明確詢問。
+
+#### 2. 測試專案建立方式（僅當選擇「是」時詢問）
+
+**問題**：
+```
+請選擇測試專案建立方式：
+
+1️⃣ 建立空白測試專案
+   ✅ 使用 dotnet new 建立基礎專案
+   ✅ 需要手動配置測試架構
+   ✅ 適合：自訂測試結構、最小化依賴
+   ⚠️ 需要較多設定工作
+
+2️⃣ 複製完整測試專案範本（推薦）
+   ✅ 從 dotnet-project-template 複製完整測試專案
+   ✅ 包含完整的測試架構（BaseStep、TestServer、範例測試）
+   ✅ 適合：快速啟動、遵循專案規範
+   ⚠️ 需要調整命名空間
+
+請選擇：
+```
+
+**不得假設**：不可擅自選擇建立方式，必須明確詢問使用者。
+
+#### 3. 測試框架選擇（僅當選擇「空白測試專案」時詢問）
+
+**問題**：
+```
+請選擇測試框架：
+
+1️⃣ xUnit（推薦）
+   ✅ 現代化的測試框架
+   ✅ 專案預設使用的框架
+   ✅ 支援平行測試執行
+   ✅ 良好的社群支援
+
+2️⃣ NUnit
+   ✅ 傳統且成熟的測試框架
+   ✅ 豐富的斷言 API
+   ✅ 適合從 Java JUnit 遷移的團隊
+   ⚠️ 需要手動整合 Reqnroll
+
+3️⃣ MSTest
+   ✅ Microsoft 官方測試框架
+   ✅ 與 Visual Studio 深度整合
+   ✅ 適合企業環境
+   ⚠️ 社群支援較少
+
+請選擇：
+```
+
+**不得假設**：不可擅自使用 xUnit，必須明確詢問使用者選擇。
+
+#### 4. 測試專案名稱
+
+**問題**：
+```
+請提供測試專案名稱：
 
 範例：
 - {ProjectName}.IntegrationTest
@@ -74,25 +162,35 @@ graph TD
 
 **不得假設**：不可擅自使用預設名稱，必須明確詢問使用者。
 
-#### 2. 測試專案位置
+#### 5. 測試專案位置
 
 **問題**：
 ```
 請選擇測試專案建立位置：
 
 1️⃣ src/be/{ProjectName}.IntegrationTest/（推薦）
+   - 與主專案同層，結構清晰
+   - 符合 .NET 專案慣例
+
 2️⃣ tests/{ProjectName}.IntegrationTest/
+   - 所有測試集中管理
+   - 適合多個測試專案
+
 3️⃣ 自訂路徑
+   - 自行指定測試專案位置
 
 請選擇：
 ```
 
 ### 測試專案建立流程
 
-#### 步驟 1：建立測試專案
+#### 路徑 A：建立空白測試專案
 
-使用 `dotnet new` 建立 xUnit 測試專案：
+根據使用者選擇的測試框架（xUnit/NUnit/MSTest），執行對應的建立流程。
 
+##### 步驟 1：建立測試專案
+
+**xUnit 範例**：
 ```powershell
 # 建立測試專案
 dotnet new xunit -n {ProjectName}.IntegrationTest -o src/be/{ProjectName}.IntegrationTest
@@ -104,10 +202,35 @@ dotnet sln add src/be/{ProjectName}.IntegrationTest/{ProjectName}.IntegrationTes
 dotnet add src/be/{ProjectName}.IntegrationTest/{ProjectName}.IntegrationTest.csproj reference src/be/{ProjectName}.WebAPI/{ProjectName}.WebAPI.csproj
 ```
 
-#### 步驟 2：安裝必要套件
+**NUnit 範例**：
+```powershell
+# 建立測試專案
+dotnet new nunit -n {ProjectName}.IntegrationTest -o src/be/{ProjectName}.IntegrationTest
 
-使用 `dotnet add package` 安裝必要 NuGet 套件：
+# 加入到解決方案
+dotnet sln add src/be/{ProjectName}.IntegrationTest/{ProjectName}.IntegrationTest.csproj
 
+# 加入專案參考
+dotnet add src/be/{ProjectName}.IntegrationTest/{ProjectName}.IntegrationTest.csproj reference src/be/{ProjectName}.WebAPI/{ProjectName}.WebAPI.csproj
+```
+
+**MSTest 範例**：
+```powershell
+# 建立測試專案
+dotnet new mstest -n {ProjectName}.IntegrationTest -o src/be/{ProjectName}.IntegrationTest
+
+# 加入到解決方案
+dotnet sln add src/be/{ProjectName}.IntegrationTest/{ProjectName}.IntegrationTest.csproj
+
+# 加入專案參考
+dotnet add src/be/{ProjectName}.IntegrationTest/{ProjectName}.IntegrationTest.csproj reference src/be/{ProjectName}.WebAPI/{ProjectName}.WebAPI.csproj
+```
+
+##### 步驟 2：安裝必要套件
+
+根據測試框架安裝對應的 Reqnroll 套件與其他必要套件。
+
+**xUnit 範例**：
 ```powershell
 # 進入測試專案目錄
 cd src/be/{ProjectName}.IntegrationTest
@@ -143,19 +266,82 @@ dotnet add package Microsoft.Extensions.TimeProvider.Testing --version 8.10.0
 cd ../../..
 ```
 
-#### 步驟 3：建立測試專案核心架構
+**NUnit 範例**：
+```powershell
+# 進入測試專案目錄
+cd src/be/{ProjectName}.IntegrationTest
 
-建立以下核心檔案：
+# 核心測試框架
+dotnet add package NUnit --version 4.0.1
+dotnet add package NUnit3TestAdapter --version 4.5.0
+dotnet add package Microsoft.AspNetCore.Mvc.Testing --version 8.0.0
 
-1. **BaseStep.cs** - BDD 測試步驟基底類別
+# BDD 測試框架
+dotnet add package Reqnroll --version 2.1.1
+dotnet add package Reqnroll.NUnit --version 2.1.1
+
+# Docker 測試容器與其他套件（同 xUnit）
+dotnet add package Testcontainers --version 3.10.0
+dotnet add package Testcontainers.MsSql --version 3.10.0
+dotnet add package Testcontainers.Redis --version 3.10.0
+dotnet add package Refit --version 8.0.0
+dotnet add package System.Text.Json --version 8.0.0
+dotnet add package JsonDiffPatch.Net --version 2.3.0
+dotnet add package Newtonsoft.Json --version 13.0.3
+dotnet add package Bogus --version 35.6.1
+dotnet add package Microsoft.Extensions.TimeProvider.Testing --version 8.10.0
+
+# 回到根目錄
+cd ../../..
+```
+
+**MSTest 範例**：
+```powershell
+# 進入測試專案目錄
+cd src/be/{ProjectName}.IntegrationTest
+
+# 核心測試框架
+dotnet add package MSTest.TestFramework --version 3.2.0
+dotnet add package MSTest.TestAdapter --version 3.2.0
+dotnet add package Microsoft.AspNetCore.Mvc.Testing --version 8.0.0
+
+# BDD 測試框架
+dotnet add package Reqnroll --version 2.1.1
+dotnet add package Reqnroll.MSTest --version 2.1.1
+
+# Docker 測試容器與其他套件（同 xUnit）
+dotnet add package Testcontainers --version 3.10.0
+dotnet add package Testcontainers.MsSql --version 3.10.0
+dotnet add package Testcontainers.Redis --version 3.10.0
+dotnet add package Refit --version 8.0.0
+dotnet add package System.Text.Json --version 8.0.0
+dotnet add package JsonDiffPatch.Net --version 2.3.0
+dotnet add package Newtonsoft.Json --version 13.0.3
+dotnet add package Bogus --version 35.6.1
+dotnet add package Microsoft.Extensions.TimeProvider.Testing --version 8.10.0
+
+# 回到根目錄
+cd ../../..
+```
+
+##### 步驟 3：建立測試專案核心架構
+
+建立以下核心檔案（根據測試框架調整屬性）：
+
+1. **BaseStep.cs** - BDD 測試步驟基底類別（需調整測試框架屬性）
 2. **TestServer.cs** - WebApplicationFactory 測試伺服器
 3. **ScenarioContextExtension.cs** - 情境上下文擴充
 4. **DbContextExtensions.cs** - 資料庫測試輔助
-5. **TestContainerFactory.cs** - Docker 容器工廠（可選，若需共用）
+5. **TestContainerFactory.cs** - Docker 容器工廠（可選）
 
-**參考檔案**：`src/be/JobBank1111.Job.IntegrationTest/` 目錄下的對應檔案
+**參考檔案**：`dotnet-project-template/src/be/JobBank1111.Job.IntegrationTest/` 目錄下的對應檔案
 
-#### 步驟 4：配置測試環境
+**注意**：不同測試框架的屬性差異：
+- xUnit: `[BeforeTestRun]`, `[BeforeScenario]`
+- NUnit: `[BeforeTestRun]`, `[Before]`
+- MSTest: `[AssemblyInitialize]`, `[TestInitialize]`
+
+##### 步驟 4：配置測試環境
 
 建立 `appsettings.Test.json`（若需要）：
 
@@ -177,6 +363,84 @@ cd ../../..
     }
   }
 }
+```
+
+#### 路徑 B：複製完整測試專案範本
+
+從 `dotnet-project-template` 資料夾複製完整的測試專案。
+
+##### 步驟 1：複製測試專案
+
+```powershell
+# 複製測試專案範本到目標位置
+Copy-Item -Path "dotnet-project-template/src/be/JobBank1111.Job.IntegrationTest" `
+          -Destination "src/be/{ProjectName}.IntegrationTest" `
+          -Recurse
+
+# 複製測試共用專案（若存在）
+Copy-Item -Path "dotnet-project-template/src/be/JobBank1111.Testing.Common" `
+          -Destination "src/be/{ProjectName}.Testing.Common" `
+          -Recurse
+```
+
+##### 步驟 2：重新命名專案檔案
+
+```powershell
+# 重新命名測試專案檔案
+Rename-Item -Path "src/be/{ProjectName}.IntegrationTest/JobBank1111.Job.IntegrationTest.csproj" `
+            -NewName "{ProjectName}.IntegrationTest.csproj"
+
+# 重新命名測試共用專案檔案（若存在）
+Rename-Item -Path "src/be/{ProjectName}.Testing.Common/JobBank1111.Testing.Common.csproj" `
+            -NewName "{ProjectName}.Testing.Common.csproj"
+```
+
+##### 步驟 3：更新命名空間
+
+使用編輯器或腳本批次替換所有檔案中的命名空間：
+- `JobBank1111.Job.IntegrationTest` → `{ProjectName}.IntegrationTest`
+- `JobBank1111.Testing.Common` → `{ProjectName}.Testing.Common`
+
+```powershell
+# PowerShell 範例：批次替換命名空間
+Get-ChildItem -Path "src/be/{ProjectName}.IntegrationTest" -Recurse -Filter "*.cs" | ForEach-Object {
+    (Get-Content $_.FullName) -replace 'JobBank1111.Job.IntegrationTest', '{ProjectName}.IntegrationTest' | Set-Content $_.FullName
+}
+
+Get-ChildItem -Path "src/be/{ProjectName}.Testing.Common" -Recurse -Filter "*.cs" | ForEach-Object {
+    (Get-Content $_.FullName) -replace 'JobBank1111.Testing.Common', '{ProjectName}.Testing.Common' | Set-Content $_.FullName
+}
+```
+
+##### 步驟 4：更新專案參考
+
+更新 `.csproj` 檔案中的專案參考路徑：
+
+```powershell
+# 更新測試專案的專案參考
+dotnet add src/be/{ProjectName}.IntegrationTest/{ProjectName}.IntegrationTest.csproj `
+         reference src/be/{ProjectName}.WebAPI/{ProjectName}.WebAPI.csproj
+
+dotnet add src/be/{ProjectName}.IntegrationTest/{ProjectName}.IntegrationTest.csproj `
+         reference src/be/{ProjectName}.Testing.Common/{ProjectName}.Testing.Common.csproj
+
+# 加入到解決方案
+dotnet sln add src/be/{ProjectName}.IntegrationTest/{ProjectName}.IntegrationTest.csproj
+dotnet sln add src/be/{ProjectName}.Testing.Common/{ProjectName}.Testing.Common.csproj
+```
+
+##### 步驟 5：驗證複製結果
+
+檢查以下項目：
+- [ ] 專案檔案已正確重新命名
+- [ ] 命名空間已正確替換
+- [ ] 專案參考已正確更新
+- [ ] 已加入到解決方案
+- [ ] 測試可以正常建置
+
+```powershell
+# 建置測試專案驗證
+dotnet build src/be/{ProjectName}.IntegrationTest/{ProjectName}.IntegrationTest.csproj
 ```
 
 ### 測試專案結構驗證
@@ -218,36 +482,50 @@ src/be/{ProjectName}.IntegrationTest/
 
 ## 互動流程範例
 
-### 完整對話範例
+### 完整對話範例（空白測試專案 + xUnit）
 
 ```
 AI: 正在檢測測試專案狀態...
 
 AI: ⚠️ 偵測到專案尚未建立整合測試專案
 
-AI: 【問題 1/2】請提供測試專案名稱：
+AI: 【問題 1/5】請選擇：
+    1️⃣ 是，我要建立測試專案
+    2️⃣ 否，暫時不需要
 
+使用者: 1
+
+AI: ✅ 確認建立測試專案
+
+AI: 【問題 2/5】請選擇測試專案建立方式：
+    1️⃣ 建立空白測試專案
+    2️⃣ 複製完整測試專案範本（推薦）
+
+使用者: 1
+
+AI: ✅ 建立空白測試專案
+
+AI: 【問題 3/5】請選擇測試框架：
+    1️⃣ xUnit（推薦）
+    2️⃣ NUnit
+    3️⃣ MSTest
+
+使用者: 1
+
+AI: ✅ 測試框架：xUnit
+
+AI: 【問題 4/5】請提供測試專案名稱：
     範例：
     - JobBank1111.Job.IntegrationTest（推薦）
     - {ProjectName}.IntegrationTest
-    - {SolutionName}.IntegrationTest
-
-    請輸入測試專案名稱：
 
 使用者: JobBank1111.Job.IntegrationTest
 
 AI: ✅ 測試專案名稱：JobBank1111.Job.IntegrationTest
 
-AI: 【問題 2/2】請選擇測試專案建立位置：
-
+AI: 【問題 5/5】請選擇測試專案建立位置：
     1️⃣ src/be/JobBank1111.Job.IntegrationTest/（推薦）
-       - 與主專案同層，結構清晰
-       - 符合 .NET 專案慣例
-
     2️⃣ tests/JobBank1111.Job.IntegrationTest/
-       - 所有測試集中管理
-       - 適合多個測試專案
-
     3️⃣ 自訂路徑
 
 使用者: 1
@@ -255,10 +533,11 @@ AI: 【問題 2/2】請選擇測試專案建立位置：
 AI: ✅ 測試專案位置：src/be/JobBank1111.Job.IntegrationTest/
 
 AI: 📋 配置摘要：
+    - 建立方式：空白測試專案
+    - 測試框架：xUnit 2.9.2
     - 測試專案名稱：JobBank1111.Job.IntegrationTest
     - 建立位置：src/be/JobBank1111.Job.IntegrationTest/
-    - 測試框架：xUnit 2.9.2
-    - BDD 框架：Reqnroll 2.1.1
+    - BDD 框架：Reqnroll.xUnit 2.1.1
     - Docker 容器：Testcontainers 3.10.0
 
 AI: 開始建立測試專案...
@@ -295,13 +574,91 @@ AI: 📖 下一步建議：
     3. 使用 `task api-dev` 啟動 API 以便測試
 ```
 
+### 完整對話範例（複製範本）
+
+```
+AI: 正在檢測測試專案狀態...
+
+AI: ⚠️ 偵測到專案尚未建立整合測試專案
+
+AI: 【問題 1/4】請選擇：
+    1️⃣ 是，我要建立測試專案
+    2️⃣ 否，暫時不需要
+
+使用者: 1
+
+AI: ✅ 確認建立測試專案
+
+AI: 【問題 2/4】請選擇測試專案建立方式：
+    1️⃣ 建立空白測試專案
+    2️⃣ 複製完整測試專案範本（推薦）
+
+使用者: 2
+
+AI: ✅ 複製完整測試專案範本
+
+AI: 【問題 3/4】請提供測試專案名稱：
+    範例：
+    - JobBank1111.Job.IntegrationTest（推薦）
+    - {ProjectName}.IntegrationTest
+
+使用者: JobBank1111.Job.IntegrationTest
+
+AI: ✅ 測試專案名稱：JobBank1111.Job.IntegrationTest
+
+AI: 【問題 4/4】請選擇測試專案建立位置：
+    1️⃣ src/be/JobBank1111.Job.IntegrationTest/（推薦）
+    2️⃣ tests/JobBank1111.Job.IntegrationTest/
+    3️⃣ 自訂路徑
+
+使用者: 1
+
+AI: ✅ 測試專案位置：src/be/JobBank1111.Job.IntegrationTest/
+
+AI: 📋 配置摘要：
+    - 建立方式：複製完整測試專案範本
+    - 測試框架：xUnit 2.9.2（從範本）
+    - 測試專案名稱：JobBank1111.Job.IntegrationTest
+    - 建立位置：src/be/JobBank1111.Job.IntegrationTest/
+    - 包含：完整測試架構、範例測試、測試輔助工具
+
+AI: 開始複製測試專案範本...
+
+AI: 📦 正在複製測試專案檔案...
+    ✅ 已複製 JobBank1111.Job.IntegrationTest
+    ✅ 已複製 JobBank1111.Testing.Common
+
+AI: 🔄 正在重新命名專案檔案...
+    ✅ 已重新命名 .csproj 檔案
+
+AI: 🔧 正在更新命名空間...
+    ✅ 已更新 39 個檔案的命名空間
+
+AI: 🔗 正在更新專案參考...
+    ✅ 已加入到解決方案
+    ✅ 已更新專案參考
+
+AI: ✅ 正在驗證專案...
+    ✅ 專案建置成功
+
+AI: 🎉 測試專案建立完成！
+
+AI: 📖 下一步建議：
+    1. 執行 `task test-integration` 驗證測試環境
+    2. 參考 `_01_Demo/飯粒.feature` 了解測試範例
+    3. 根據需求調整測試架構與設定
+```
+
 ## 禁止的行為 ❌
 
-1. **擅自使用預設專案名稱** - 必須明確詢問使用者
-2. **跳過專案檢測步驟** - 必須先檢測測試專案是否存在
-3. **手動建立專案檔案** - 必須使用 `dotnet new` 建立
-4. **手動編輯 .csproj 安裝套件** - 必須使用 `dotnet add package`
-5. **假設專案位置** - 必須明確詢問使用者選擇
+1. **擅自假設使用者要建立測試專案** - 必須明確詢問是否建立測試專案
+2. **擅自選擇建立方式** - 必須明確詢問空白專案或複製範本
+3. **擅自選擇測試框架** - 必須明確詢問 xUnit/NUnit/MSTest
+4. **擅自使用預設專案名稱** - 必須明確詢問使用者
+5. **跳過專案檢測步驟** - 必須先檢測測試專案是否存在
+6. **手動建立專案檔案** - 必須使用 `dotnet new` 或複製範本
+7. **手動編輯 .csproj 安裝套件** - 必須使用 `dotnet add package`
+8. **假設專案位置** - 必須明確詢問使用者選擇
 
 ## 測試架構組成
 
