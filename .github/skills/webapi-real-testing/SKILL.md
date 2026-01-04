@@ -36,8 +36,8 @@ Web API 測試實作技能,協助開發者使用 Testcontainers + Reqnroll 撰�
 
 #### 檢測條件（滿足以下任一條件視為不存在測試專案）
 
-1. **不存在** `*.IntegrationTest.csproj` 專案檔案
-2. **不存在** `src/be/**/IntegrationTest/` 目錄
+1. **不存在** `*.Test.csproj` 專案檔案
+2. **不存在** `**/Test/` 目錄
 3. **不存在** `BaseStep.cs` 或 `TestServer.cs` 等核心測試檔案
 
 #### 檢測流程圖
@@ -67,8 +67,14 @@ graph TD
     M1 --> M3[重新命名與更新命名空間]
     M2 --> N[建立測試專案核心架構]
     M3 --> O[驗證複製是否成功]
-    N --> E
-    O --> E
+    N --> P{偵測方案檔案數量}
+    O --> P
+    P -->|1個| Q[自動加入該方案]
+    P -->|多個| R[詢問要加入到哪個方案]
+    P -->|0個| S[警告：無方案檔案，跳過加入]
+    Q --> E
+    R --> E
+    S --> E
 ```
 
 ### 強制詢問情境
@@ -181,6 +187,35 @@ graph TD
 
 請選擇：
 ```
+
+**不得假設**：不可擅自使用預設位置，必須明確詢問使用者。
+
+#### 6. 選擇解決方案檔案（自動偵測）
+
+**偵測邏輯**：
+- **1 個 .sln**：自動加入該方案，無需詢問
+- **多個 .sln**：詢問使用者選擇
+- **0 個 .sln**：警告並跳過加入步驟
+
+**問題**（僅當偵測到多個 .sln 時詢問）：
+```
+偵測到多個解決方案檔案，請選擇要加入測試專案的方案：
+
+1️⃣ JobBank1111.sln
+   - 主要解決方案
+   - 包含所有專案
+
+2️⃣ JobBank1111.Backend.sln
+   - 後端專案解決方案
+   - 僅包含後端相關專案
+
+3️⃣ 不加入任何方案
+   - 手動管理專案參考
+
+請選擇：
+```
+
+**不得假設**：偵測到多個方案時，不可擅自選擇，必須明確詢問使用者。
 
 ### 測試專案建立流程
 
@@ -532,11 +567,16 @@ AI: 【問題 5/5】請選擇測試專案建立位置：
 
 AI: ✅ 測試專案位置：src/be/JobBank1111.Job.IntegrationTest/
 
+AI: 🔍 正在偵測解決方案檔案...
+    ✅ 偵測到 1 個解決方案檔案：JobBank1111.sln
+    ℹ️ 將自動加入到該解決方案
+
 AI: 📋 配置摘要：
     - 建立方式：空白測試專案
     - 測試框架：xUnit 2.9.2
     - 測試專案名稱：JobBank1111.Job.IntegrationTest
     - 建立位置：src/be/JobBank1111.Job.IntegrationTest/
+    - 加入方案：JobBank1111.sln（自動偵測）
     - BDD 框架：Reqnroll.xUnit 2.1.1
     - Docker 容器：Testcontainers 3.10.0
 
@@ -546,7 +586,7 @@ AI: 📦 正在建立 xUnit 測試專案...
     ✅ dotnet new xunit 完成
 
 AI: 🔗 正在加入專案參考...
-    ✅ 已加入到解決方案
+    ✅ 已加入到解決方案 JobBank1111.sln
     ✅ 已參考主專案
 
 AI: 📥 正在安裝 NuGet 套件...
@@ -649,6 +689,118 @@ AI: 📖 下一步建議：
     3. 根據需求調整測試架構與設定
 ```
 
+### 完整對話範例（多個方案檔案情境）
+
+```
+AI: 正在檢測測試專案狀態...
+
+AI: ⚠️ 偵測到專案尚未建立整合測試專案
+
+AI: 【問題 1/5】請選擇：
+    1️⃣ 是，我要建立測試專案
+    2️⃣ 否，暫時不需要
+
+使用者: 1
+
+AI: ✅ 確認建立測試專案
+
+AI: 【問題 2/5】請選擇測試專案建立方式：
+    1️⃣ 建立空白測試專案
+    2️⃣ 複製完整測試專案範本（推薦）
+
+使用者: 1
+
+AI: ✅ 建立空白測試專案
+
+AI: 【問題 3/5】請選擇測試框架：
+    1️⃣ xUnit（推薦）
+    2️⃣ NUnit
+    3️⃣ MSTest
+
+使用者: 1
+
+AI: ✅ 測試框架：xUnit
+
+AI: 【問題 4/5】請提供測試專案名稱：
+    範例：
+    - JobBank1111.Job.IntegrationTest（推薦）
+    - {ProjectName}.IntegrationTest
+
+使用者: JobBank1111.Job.IntegrationTest
+
+AI: ✅ 測試專案名稱：JobBank1111.Job.IntegrationTest
+
+AI: 【問題 5/5】請選擇測試專案建立位置：
+    1️⃣ src/be/JobBank1111.Job.IntegrationTest/（推薦）
+    2️⃣ tests/JobBank1111.Job.IntegrationTest/
+    3️⃣ 自訂路徑
+
+使用者: 1
+
+AI: ✅ 測試專案位置：src/be/JobBank1111.Job.IntegrationTest/
+
+AI: 🔍 正在偵測解決方案檔案...
+    ⚠️ 偵測到 2 個解決方案檔案
+
+AI: 【問題 6/6】請選擇要加入測試專案的方案：
+    1️⃣ JobBank1111.sln
+       - 主要解決方案
+       - 包含所有專案
+
+    2️⃣ JobBank1111.Backend.sln
+       - 後端專案解決方案
+       - 僅包含後端相關專案
+
+    3️⃣ 不加入任何方案
+       - 手動管理專案參考
+
+使用者: 1
+
+AI: ✅ 選擇方案：JobBank1111.sln
+
+AI: 📋 配置摘要：
+    - 建立方式：空白測試專案
+    - 測試框架：xUnit 2.9.2
+    - 測試專案名稱：JobBank1111.Job.IntegrationTest
+    - 建立位置：src/be/JobBank1111.Job.IntegrationTest/
+    - 加入方案：JobBank1111.sln
+    - BDD 框架：Reqnroll.xUnit 2.1.1
+    - Docker 容器：Testcontainers 3.10.0
+
+AI: 開始建立測試專案...
+
+AI: 📦 正在建立 xUnit 測試專案...
+    ✅ dotnet new xunit 完成
+
+AI: 🔗 正在加入專案參考...
+    ✅ 已加入到解決方案 JobBank1111.sln
+    ✅ 已參考主專案
+
+AI: 📥 正在安裝 NuGet 套件...
+    ✅ xUnit 2.9.2
+    ✅ Microsoft.AspNetCore.Mvc.Testing 8.0.0
+    ✅ Reqnroll.xUnit 2.1.1
+    ✅ Testcontainers 3.10.0
+    ✅ Testcontainers.MsSql 3.10.0
+    ✅ Testcontainers.Redis 3.10.0
+    （共 11 個套件）
+
+AI: 📝 正在建立測試核心架構...
+    ✅ BaseStep.cs
+    ✅ TestServer.cs
+    ✅ ScenarioContextExtension.cs
+    ✅ DbContextExtensions.cs
+    ✅ _01_Demo/Demo.feature
+    ✅ _01_Demo/DemoStep.cs
+
+AI: 🎉 測試專案建立完成！
+
+AI: 📖 下一步建議：
+    1. 執行 `task test-integration` 驗證測試環境
+    2. 參考 `_01_Demo/Demo.feature` 撰寫測試情境
+    3. 使用 `task api-dev` 啟動 API 以便測試
+```
+
 ## 禁止的行為 ❌
 
 1. **擅自假設使用者要建立測試專案** - 必須明確詢問是否建立測試專案
@@ -659,6 +811,8 @@ AI: 📖 下一步建議：
 6. **手動建立專案檔案** - 必須使用 `dotnet new` 或複製範本
 7. **手動編輯 .csproj 安裝套件** - 必須使用 `dotnet add package`
 8. **假設專案位置** - 必須明確詢問使用者選擇
+9. **跳過方案檔案偵測** - 必須偵測 .sln 檔案數量，多個時須詢問使用者選擇
+10. **擅自選擇方案檔案** - 偵測到多個 .sln 時，不可擅自選擇，必須明確詢問
 
 ## 測試架構組成
 
