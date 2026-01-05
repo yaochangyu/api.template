@@ -58,6 +58,7 @@ Repository 設計指導技能，協助開發者根據業務需求選擇最合適
 
 ## 參考文件
 - [Repository 設計哲學](./references/repository-design-philosophy.md)
+- [Repository Pattern 最佳實踐](./references/repository-pattern-best-practices.md) - 完整的 Repository Pattern 實作指南，包含 DDD、CQRS、常見反模式與實作範例
 
 ## 範本檔案
 - [資料表導向範本](./assets/repository-table-oriented-template.cs)

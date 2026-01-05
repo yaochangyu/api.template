@@ -52,6 +52,7 @@ api.template/
 ├── .github/skills/repository-design/assets/repository-domain-oriented-template.cs
 ├── .github/skills/repository-design/assets/repository-table-oriented-template.cs
 ├── .github/skills/repository-design/references/repository-design-philosophy.md
+├── .github/skills/repository-design/references/repository-pattern-best-practices.md
 ├── .github/skills/repository-design/skill.md
 ├── .github/skills/skill-agent-design/skill.md
 ├── .github/skills/webapi-real-testing/SKILL.md
