@@ -53,6 +53,7 @@ api.template/
 ├── .github/skills/repository-design/assets/repository-table-oriented-template.cs
 ├── .github/skills/repository-design/references/repository-design-philosophy.md
 ├── .github/skills/repository-design/skill.md
+├── .github/skills/skill-agent-design/skill.md
 ├── .github/skills/webapi-real-testing/SKILL.md
 ├── .vscode/mcp.json
 ├── CLAUDE_OLD.md
@@ -152,3 +153,4 @@ api.template/
 ├── dotnet-project-template/Taskfile.yml
 ├── dotnet-project-template/最佳實踐.md
 ├── dotnet-project-template/如何產生agent.md
+├── output/Github-Copilot-Agent-Skill-最佳實踐.md
