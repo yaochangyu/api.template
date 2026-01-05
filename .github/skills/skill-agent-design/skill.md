@@ -459,9 +459,6 @@ tools: ['grep', 'glob', 'view', 'task']
 2. 提供改善建議
 3. 檢查是否符合最佳實踐
 
-## 參考文件
-- [完整最佳實踐指南](../../../output/Github-Copilot-Agent-Skill-最佳實踐.md)
-
 ## 相關 Skills
 - `project-init` - 專案初始化時可能需要建立 Skill
 - `bdd-practices` - BDD 實踐參考
@@ -521,14 +518,3 @@ tools: ['view', 'grep']
 description: 清晰的角色描述
 tools: ['view', 'grep']
 ---
-```
-
-### 常見錯誤 3: 忘記更新 tree.md
-建立新的 Skill/Agent 後,記得更新專案的 `tree.md`:
-
-```markdown
-├── .github/skills/my-new-skill/
-│   ├── skill.md
-│   └── assets/
-│       └── template.cs
-```
