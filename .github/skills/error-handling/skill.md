@@ -80,7 +80,7 @@ public enum FailureCode
 - 統一回應格式
 
 ## 參考文件
-- [錯誤處理指南](./references/error-handling-guide.md)
+- [Result Pattern 最佳實踐](./references/result-pattern-best-practices.md)
 
 ## 範本檔案
 - [Failure 範本](./assets/failure-template.cs)
