@@ -198,3 +198,13 @@ updates:
 - [OWASP Dependency-Check](https://owasp.org/www-project-dependency-check/)
 - [GitHub Advisory Database](https://github.com/advisories)
 - [Snyk Vulnerability Database](https://security.snyk.io/)
+
+## 報告範本
+
+產生依賴套件檢查報告時，可參考：
+- `../templates/security-report-template.md` - 完整報告範本（參考「依賴套件漏洞」章節）
+
+## 相關 Skills
+- `security-scan` - 完整安全掃描
+- `check-config` - 安全配置檢查
+- `review-security` - 程式碼安全審查

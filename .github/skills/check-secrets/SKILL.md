@@ -137,3 +137,13 @@ files: "**/*.{ts,js,go,py,java,cs}"
 
 - [OWASP: Use of Hard-coded Password](https://owasp.org/www-community/vulnerabilities/Use_of_hard-coded_password)
 - [GitHub: Removing sensitive data](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository)
+
+## 報告範本
+
+產生敏感資料掃描報告時，可參考：
+- `../templates/security-report-template.md` - 完整報告範本（參考「敏感資料洩漏」相關章節）
+
+## 相關 Skills
+- `security-scan` - 完整安全掃描
+- `review-security` - 程式碼安全審查
+- `check-config` - 檢查配置中的硬編碼憑證

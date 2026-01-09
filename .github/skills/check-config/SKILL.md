@@ -206,3 +206,13 @@ config/secrets.json
 - [OWASP Secure Headers Project](https://owasp.org/www-project-secure-headers/)
 - [Mozilla Observatory](https://observatory.mozilla.org/)
 - [Security Headers](https://securityheaders.com/)
+
+## 報告範本
+
+產生配置檢查報告時，可參考：
+- `../templates/security-report-template.md` - 完整報告範本（參考「安全配置檢查」章節）
+
+## 相關 Skills
+- `security-scan` - 完整安全掃描
+- `review-security` - 程式碼安全審查
+- `check-dependencies` - 依賴套件檢查

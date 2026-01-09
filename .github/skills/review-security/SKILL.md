@@ -171,3 +171,13 @@ const validated = schema.parse(req.body);
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/)
 - [CWE Top 25](https://cwe.mitre.org/top25/)
+
+## 報告範本
+
+產生詳細安全審查報告時，請參考：
+- `../templates/security-report-template.md` - 完整的安全檢查報告範本
+
+## 相關 Skills
+- `security-scan` - 完整安全掃描
+- `check-secrets` - 敏感資料檢查
+- `check-config` - 安全配置檢查
