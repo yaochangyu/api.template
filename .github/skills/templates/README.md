@@ -51,11 +51,11 @@
 
 ## 🔗 使用此範本的 Skills
 
-### 1. security-scan
+### 1. security-fast-scan
 **完整使用**：產生全面的安全掃描報告
 
 ```markdown
-使用 security-scan skill 時，產生的報告會參考完整的範本結構，包含：
+使用 security-fast-scan skill 時，產生的報告會參考完整的範本結構，包含：
 - 所有章節（執行摘要、詳細發現、依賴套件、配置檢查、合規性）
 - 完整的嚴重程度分類
 - OWASP Top 10 檢查結果
@@ -63,11 +63,11 @@
 
 **參考章節**：全部
 
-### 2. review-security
+### 2. security-deep-review
 **部分使用**：產生程式碼安全審查報告
 
 ```markdown
-使用 review-security skill 時，主要參考：
+使用 security-deep-review skill 時，主要參考：
 - 詳細發現（Critical/High/Medium/Low）
 - 問題描述格式（檔案位置、漏洞類型、程式碼片段、修復建議）
 - 修復優先級建議
@@ -78,11 +78,11 @@
 - 修復優先級建議
 - 程式碼範例格式
 
-### 3. check-config
+### 3. security-check-config
 **部分使用**：產生安全配置檢查報告
 
 ```markdown
-使用 check-config skill 時，主要參考：
+使用 security-check-config skill 時，主要參考：
 - 安全配置檢查章節
   - 網路安全
   - HTTP Security Headers
@@ -95,11 +95,11 @@
 - 問題統計表格
 - 修復建議格式
 
-### 4. check-dependencies
+### 4. security-check-dependencies
 **部分使用**：產生依賴套件檢查報告
 
 ```markdown
-使用 check-dependencies skill 時，主要參考：
+使用 security-check-dependencies skill 時，主要參考：
 - 依賴套件漏洞章節
   - 已知漏洞清單表格
   - 更新建議與命令
@@ -110,11 +110,11 @@
 - 更新建議
 - 問題統計
 
-### 5. check-secrets
+### 5. security-check-secrets
 **部分使用**：產生敏感資料掃描報告
 
 ```markdown
-使用 check-secrets skill 時，主要參考：
+使用 security-check-secrets skill 時，主要參考：
 - 詳細發現中的敏感資料洩漏部分
 - Critical 級別問題格式
 - 修復建議（立即撤銷、移除、環境變數）
@@ -129,18 +129,18 @@
 
 | Skill | 使用範圍 | 主要參考章節 | 報告類型 |
 |-------|---------|------------|---------|
-| **security-scan** | ✅ 完整使用 | 所有章節 | 全面安全掃描報告 |
-| **review-security** | 🔶 部分使用 | 詳細發現、修復優先級 | 程式碼安全審查報告 |
-| **check-config** | 🔶 部分使用 | 安全配置檢查 | 配置安全檢查報告 |
-| **check-dependencies** | 🔶 部分使用 | 依賴套件漏洞 | 依賴套件檢查報告 |
-| **check-secrets** | 🔶 部分使用 | 敏感資料洩漏 | 敏感資料掃描報告 |
+| **security-fast-scan** | ✅ 完整使用 | 所有章節 | 全面安全掃描報告 |
+| **security-deep-review** | 🔶 部分使用 | 詳細發現、修復優先級 | 程式碼安全審查報告 |
+| **security-check-config** | 🔶 部分使用 | 安全配置檢查 | 配置安全檢查報告 |
+| **security-check-dependencies** | 🔶 部分使用 | 依賴套件漏洞 | 依賴套件檢查報告 |
+| **security-check-secrets** | 🔶 部分使用 | 敏感資料洩漏 | 敏感資料掃描報告 |
 
 ## 🎯 使用建議
 
 ### 1. 完整安全掃描
 當需要全面的安全報告時：
 ```bash
-@workspace 使用 security-scan 執行完整安全掃描並產生詳細報告
+@workspace 使用 security-fast-scan 執行完整安全掃描並產生詳細報告
 ```
 → 使用完整範本，涵蓋所有安全面向
 
@@ -149,25 +149,25 @@
 
 **程式碼安全**：
 ```bash
-@workspace 使用 review-security 審查程式碼安全問題
+@workspace 使用 security-deep-review 審查程式碼安全問題
 ```
 → 參考範本的詳細發現章節
 
 **配置安全**：
 ```bash
-@workspace 使用 check-config 檢查安全配置
+@workspace 使用 security-check-config 檢查安全配置
 ```
 → 參考範本的安全配置檢查章節
 
 **依賴套件**：
 ```bash
-@workspace 使用 check-dependencies 檢查依賴套件漏洞
+@workspace 使用 security-check-dependencies 檢查依賴套件漏洞
 ```
 → 參考範本的依賴套件漏洞章節
 
 **敏感資料**：
 ```bash
-@workspace 使用 check-secrets 掃描敏感資料洩漏
+@workspace 使用 security-check-secrets 掃描敏感資料洩漏
 ```
 → 參考範本的敏感資料相關部分
 
@@ -175,10 +175,10 @@
 執行多個專項檢查後，統整為完整報告：
 ```bash
 # 步驟 1：執行各項檢查
-@workspace 使用 check-secrets 掃描敏感資料
-@workspace 使用 check-config 檢查配置
-@workspace 使用 check-dependencies 檢查依賴套件
-@workspace 使用 review-security 審查程式碼
+@workspace 使用 security-check-secrets 掃描敏感資料
+@workspace 使用 security-check-config 檢查配置
+@workspace 使用 security-check-dependencies 檢查依賴套件
+@workspace 使用 security-deep-review 審查程式碼
 
 # 步驟 2：統整報告
 請將以上檢查結果統整為一份完整的安全報告，參考 security-report-template.md 格式
@@ -251,10 +251,10 @@
 
 `security-report-template.md` 提供了一個標準化、全面的安全報告框架，被 5 個安全相關 skills 使用：
 
-1. **security-scan**：完整使用，產生全面報告
-2. **review-security**：程式碼審查部分
-3. **check-config**：配置檢查部分
-4. **check-dependencies**：依賴套件部分
-5. **check-secrets**：敏感資料部分
+1. **security-fast-scan**：完整使用，產生全面報告
+2. **security-deep-review**：程式碼審查部分
+3. **security-check-config**：配置檢查部分
+4. **security-check-dependencies**：依賴套件部分
+5. **security-check-secrets**：敏感資料部分
 
 透過統一的範本，確保所有安全檢查產生的報告格式一致、內容完整、易於理解與追蹤。

@@ -1,9 +1,9 @@
 ---
-name: check-secrets
+name: security-check-secrets
 description: 掃描程式碼和配置檔中的敏感資料洩漏，包括 API Keys、密碼、Token 等
 ---
 
-# Check Secrets
+# Security Check Secrets
 
 專門掃描敏感資料洩漏，防止憑證被提交到版本控制系統。
 
@@ -144,6 +144,6 @@ files: "**/*.{ts,js,go,py,java,cs}"
 - `../templates/security-report-template.md` - 完整報告範本（參考「敏感資料洩漏」相關章節）
 
 ## 相關 Skills
-- `security-scan` - 完整安全掃描
-- `review-security` - 程式碼安全審查
-- `check-config` - 檢查配置中的硬編碼憑證
+- `security-fast-scan` - 快速安全掃描
+- `security-deep-review` - 程式碼安全深度審查
+- `security-check-config` - 檢查配置中的硬編碼憑證

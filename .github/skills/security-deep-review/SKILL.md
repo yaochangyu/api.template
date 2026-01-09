@@ -1,9 +1,9 @@
 ---
-name: review-security
+name: security-deep-review
 description: 深度程式碼安全審查，檢測注入攻擊、XSS、CSRF、身份驗證和授權問題
 ---
 
-# Review Security
+# Security Deep Review
 
 深度程式碼層級的安全審查，專注於程式設計上的漏洞。
 
@@ -178,6 +178,6 @@ const validated = schema.parse(req.body);
 - `../templates/security-report-template.md` - 完整的安全檢查報告範本
 
 ## 相關 Skills
-- `security-scan` - 完整安全掃描
-- `check-secrets` - 敏感資料檢查
-- `check-config` - 安全配置檢查
+- `security-fast-scan` - 完整安全掃描
+- `security-check-secrets` - 敏感資料檢查
+- `security-check-config` - 安全配置檢查

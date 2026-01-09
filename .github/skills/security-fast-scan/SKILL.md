@@ -1,9 +1,9 @@
 ---
-name: security-scan
+name: security-fast-scan
 description: 執行完整的應用程式安全掃描，檢查 OWASP Top 10 漏洞、敏感資料洩漏、依賴套件漏洞和安全配置問題。
 ---
 
-# Security Scan
+# Security Fast Scan
 
 ## 描述
 執行全面的應用程式安全掃描，整合所有安全檢查項目，識別潛在的安全漏洞與風險。
@@ -240,10 +240,10 @@ A: 建立排除清單，並結合人工審查確認
 ## 相關 Skills
 - `error-handling` - 安全的錯誤處理模式
 - `api-development` - API 安全設計
-- `check-secrets` - 敏感資料掃描
-- `check-dependencies` - 依賴套件檢查
-- `check-config` - 安全配置檢查
-- `review-security` - 程式碼安全審查
+- `security-check-secrets` - 敏感資料掃描
+- `security-check-dependencies` - 依賴套件檢查
+- `security-check-config` - 安全配置檢查
+- `security-deep-review` - 程式碼安全審查
 
 ## 相關 Agents
 - `api-security-specialist` - 使用本 skill 進行安全審查

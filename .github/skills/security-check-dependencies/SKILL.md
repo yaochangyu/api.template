@@ -1,9 +1,9 @@
 ---
-name: check-dependencies
+name: security-check-dependencies
 description: 檢查專案依賴套件的已知漏洞、過時版本和安全問題
 ---
 
-# Check Dependencies
+# Security Check Dependencies
 
 檢查專案依賴套件的已知漏洞和安全問題。
 
@@ -205,6 +205,6 @@ updates:
 - `../templates/security-report-template.md` - 完整報告範本（參考「依賴套件漏洞」章節）
 
 ## 相關 Skills
-- `security-scan` - 完整安全掃描
-- `check-config` - 安全配置檢查
-- `review-security` - 程式碼安全審查
+- `security-fast-scan` - 快速安全掃描
+- `security-check-config` - 安全配置檢查
+- `security-deep-review` - 程式碼安全深度審查

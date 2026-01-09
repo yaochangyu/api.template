@@ -1,9 +1,9 @@
 ---
-name: check-config
+name: security-check-config
 description: 檢查應用程式的安全配置，包括 HTTPS、CORS、Security Headers、Cookie 等
 ---
 
-# Check Config
+# Security Check Config
 
 檢查應用程式的安全配置問題。
 
@@ -213,6 +213,6 @@ config/secrets.json
 - `../templates/security-report-template.md` - 完整報告範本（參考「安全配置檢查」章節）
 
 ## 相關 Skills
-- `security-scan` - 完整安全掃描
-- `review-security` - 程式碼安全審查
-- `check-dependencies` - 依賴套件檢查
+- `security-fast-scan` - 快速安全掃描
+- `security-deep-review` - 程式碼安全深度審查
+- `security-check-dependencies` - 依賴套件檢查
