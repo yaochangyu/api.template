@@ -5,6 +5,8 @@
       總計 147 個檔案
 
 api.template/
+├── .archive/rename-member-v2-controller.plan.Progress.md
+├── .archive/rename-member-v2-controller.plan.md
 ├── .archive/enable-member-v1.plan.md
 ├── .archive/enable-member-v1.plan.Progress.md
 ├── .archive/fix-integration-failures.plan.md
@@ -135,7 +137,7 @@ api.template/
 ├── dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/Member.cs
 ├── dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberChain.cs
 ├── dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberController.cs
-├── dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberControllerImpl.cs
+├── dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberV2ControllerImpl.cs
 ├── dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberHandler.cs
 ├── dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs
 ├── dotnet-project-template/src/be/JobBank1111.Job.WebAPI/PaginatedList.cs

@@ -52,7 +52,7 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
     builder.Services.AddHttpContextAccessor();
-    builder.Services.AddScoped<JobBank1111.Job.WebAPI.Contract.IMemberController, JobBank1111.Job.WebAPI.Member.MemberControllerImpl>();
+    builder.Services.AddScoped<JobBank1111.Job.WebAPI.Contract.IMemberController, JobBank1111.Job.WebAPI.Member.MemberV2ControllerImpl>();
 
     builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
     builder.Services.AddContextAccessor();
