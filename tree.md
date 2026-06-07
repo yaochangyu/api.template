@@ -5,6 +5,14 @@
       總計 147 個檔案
 
 api.template/
+├── .archive/enable-member-v1.plan.md
+├── .archive/enable-member-v1.plan.Progress.md
+├── .archive/fix-integration-failures.plan.md
+├── .archive/fix-integration-failures.plan.Progress.md
+├── .archive/fix-test-environment.plan.md
+├── .archive/fix-test-environment.plan.Progress.md
+├── .archive/fix-testcontainers-cleanup.plan.md
+├── .archive/fix-testcontainers-cleanup.plan.Progress.md
 ├── .claude/agents-workflow-guide.md
 ├── .claude/agents/api-security-specialist.md
 ├── .claude/agents/aspnetcore-code-reviewer.md

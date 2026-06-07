@@ -12,6 +12,7 @@ public class TestContainerFactory
     {
         // 設定 Docker 端點
         Environment.SetEnvironmentVariable("DOCKER_HOST", "tcp://127.0.0.1:2375");
+        Environment.SetEnvironmentVariable("TESTCONTAINERS_RYUK_DISABLED", "true");
     }
 
     // TODO:docker hub 有訪問次數限制，需要一台 proxy server
@@ -19,6 +20,8 @@ public class TestContainerFactory
     {
         var redisContainer = new RedisBuilder()
             .WithImage("redis:7.0")
+            .WithCleanUp(true)
+            .WithAutoRemove(true)
             .Build();
         await redisContainer.StartAsync();
         return redisContainer;
@@ -27,12 +30,13 @@ public class TestContainerFactory
     public static async Task<MsSqlContainer> CreateMsSqlContainerAsync()
     {
         var container = new MsSqlBuilder()
-            .WithName("sql2019")
             .WithImage("mcr.microsoft.com/mssql/server:2019-latest")
             .WithPassword("pass@w0rd1~")
             .WithEnvironment("ACCEPT_EULA", "Y")
             .WithEnvironment("MSSQL_PID", "Developer")
             .WithPortBinding(1433, assignRandomHostPort: true)
+            .WithCleanUp(true)
+            .WithAutoRemove(true)
             .Build();
         await container.StartAsync();
         return container;
@@ -43,11 +47,12 @@ public class TestContainerFactory
         var waitStrategy = Wait.ForUnixContainer().UntilCommandIsCompleted("pg_isready");
         var container = new PostgreSqlBuilder()
             .WithImage("postgres:13-alpine")
-            .WithName("postgres.13")
             .WithPortBinding(5432, assignRandomHostPort: true)
             .WithWaitStrategy(waitStrategy)
             .WithUsername("postgres")
             .WithPassword("postgres")
+            .WithCleanUp(true)
+            .WithAutoRemove(true)
             .Build();
         await container.StartAsync();
         return container;
@@ -56,9 +61,10 @@ public class TestContainerFactory
     public static async Task<IContainer> CreateMockServerContainerAsync()
     {
         var container = new ContainerBuilder()
-            .WithName("mockserver")
             .WithImage("mockserver/mockserver")
             .WithPortBinding(1080, assignRandomHostPort: true)
+            .WithCleanUp(true)
+            .WithAutoRemove(true)
             .Build();
         await container.StartAsync();
         return container;

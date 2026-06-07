@@ -7,9 +7,14 @@ public class TestController : ControllerBase
 {
     [HttpGet]
     [Route("api/v1/tests")]
-    public async Task<ActionResult> GetTests(
-        CancellationToken cancel = default)
+    public ActionResult GetTests(
+        [FromQuery] string userId,
+        [FromQuery] string description)
     {
-        return this.Ok();
+        return this.Ok(new
+        {
+            userId,
+            description
+        });
     }
 }

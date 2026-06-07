@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json.JsonDiffPatch;
 using System.Text.Json.JsonDiffPatch.Xunit;
 using System.Text.Json.Nodes;
+using DotNet.Testcontainers.Containers;
 using FluentAssertions;
 using Flurl;
 using JobBank1111.Job.DB;
@@ -28,6 +29,7 @@ public class BaseStep : Steps
     private readonly ITestOutputHelper _testOutputHelper;
     private static HttpClient ExternalClient;
     static IServiceProvider ServiceProvider;
+    private static readonly List<IContainer> TestContainers = [];
 
     private const string StringEquals = "字串等於";
     private const string NumberEquals = "數值等於";
@@ -68,17 +70,43 @@ public class BaseStep : Steps
         async Task CreateContainersAsync()
         {
             var msSqlContainer = await TestContainerFactory.CreateMsSqlContainerAsync();
+            TestContainers.Add(msSqlContainer);
             var dbConnectionString = msSqlContainer.GetConnectionString();
             TestAssistant.SetDbConnectionEnvironmentVariable(dbConnectionString);
             var redisContainer = await TestContainerFactory.CreateRedisContainerAsync();
+            TestContainers.Add(redisContainer);
             var redisDomainUrl = redisContainer.GetConnectionString();
             TestAssistant.SetRedisConnectionEnvironmentVariable(redisDomainUrl);
 
             var mockServerContainer = await TestContainerFactory.CreateMockServerContainerAsync();
+            TestContainers.Add(mockServerContainer);
             var externalUrl = TestContainerFactory.GetMockServerConnection(mockServerContainer);
             TestAssistant.SetExternalConnectionEnvironmentVariable(externalUrl);
             ExternalClient = new HttpClient() { BaseAddress = new Uri(externalUrl) };
         }
+    }
+
+    [AfterTestRun]
+    public static async Task AfterTestRun()
+    {
+        ExternalClient?.Dispose();
+        ExternalClient = null;
+
+        if (ServiceProvider is IAsyncDisposable asyncDisposable)
+        {
+            await asyncDisposable.DisposeAsync();
+        }
+        else if (ServiceProvider is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
+        for (var i = TestContainers.Count - 1; i >= 0; i--)
+        {
+            await TestContainers[i].StopAsync();
+        }
+
+        TestContainers.Clear();
     }
 
     [BeforeScenario]
