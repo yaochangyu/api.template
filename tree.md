@@ -5,6 +5,7 @@
       總計 147 個檔案
 
 api.template/
+├── reorganize-ai-assets.plan.md
 ├── .archive/rename-member-v2-controller.plan.Progress.md
 ├── .archive/rename-member-v2-controller.plan.md
 ├── .archive/enable-member-v1.plan.md
