@@ -175,7 +175,7 @@ const validated = schema.parse(req.body);
 ## 報告範本
 
 產生詳細安全審查報告時，請參考：
-- `../templates/security-report-template.md` - 完整的安全檢查報告範本
+- `../security-fast-scan/assets/security-report-template.md` - 完整的安全檢查報告範本
 
 ## 相關 Skills
 - `security-fast-scan` - 完整安全掃描

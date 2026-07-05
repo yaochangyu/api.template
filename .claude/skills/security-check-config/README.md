@@ -195,4 +195,4 @@ app.use(helmet.contentSecurityPolicy({
 - [Mozilla Observatory](https://observatory.mozilla.org/)
 - [Security Headers](https://securityheaders.com/)
 - [完整文件](./SKILL.md)
-- [安全報告範本](../templates/security-report-template.md)
+- [安全報告範本](../security-fast-scan/assets/security-report-template.md)

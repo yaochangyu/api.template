@@ -160,4 +160,4 @@
 - [OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/)
 - [CWE Top 25](https://cwe.mitre.org/top25/)
 - [完整文件](./SKILL.md)
-- [安全報告範本](../templates/security-report-template.md)
+- [安全報告範本](../security-fast-scan/assets/security-report-template.md)

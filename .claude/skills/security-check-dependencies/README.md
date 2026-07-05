@@ -236,4 +236,4 @@ jobs:
 - [npm audit 文件](https://docs.npmjs.com/cli/v8/commands/npm-audit)
 - [govulncheck 文件](https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck)
 - [完整文件](./SKILL.md)
-- [安全報告範本](../templates/security-report-template.md)
+- [安全報告範本](../security-fast-scan/assets/security-report-template.md)

@@ -675,5 +675,5 @@ responses:
 
 - [OpenAPI Specification 3.0](https://swagger.io/specification/)
 - [ASP.NET Core Web API 官方文件](https://learn.microsoft.com/aspnet/core/web-api/)
-- [本專案 OpenAPI 規格](../../../doc/openapi.yml)
+- [本專案 OpenAPI 規格](../../../../dotnet-project-template/doc/openapi.yml)
 - [Controller 實作範例](../../../src/be/JobBank1111.Job.WebAPI/Member/MemberController.cs)

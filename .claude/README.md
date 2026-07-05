@@ -7,15 +7,35 @@
 ```
 .claude/
 ├── README.md                   # 此說明文件
+├── agents/                     # Agent 定義（4 個）
+│   ├── architecture-review.md  # 架構檢視與反模式檢查
+│   ├── feature-development.md  # 完整功能開發流程協調
+│   ├── project-setup.md        # 專案初始化引導
+│   └── testing-strategy.md     # 測試策略規劃
 ├── commands/
-│   └── webapi.md              # /webapi 系列指令定義
-├── templates/
+│   ├── jb.md                   # /jb 系列指令定義
+│   └── webapi.md               # /webapi 系列指令定義
+├── skills/                     # Skill 定義（17 個，主檔一律為 SKILL.md）
+│   ├── api-development/ bdd-practices/ bdd-testing/ ef-core/
+│   ├── error-handling/ handler/ middleware/ project-init/
+│   ├── repository-design/ skill-agent-design/ skill-creator/
+│   ├── security-check-config/ security-check-dependencies/
+│   ├── security-check-secrets/ security-deep-review/
+│   ├── security-fast-scan/     # （assets/ 內含共用安全報告範本）
+│   └── webapi-real-testing/
+├── templates/                  # 程式碼產生模板（權威來源，{{ENTITY}} 佔位符）
 │   ├── handler-template.cs     # Handler 類別模板
 │   ├── controller-template.cs  # Controller 實作模板
 │   ├── middleware-template.cs  # Middleware 模板
+│   ├── model-template.cs       # Model 模板
 │   └── repository-template.cs  # Repository 模板
+├── agents-workflow-guide.md    # Agent 工作流程指南
 └── command-processor.md        # 指令處理邏輯說明
 ```
+
+> 維護規則：`skills/api-development/assets/controller-template.cs` 與
+> `skills/handler/assets/handler-template.cs` 是 `templates/` 對應檔的同步副本，
+> 修改 `templates/` 後需同步（diff 應為 0）。
 
 ## 🚀 快速開始
 
@@ -201,7 +221,7 @@ public class ProductHandler(
 產生程式碼後，通常需要：
 
 - [ ] 建立或更新 Request/Response 模型類別
-- [ ] 更新 OpenAPI 規格 (`doc/openapi.yml`)
+- [ ] 更新 OpenAPI 規格 (`dotnet-project-template/doc/openapi.yml`)
 - [ ] 執行 `task codegen-api` 重新產生 Contract
 - [ ] 更新依賴注入註冊
 - [ ] 撰寫單元測試和整合測試

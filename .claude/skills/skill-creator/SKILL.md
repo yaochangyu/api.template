@@ -21,7 +21,7 @@ Skill Creator 是專門協助建立 GitHub Copilot Custom Agent 與 Skill 的指
 
 | 比較項目 | Custom Agent | Skill |
 |---------|-------------|-------|
-| **檔案位置** | `.github/agents/` 或 `.claude/agents/` | `.github/skills/` |
+| **檔案位置** | `.claude/agents/` 或 `.claude/agents/` | `.claude/skills/` |
 | **檔案副檔名** | `.agent.md` 或 `.md` | `skill.md` |
 | **啟用方式** | `@agent-name` | 通常由 agent 或 workspace 呼叫 |
 | **主要用途** | 獨立的專業助理，具備特定領域知識 | 可重複使用的技能模組，供 agent 組合使用 |
@@ -330,7 +330,7 @@ graph TD
 
 **範本檔案組織**：
 ```
-.github/skills/your-skill/
+.claude/skills/your-skill/
 ├── skill.md                    # 主要定義檔案
 ├── assets/                     # 程式碼範本
 │   ├── template-1.cs
@@ -418,7 +418,7 @@ tools:
 
 **Repository 層級（推薦）**：
 ```
-.copilot/mcp-config.json         # GitHub Copilot
+.mcp.json         # GitHub Copilot
 .claude/mcp-config.json          # Claude Desktop
 ```
 
@@ -543,7 +543,7 @@ graph TD
 4. **參考完整**：連結相關 skills、agents、範本檔案
 
 ### ✅ MCP 整合原則
-1. **環境配置優先**：盡可能在 `.copilot/mcp-config.json` 配置
+1. **環境配置優先**：盡可能在 `.mcp.json` 配置
 2. **工具明確引用**：使用 `server-name/tool-name` 格式
 3. **環境變數安全**：敏感資訊使用環境變數，不寫死在配置中
 4. **錯誤處理**：說明 MCP 工具失敗時的降級策略
@@ -552,7 +552,7 @@ graph TD
 
 ### Skill 檔案組織
 ```
-.github/skills/
+.claude/skills/
 ├── skill-name/
 │   ├── skill.md              # 主要定義（必須）
 │   ├── assets/               # 範本檔案（可選）
@@ -561,7 +561,7 @@ graph TD
 
 ### Agent 檔案組織
 ```
-.github/agents/
+.claude/agents/
 ├── agent-name.agent.md       # 方式 1：單檔案
 或
 ├── agent-name/
@@ -596,6 +596,6 @@ graph TD
 - [MCP Server 配置參考](https://docs.github.com/en/copilot/reference/custom-agents-configuration)
 
 ### 專案內範例
-- `.github/skills/api-development/` - 複雜互動流程範例
-- `.github/skills/handler/` - 單一職責 Skill 範例
+- `.claude/skills/api-development/` - 複雜互動流程範例
+- `.claude/skills/handler/` - 單一職責 Skill 範例
 - `.claude/agents-workflow-guide.md` - Agent 工作流程設計

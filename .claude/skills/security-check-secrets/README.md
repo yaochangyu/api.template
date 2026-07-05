@@ -314,4 +314,4 @@ jobs:
 - [TruffleHog](https://github.com/trufflesecurity/trufflehog)
 - [GitLeaks](https://github.com/gitleaks/gitleaks)
 - [完整文件](./SKILL.md)
-- [安全報告範本](../templates/security-report-template.md)
+- [安全報告範本](../security-fast-scan/assets/security-report-template.md)

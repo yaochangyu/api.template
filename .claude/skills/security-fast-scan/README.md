@@ -123,4 +123,4 @@
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [CWE Top 25](https://cwe.mitre.org/top25/)
 - [完整文件](./SKILL.md)
-- [安全報告範本](../templates/security-report-template.md)
+- [安全報告範本](assets/security-report-template.md)
