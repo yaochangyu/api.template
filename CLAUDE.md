@@ -64,7 +64,7 @@ AI 助理在與使用者互動時，必須遵循以下核心原則：
 當 AI 助理首次接觸此專案時，**必須優先檢測專案狀態**：
 
 #### 檢測條件（滿足以下任一條件視為空白專案）
-1. **不存在** `env/.template-config.json` 配置檔案
+1. **不存在** `dotnet-project-template/env/.template-config.json` 配置檔案
 2. **不存在** `.sln` 解決方案檔案
 3. **不存在** `src/` 目錄或該目錄為空
 4. **不存在** `appsettings.json` 或 `docker-compose.yml`
@@ -72,7 +72,7 @@ AI 助理在與使用者互動時，必須遵循以下核心原則：
 #### 檢測流程
 ```mermaid
 graph TD
-    A[AI 助理啟動] --> B{檢查 env/.template-config.json}
+    A[AI 助理啟動] --> B{檢查 env/.template-config.json（位於 dotnet-project-template/env/）}
     B -->|存在| C{驗證專案結構完整性}
     B -->|不存在| D[觸發初始化對話]
     C -->|完整| E[正常工作模式]
@@ -103,7 +103,7 @@ graph TD
 3. **刪除 Git 相關資料**：
    - 刪除 `.git/` 目錄（移除歷史與遠端設定）。
    - Windows PowerShell 範例：`Remove-Item -Recurse -Force .git`
-4. **接著才進入本專案的互動式配置**（資料庫/快取/專案結構等），並依照互動結果修改專案內容與寫入 `env/.template-config.json`。
+4. **接著才進入本專案的互動式配置**（資料庫/快取/專案結構等），並依照互動結果修改專案內容與寫入 `dotnet-project-template/env/.template-config.json`。
 
 #### 配置檔案格式（env/.template-config.json）
 ```json
@@ -244,7 +244,7 @@ AI 應詢問：
 - **執行整合測試**: `task test-integration`
 - **產生 API 程式碼**: `task codegen-api`
 - **從資料庫反向工程產生實體**: `task ef-codegen`
-- **建立新的 Migration**: `task ef-migration-add NAME=<MigrationName>`
+- **建立新的 Migration**: `task ef-migration-add MIGRATION_NAME=<MigrationName>`
 - **更新資料庫**: `task ef-database-update`
 
 **重要**: EF Core 相關指令必須透過 Taskfile 執行，不應直接執行 `dotnet ef` 指令。
@@ -281,9 +281,9 @@ AI 應詢問：
 - 缺點：專案結構較複雜、編譯時間較長
 
 **📝 實作參考**:
-- Controller 範例：[project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberController.cs](project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberController.cs)
-- Handler 範例：[project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberHandler.cs](project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberHandler.cs)
-- Repository 範例：[project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs](project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs)
+- Controller 範例：[dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberV1ControllerImpl.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberV1ControllerImpl.cs)
+- Handler 範例：[dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberHandler.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberHandler.cs)
+- Repository 範例：[dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs)
 
 ### 技術堆疊
 - **框架**: ASP.NET Core 8.0
@@ -314,7 +314,7 @@ AI 應詢問：
 ### BDD 開發循環
 
 #### 1. 需求分析階段
-使用 Gherkin 語法定義功能情境，參考：[project-template/src/be/JobBank1111.Job.IntegrationTest/_01_Demo/](project-template/src/be/JobBank1111.Job.IntegrationTest/_01_Demo/) 目錄下的 `.feature` 檔案。
+使用 Gherkin 語法定義功能情境，參考：[dotnet-project-template/src/be/JobBank1111.Job.IntegrationTest/_01_Demo/](dotnet-project-template/src/be/JobBank1111.Job.IntegrationTest/_01_Demo/) 目錄下的 `.feature` 檔案。
 
 #### 2. 測試實作階段
 使用 Reqnroll 與真實 Docker 服務實作測試步驟，參考測試步驟實作檔案。
@@ -325,7 +325,7 @@ AI 應詢問：
 - Redis 容器
 - Seq 日誌容器
 
-📝 **測試環境設定參考**: [project-template/src/be/JobBank1111.Job.IntegrationTest/TestServer.cs](project-template/src/be/JobBank1111.Job.IntegrationTest/TestServer.cs)
+📝 **測試環境設定參考**: [dotnet-project-template/src/be/JobBank1111.Job.IntegrationTest/TestServer.cs](dotnet-project-template/src/be/JobBank1111.Job.IntegrationTest/TestServer.cs)
 
 ### Docker 優先測試策略
 
@@ -335,7 +335,7 @@ AI 應詢問：
 - **隔離測試**: 每個測試使用獨立的資料，測試完成後自動清理
 - **並行執行**: 利用 Docker 容器的隔離特性支援測試並行執行
 
-📝 **測試輔助工具參考**: [project-template/src/be/JobBank1111.Job.IntegrationTest/TestAssistant.cs](project-template/src/be/JobBank1111.Job.IntegrationTest/TestAssistant.cs)
+📝 **測試輔助工具參考**: [dotnet-project-template/src/be/JobBank1111.Job.IntegrationTest/TestAssistant.cs](dotnet-project-template/src/be/JobBank1111.Job.IntegrationTest/TestAssistant.cs)
 
 ### API 控制器測試指引
 
@@ -354,7 +354,7 @@ AI 應詢問：
 - 所有屬性使用 `init` 關鍵字
 - 避免在應用程式各層間傳遞可變狀態
 
-📝 **TraceContext 實作參考**: [project-template/src/be/JobBank1111.Job.WebAPI/TraceContext.cs](project-template/src/be/JobBank1111.Job.WebAPI/TraceContext.cs)
+📝 **TraceContext 實作參考**: [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/TraceContext.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/TraceContext.cs)
 
 ### 架構守則
 - 業務邏輯層不應直接處理 HTTP 相關邏輯
@@ -367,7 +367,7 @@ AI 應詢問：
 - **集中處理**: 集中在 TraceContextMiddleware 處理
 - **依賴注入**: 透過 IContextSetter 設定用戶資訊，透過 IContextGetter 取得
 
-📝 **中介軟體實作參考**: [project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs](project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs)
+📝 **中介軟體實作參考**: [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs)
 
 ---
 
@@ -564,7 +564,7 @@ public class OrderHandler(OrderManagementRepository orderRepo)
 - 當發現業務邏輯分散、難以維護時，重構為需求導向
 - 不要過度設計，根據實際複雜度調整
 
-📝 **實作參考**: [project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs](project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs)
+📝 **實作參考**: [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs)
 
 ### 3. 依賴注入最佳實踐
 
@@ -592,7 +592,7 @@ public class OrderHandler(OrderManagementRepository orderRepo)
 - 使用冒號分隔命名空間：`{feature}:{operation}:{parameters}`
 - 範例：`members:page:0:10`, `member:email:test@example.com`
 
-📝 **快取實作參考**: [project-template/src/be/JobBank1111.Infrastructure/Caching/](project-template/src/be/JobBank1111.Infrastructure/Caching/)
+📝 **快取實作參考**: [dotnet-project-template/src/be/JobBank1111.Infrastructure/Caching/](dotnet-project-template/src/be/JobBank1111.Infrastructure/Caching/)
 
 ### 7. 日誌記錄最佳實踐
 
@@ -603,8 +603,8 @@ public class OrderHandler(OrderManagementRepository orderRepo)
 使用 Serilog 的結構化日誌，自動包含 TraceId。
 
 📝 **中介軟體實作參考**: 
-- [project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs](project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs)
-- [project-template/src/be/JobBank1111.Job.WebAPI/RequestParameterLoggerMiddleware.cs](project-template/src/be/JobBank1111.Job.WebAPI/RequestParameterLoggerMiddleware.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/RequestParameterLoggerMiddleware.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/RequestParameterLoggerMiddleware.cs)
 
 ### 8. 安全最佳實踐
 
@@ -694,7 +694,7 @@ graph TD
 
 **步驟 1: 定義 OpenAPI 規格**
 
-📝 **專案 OpenAPI 規格檔案**：[doc/openapi.yml](doc/openapi.yml)
+📝 **專案 OpenAPI 規格檔案**：[doc/openapi.yml](dotnet-project-template/doc/openapi.yml)
 
 在現有規格中新增或修改 API 端點定義，包含：
 - HTTP 方法與路徑
@@ -714,7 +714,7 @@ task codegen-api-server
 **步驟 3: 實作 Controller**
 
 📝 **Controller 實作參考**：
-- [project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberController.cs](project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberController.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberV1ControllerImpl.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberV1ControllerImpl.cs)
 
 實作自動產生的介面，整合 Handler 業務邏輯，處理 Result Pattern 回應轉換。
 
@@ -778,8 +778,8 @@ task codegen-api-client
 - **回應標頭**: 自動將 TraceId 加入回應標頭供追蹤使用
 
 📝 **實作參考**: 
-- [project-template/src/be/JobBank1111.Job.WebAPI/TraceContext.cs](project-template/src/be/JobBank1111.Job.WebAPI/TraceContext.cs)
-- [project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs](project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/TraceContext.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/TraceContext.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs)
 
 ---
 
@@ -816,9 +816,9 @@ public enum FailureCode
 - **Data**: 結構化資料
 
 📝 **實作參考**: 
-- [project-template/src/be/JobBank1111.Job.WebAPI/Failure.cs](project-template/src/be/JobBank1111.Job.WebAPI/Failure.cs)
-- [project-template/src/be/JobBank1111.Job.WebAPI/FailureCode.cs](project-template/src/be/JobBank1111.Job.WebAPI/FailureCode.cs)
-- [project-template/src/be/JobBank1111.Job.WebAPI/FailureCodeMapper.cs](project-template/src/be/JobBank1111.Job.WebAPI/FailureCodeMapper.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Failure.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Failure.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/FailureCode.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/FailureCode.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/FailureCodeMapper.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/FailureCodeMapper.cs)
 
 ### 分層錯誤處理策略
 
@@ -833,7 +833,7 @@ public enum FailureCode
 - 將系統例外轉換為標準化的 `Failure` 物件回應
 - 統一設定為 500 Internal Server Error
 
-📝 **實作參考**: [project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs](project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs)
+📝 **實作參考**: [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs)
 
 ### 錯誤處理最佳實務原則
 - **不要重複拋出例外**: 處理過的例外不應再次 throw
@@ -872,10 +872,10 @@ app.UseMiddleware<RequestParameterLoggerMiddleware>();
 - **請求資訊**: 使用 `RequestInfoExtractor` 統一擷取請求參數
 
 📝 **實作參考**: 
-- [project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs](project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs)
-- [project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs](project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs)
-- [project-template/src/be/JobBank1111.Job.WebAPI/RequestParameterLoggerMiddleware.cs](project-template/src/be/JobBank1111.Job.WebAPI/RequestParameterLoggerMiddleware.cs)
-- [project-template/src/be/JobBank1111.Job.WebAPI/RequestInfoExtractor.cs](project-template/src/be/JobBank1111.Job.WebAPI/RequestInfoExtractor.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/RequestParameterLoggerMiddleware.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/RequestParameterLoggerMiddleware.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/RequestInfoExtractor.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/RequestInfoExtractor.cs)
 
 ### RequestInfoExtractor 功能
 1. **路由參數**: 擷取 URL 路由中的參數
@@ -903,7 +903,7 @@ app.UseMiddleware<RequestParameterLoggerMiddleware>();
 - **快取備援**: 當 Redis 不可用時，自動降級至記憶體快取
 - **快取預熱**: 應用程式啟動時預載常用資料
 
-📝 **快取實作參考**: [project-template/src/be/JobBank1111.Infrastructure/Caching/](project-template/src/be/JobBank1111.Infrastructure/Caching/)
+📝 **快取實作參考**: [dotnet-project-template/src/be/JobBank1111.Infrastructure/Caching/](dotnet-project-template/src/be/JobBank1111.Infrastructure/Caching/)
 
 #### 快取失效與管理策略
 - **時間過期 (TTL)**: 設定合理的快取過期時間
@@ -938,7 +938,7 @@ app.UseMiddleware<RequestParameterLoggerMiddleware>();
 - **內容壓縮**: 自動 Gzip/Brotli 壓縮
 - **API 文件**: 整合 Swagger/OpenAPI 3.0 規格
 
-📝 **API 規格參考**: [doc/openapi.yml](doc/openapi.yml)
+📝 **API 規格參考**: [doc/openapi.yml](dotnet-project-template/doc/openapi.yml)
 
 ### API 安全性防護
 
@@ -1001,7 +1001,7 @@ app.UseMiddleware<RequestParameterLoggerMiddleware>();
 - 最小化映像大小
 - 定期更新基礎映像
 
-📝 **Docker 配置參考**: [docker-compose.yml](docker-compose.yml)
+📝 **Docker 配置參考**: [docker-compose.yml](dotnet-project-template/docker-compose.yml)
 
 ### CI/CD 管線
 
@@ -1010,7 +1010,7 @@ app.UseMiddleware<RequestParameterLoggerMiddleware>();
 ### 生產環境設定管理
 
 #### 環境變數與機密管理
-- 開發環境：.NET User Secrets、`env/local.env`
+- 開發環境：.NET User Secrets、`dotnet-project-template/env/local.env`
 - 容器環境：Docker/K8s Secrets
 - 雲端環境：Azure Key Vault 等祕密管家
 
@@ -1024,33 +1024,33 @@ app.UseMiddleware<RequestParameterLoggerMiddleware>();
 ### 重要檔案路徑
 
 #### Controller 層
-- [project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberController.cs](project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberController.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberV1ControllerImpl.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberV1ControllerImpl.cs)
 
 #### Handler 層
-- [project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberHandler.cs](project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberHandler.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberHandler.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberHandler.cs)
 
 #### Repository 層
-- [project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs](project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs)
 
 #### 中介軟體
-- [project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs](project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs)
-- [project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs](project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs)
-- [project-template/src/be/JobBank1111.Job.WebAPI/RequestParameterLoggerMiddleware.cs](project-template/src/be/JobBank1111.Job.WebAPI/RequestParameterLoggerMiddleware.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/TraceContextMiddleware.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/ExceptionHandlingMiddleware.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/RequestParameterLoggerMiddleware.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/RequestParameterLoggerMiddleware.cs)
 
 #### 錯誤處理
-- [project-template/src/be/JobBank1111.Job.WebAPI/Failure.cs](project-template/src/be/JobBank1111.Job.WebAPI/Failure.cs)
-- [project-template/src/be/JobBank1111.Job.WebAPI/FailureCode.cs](project-template/src/be/JobBank1111.Job.WebAPI/FailureCode.cs)
-- [project-template/src/be/JobBank1111.Job.WebAPI/FailureCodeMapper.cs](project-template/src/be/JobBank1111.Job.WebAPI/FailureCodeMapper.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Failure.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Failure.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/FailureCode.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/FailureCode.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/FailureCodeMapper.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/FailureCodeMapper.cs)
 
 #### 追蹤管理
-- [project-template/src/be/JobBank1111.Job.WebAPI/TraceContext.cs](project-template/src/be/JobBank1111.Job.WebAPI/TraceContext.cs)
+- [dotnet-project-template/src/be/JobBank1111.Job.WebAPI/TraceContext.cs](dotnet-project-template/src/be/JobBank1111.Job.WebAPI/TraceContext.cs)
 
 #### 快取
-- [project-template/src/be/JobBank1111.Infrastructure/Caching/](project-template/src/be/JobBank1111.Infrastructure/Caching/)
+- [dotnet-project-template/src/be/JobBank1111.Infrastructure/Caching/](dotnet-project-template/src/be/JobBank1111.Infrastructure/Caching/)
 
 #### 測試
-- [project-template/src/be/JobBank1111.Job.IntegrationTest/](project-template/src/be/JobBank1111.Job.IntegrationTest/) - BDD 整合測試
-- [project-template/src/be/JobBank1111.Job.Test/](project-template/src/be/JobBank1111.Job.Test/) - 單元測試
+- [dotnet-project-template/src/be/JobBank1111.Job.IntegrationTest/](dotnet-project-template/src/be/JobBank1111.Job.IntegrationTest/) - BDD 整合測試
+- [dotnet-project-template/src/be/JobBank1111.Job.Test/](dotnet-project-template/src/be/JobBank1111.Job.Test/) - 單元測試
 
 ### 最佳實踐檢查清單
 
