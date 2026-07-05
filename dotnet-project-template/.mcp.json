@@ -7,10 +7,11 @@
       ]
     },
     "filesystem": {
-      "command": "cmd.exe",
+      "command": "npx",
       "args": [
-        "/c",
-        "cd D:\\lab\\api.template && npx -y @modelcontextprotocol/server-filesystem ."
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "."
       ]
     },
     "playwright": {
@@ -54,12 +55,12 @@
         "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_TOKEN>"
       }
     },
-	 "drawio": {
+    "drawio": {
       "command": "npm",
       "args": [
-		"exec", 
-		"drawio-mcp-server"
-		]
+        "exec",
+        "drawio-mcp-server"
+      ]
     }
   }
 }

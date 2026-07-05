@@ -2,6 +2,9 @@
 
 > 本文件整合專案規範與最佳實踐，提供從開發到部署的完整指引。
 > 適用於 JobBank1111 API 專案及類似的 ASP.NET Core Web API 專案。
+>
+> **定位**：操作與流程指南（指令、工作流程、環境設定）。
+> 編碼原則與程式碼範例請見 [最佳實踐.md](最佳實踐.md)；指令以 [Taskfile.yml](Taskfile.yml) 為準。
 
 ---
 
@@ -185,19 +188,13 @@ task codegen-api-preview
 
 ```bash
 # 建立新的 Migration 檔案
-task ef-migration-add NAME=InitialCreate
+task ef-migration-add MIGRATION_NAME=InitialCreate
 
 # 更新資料庫至最新版本
 task ef-database-update
 
-# 回復至特定 Migration
-task ef-database-update MIGRATION=AddMemberTable
-
-# 移除最後一個 Migration
-task ef-migration-remove
-
-# 檢視 Migration 清單
-task ef-migration-list
+# 其他 migration 操作（回復/移除/清單）目前未納入 Taskfile，
+# 需要時於 src/be/JobBank1111.Job.DB 目錄下使用 dotnet ef 對應指令
 
 # 產生 SQL 腳本（FROM → TO）
 task ef-migration-script FROM=InitialCreate TO=AddMemberTable
