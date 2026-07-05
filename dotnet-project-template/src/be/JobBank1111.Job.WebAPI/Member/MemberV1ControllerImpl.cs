@@ -1,14 +1,14 @@
-﻿using JobBank1111.Job.WebAPI.Contract;
+using JobBank1111.Job.WebAPI.Contract;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobBank1111.Job.WebAPI.Member;
 
-public class MemberV2ControllerImpl(
+public class MemberV1ControllerImpl(
     MemberHandler memberHandler,
     IHttpContextAccessor httpContextAccessor
-) : IMemberController
+) : IMemberV1Controller
 {
-    public async Task<ActionResult<GetMemberResponseCursorPaginatedList>> GetMembersCursorAsync(
+    public async Task<ActionResult<GetMemberResponseCursorPaginatedList>> GetMemberCursorV1Async(
         CancellationToken cancellationToken = default(CancellationToken))
     {
         var noCache = true;
@@ -18,7 +18,7 @@ public class MemberV2ControllerImpl(
         return result.ToActionResult();
     }
 
-    public async Task<ActionResult<GetMemberResponsePaginatedList>> GetMemberOffsetAsync(
+    public async Task<ActionResult<GetMemberResponsePaginatedList>> GetMemberOffsetV1Async(
         CancellationToken cancellationToken = default(CancellationToken))
     {
         var request = httpContextAccessor.HttpContext.Request;
@@ -45,19 +45,13 @@ public class MemberV2ControllerImpl(
         return result.ToActionResult();
     }
 
-    public async Task<IActionResult> InsertMember1Async(Contract.InsertMemberRequest body,
-        CancellationToken cancellationToken =
-            default(CancellationToken))
+    public async Task<ActionResult<Contract.InsertMemberResponse>> InsertMemberV1Async(
+        Contract.InsertMemberRequest body,
+        CancellationToken cancellationToken = default(CancellationToken))
     {
         var result = await memberHandler.InsertAsync(
             new InsertMemberRequest { Email = body.Email, Name = body.Name, Age = body.Age, }, cancellationToken);
-
-        if (result.IsFailure)
-        {
-            return result.ToFailureResult();
-        }
-
-        return new NoContentResult();
+        return result.ToActionResult();
     }
 
     private int TryGetPageSize()

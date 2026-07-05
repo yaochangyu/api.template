@@ -25,78 +25,95 @@ namespace JobBank1111.Job.WebAPI.Contract
     using System = global::System;
 
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.5.0.0 (NJsonSchema v11.4.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public interface ITagController
+    public interface IMemberV1Controller
     {
 
         /// <remarks>
-        /// This endpoint retrieves tags using cursor pagination.
+        /// This endpoint retrieves members using cursor pagination (v1).
         /// <br/>
-        /// <br/>## Parameters
-        /// <br/>- **x-next-page-token**: The token for the next page of results.
-        /// <br/>
-        /// <br/>## Responses
-        /// <br/>- **200 OK**: Returns the tags.
-        /// <br/>- **400 Bad Request**: Invalid request parameters.
+        /// <br/>Paging is controlled by request headers:
+        /// <br/>- **x-page-size**: page size (default 10)
+        /// <br/>- **x-next-page-token**: the token for the next page of results
         /// </remarks>
 
-        /// <param name="x_next_page_token">next page token</param>
+        /// <returns>OK</returns>
 
-        /// <returns>Successful response.
+        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetMemberCursorV1Async(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <remarks>
+        /// This endpoint retrieves members using offset pagination (v1).
         /// <br/>
-        /// <br/>### Example Response
-        /// <br/>```json
-        /// <br/>{
-        /// <br/>  "items": [
-        /// <br/>    { "id": "1", "name": "Tag1" },
-        /// <br/>    { "id": "2", "name": "Tag2" }
-        /// <br/>  ],
-        /// <br/>  "nextPageToken": "abc123"
-        /// <br/>}
-        /// <br/>```</returns>
+        /// <br/>Paging is controlled by request headers:
+        /// <br/>- **x-page-index**: page index (default 0)
+        /// <br/>- **x-page-size**: page size (default 10)
+        /// <br/>- **cache-control**: set to `true` to bypass cache
+        /// </remarks>
 
-        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetTagsCursorAsync(string x_next_page_token, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+        /// <returns>OK</returns>
+
+        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponsePaginatedList>> GetMemberOffsetV1Async(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <remarks>
+        /// Insert a new member (v1). Returns the inserted member.
+        /// </remarks>
+
+        /// <returns>OK</returns>
+
+        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<InsertMemberResponse>> InsertMemberV1Async(InsertMemberRequest body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.5.0.0 (NJsonSchema v11.4.0.0 (Newtonsoft.Json v13.0.0.0))")]
 
-    public partial class TagController : Microsoft.AspNetCore.Mvc.ControllerBase
+    public partial class MemberV1Controller : Microsoft.AspNetCore.Mvc.ControllerBase
     {
-        private ITagController _implementation;
+        private IMemberV1Controller _implementation;
 
-        public TagController(ITagController implementation)
+        public MemberV1Controller(IMemberV1Controller implementation)
         {
             _implementation = implementation;
         }
 
         /// <remarks>
-        /// This endpoint retrieves tags using cursor pagination.
+        /// This endpoint retrieves members using cursor pagination (v1).
         /// <br/>
-        /// <br/>## Parameters
-        /// <br/>- **x-next-page-token**: The token for the next page of results.
-        /// <br/>
-        /// <br/>## Responses
-        /// <br/>- **200 OK**: Returns the tags.
-        /// <br/>- **400 Bad Request**: Invalid request parameters.
+        /// <br/>Paging is controlled by request headers:
+        /// <br/>- **x-page-size**: page size (default 10)
+        /// <br/>- **x-next-page-token**: the token for the next page of results
         /// </remarks>
-        /// <param name="x_next_page_token">next page token</param>
-        /// <returns>Successful response.
-        /// <br/>
-        /// <br/>### Example Response
-        /// <br/>```json
-        /// <br/>{
-        /// <br/>  "items": [
-        /// <br/>    { "id": "1", "name": "Tag1" },
-        /// <br/>    { "id": "2", "name": "Tag2" }
-        /// <br/>  ],
-        /// <br/>  "nextPageToken": "abc123"
-        /// <br/>}
-        /// <br/>```</returns>
-        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v2/tags:cursor")]
-        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetTagsCursor([Microsoft.AspNetCore.Mvc.FromHeader(Name = "x-next-page-token")] string x_next_page_token, System.Threading.CancellationToken cancellationToken)
+        /// <returns>OK</returns>
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v1/members:cursor")]
+        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetMemberCursorV1(System.Threading.CancellationToken cancellationToken)
         {
 
-            return _implementation.GetTagsCursorAsync(x_next_page_token, cancellationToken);
+            return _implementation.GetMemberCursorV1Async(cancellationToken);
+        }
+
+        /// <remarks>
+        /// This endpoint retrieves members using offset pagination (v1).
+        /// <br/>
+        /// <br/>Paging is controlled by request headers:
+        /// <br/>- **x-page-index**: page index (default 0)
+        /// <br/>- **x-page-size**: page size (default 10)
+        /// <br/>- **cache-control**: set to `true` to bypass cache
+        /// </remarks>
+        /// <returns>OK</returns>
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v1/members:offset")]
+        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponsePaginatedList>> GetMemberOffsetV1(System.Threading.CancellationToken cancellationToken)
+        {
+
+            return _implementation.GetMemberOffsetV1Async(cancellationToken);
+        }
+
+        /// <remarks>
+        /// Insert a new member (v1). Returns the inserted member.
+        /// </remarks>
+        /// <returns>OK</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/v1/members")]
+        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<InsertMemberResponse>> InsertMemberV1([Microsoft.AspNetCore.Mvc.FromBody] InsertMemberRequest body, System.Threading.CancellationToken cancellationToken)
+        {
+
+            return _implementation.InsertMemberV1Async(body, cancellationToken);
         }
 
     }
@@ -227,6 +244,36 @@ namespace JobBank1111.Job.WebAPI.Contract
 
         [System.Text.Json.Serialization.JsonPropertyName("age")]
         public int Age { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.5.0.0 (NJsonSchema v11.4.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class InsertMemberResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("age")]
+        public int? Age { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("email")]
+        public string Email { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
+        public System.DateTimeOffset CreatedAt { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("createdBy")]
+        public string CreatedBy { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("changedAt")]
+        public System.DateTimeOffset? ChangedAt { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("changedBy")]
+        public string ChangedBy { get; set; }
 
     }
 
