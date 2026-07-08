@@ -1,249 +1,160 @@
 using CSharpFunctionalExtensions;
+using JobBank1111.Infrastructure.TraceContext;
 
-namespace JobBank1111.Job.WebAPI.{Feature};
+namespace JobBank1111.Job.WebAPI.{{ENTITY}};
 
-/// <summary>
-/// {Feature} Handler - 業務邏輯層
-/// </summary>
-/// <remarks>
-/// 職責：
-/// - 實作業務規則與驗證
-/// - 協調 Repository 進行資料操作
-/// - 使用 Result Pattern 處理錯誤
-/// - 不包含 HTTP 相關邏輯
-/// </remarks>
-public class {Feature}Handler(
-    {Feature}Repository repository,
-    IDbContextFactory<JobBankDbContext> dbContextFactory,
-    IContextGetter<TraceContext> traceContextGetter,
-    ILogger<{Feature}Handler> logger)
+public class {{ENTITY}}Handler(
+    {{ENTITY}}Repository repository,
+    IContextGetter<TraceContext?> traceContextGetter,
+    ILogger<{{ENTITY}}Handler> logger)
 {
-    /// <summary>
-    /// 建立新的 {Resource}
-    /// </summary>
-    public async Task<Result<{Resource}Response, Failure>> Create{Resource}Async(
-        Create{Resource}Request request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<{{ENTITY}}, Failure>>
+        CreateAsync(Create{{ENTITY}}Request request,
+                    CancellationToken cancel = default)
     {
         var traceContext = traceContextGetter.Get();
-
-        try
+        
+        // 前置條件檢查 - 可以用 Fluent Pattern 重構
+        var validateResult = ValidateCreateRequest(request);
+        if (validateResult.IsFailure)
         {
-            // 1. 業務驗證
-            var emailExists = await repository.EmailExistsAsync(
-                request.Email,
-                cancellationToken);
-
-            if (emailExists)
-            {
-                return Result.Failure<{Resource}Response, Failure>(new Failure
-                {
-                    Code = nameof(FailureCode.DuplicateEmail),
-                    Message = "此 Email 已被註冊",
-                    TraceId = traceContext.TraceId
-                });
-            }
-
-            // 2. 建立實體
-            var entity = new {Resource}
-            {
-                Id = Guid.NewGuid(),
-                Email = request.Email,
-                Name = request.Name,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            // 3. 呼叫 Repository
-            var createResult = await repository.CreateAsync(entity, cancellationToken);
-
-            // 4. 轉換為 Response
-            return createResult.Match(
-                success => Result.Success<{Resource}Response, Failure>(
-                    MapToResponse(success)),
-                failure => Result.Failure<{Resource}Response, Failure>(failure)
-            );
+            return validateResult;
         }
-        catch (Exception ex)
+
+        var insertResult = await repository.CreateAsync(request, cancel);
+        if (insertResult.IsFailure)
         {
-            return Result.Failure<{Resource}Response, Failure>(new Failure
-            {
-                Code = nameof(FailureCode.InternalServerError),
-                Message = ex.Message,
-                TraceId = traceContext.TraceId,
-                Exception = ex
-            });
+            return Result.Failure<{{ENTITY}}, Failure>(insertResult.Error);
         }
+
+        return insertResult;
     }
 
-    /// <summary>
-    /// 根據 ID 查詢 {Resource}
-    /// </summary>
-    public async Task<Result<{Resource}Response, Failure>> Get{Resource}ByIdAsync(
-        Guid id,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<{{ENTITY}}, Failure>>
+        UpdateAsync(int id, Update{{ENTITY}}Request request,
+                    CancellationToken cancel = default)
     {
         var traceContext = traceContextGetter.Get();
-
-        try
+        
+        // 檢查實體是否存在
+        var existingResult = await repository.GetByIdAsync(id, cancel);
+        if (existingResult.IsFailure)
         {
-            var result = await repository.GetByIdAsync(id, cancellationToken);
+            return existingResult;
+        }
 
-            return result.Match(
-                success => Result.Success<{Resource}Response, Failure>(
-                    MapToResponse(success)),
-                failure => Result.Failure<{Resource}Response, Failure>(failure)
-            );
-        }
-        catch (Exception ex)
+        // 驗證更新請求
+        var validateResult = ValidateUpdateRequest(request);
+        if (validateResult.IsFailure)
         {
-            return Result.Failure<{Resource}Response, Failure>(new Failure
-            {
-                Code = nameof(FailureCode.InternalServerError),
-                Message = ex.Message,
-                TraceId = traceContext.TraceId,
-                Exception = ex
-            });
+            return validateResult;
         }
+
+        var updateResult = await repository.UpdateAsync(id, request, cancel);
+        if (updateResult.IsFailure)
+        {
+            return Result.Failure<{{ENTITY}}, Failure>(updateResult.Error);
+        }
+
+        return updateResult;
     }
 
-    /// <summary>
-    /// 更新 {Resource}
-    /// </summary>
-    public async Task<Result<{Resource}Response, Failure>> Update{Resource}Async(
-        Guid id,
-        Update{Resource}Request request,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<{{ENTITY}}, Failure>>
+        GetByIdAsync(int id, CancellationToken cancel = default)
+    {
+        var result = await repository.GetByIdAsync(id, cancel);
+        return result;
+    }
+
+    public async Task<Result<PaginatedList<Get{{ENTITY}}Response>, Failure>>
+        GetOffsetAsync(int pageIndex, int pageSize, bool noCache = true, 
+                       CancellationToken cancel = default)
+    {
+        var result = await repository.GetOffsetAsync(pageIndex, pageSize, noCache, cancel);
+        return result;
+    }
+
+    public async Task<Result<CursorPaginatedList<Get{{ENTITY}}Response>, Failure>>
+        GetCursorAsync(int pageSize, string nextPageToken, bool noCache = true, 
+                       CancellationToken cancel = default)
+    {
+        var result = await repository.GetCursorAsync(pageSize, nextPageToken, noCache, cancel);
+        return result;
+    }
+
+    public async Task<Result<bool, Failure>>
+        DeleteAsync(int id, CancellationToken cancel = default)
     {
         var traceContext = traceContextGetter.Get();
-
-        try
+        
+        // 檢查實體是否存在
+        var existingResult = await repository.GetByIdAsync(id, cancel);
+        if (existingResult.IsFailure)
         {
-            // 1. 查詢現有資料
-            var getResult = await repository.GetByIdAsync(id, cancellationToken);
-            if (getResult.IsFailure)
-                return Result.Failure<{Resource}Response, Failure>(getResult.Error);
-
-            var entity = getResult.Value;
-
-            // 2. 更新欄位
-            entity.Name = request.Name;
-            entity.UpdatedAt = DateTime.UtcNow;
-
-            // 3. 儲存變更
-            var updateResult = await repository.UpdateAsync(entity, cancellationToken);
-
-            return updateResult.Match(
-                success => Result.Success<{Resource}Response, Failure>(
-                    MapToResponse(success)),
-                failure => Result.Failure<{Resource}Response, Failure>(failure)
-            );
+            return Result.Failure<bool, Failure>(existingResult.Error);
         }
-        catch (Exception ex)
-        {
-            return Result.Failure<{Resource}Response, Failure>(new Failure
-            {
-                Code = nameof(FailureCode.InternalServerError),
-                Message = ex.Message,
-                TraceId = traceContext.TraceId,
-                Exception = ex
-            });
-        }
+
+        var deleteResult = await repository.DeleteAsync(id, cancel);
+        return deleteResult;
     }
 
-    /// <summary>
-    /// 刪除 {Resource}
-    /// </summary>
-    public async Task<Result<bool, Failure>> Delete{Resource}Async(
-        Guid id,
-        CancellationToken cancellationToken = default)
+    private Result<{{ENTITY}}, Failure> ValidateCreateRequest(Create{{ENTITY}}Request request)
     {
         var traceContext = traceContextGetter.Get();
-
-        try
+        
+        // TODO: 實作建立請求的驗證邏輯
+        if (string.IsNullOrEmpty(request.Name))
         {
-            var result = await repository.DeleteAsync(id, cancellationToken);
-            return result;
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<bool, Failure>(new Failure
+            return Result.Failure<{{ENTITY}}, Failure>(new Failure
             {
-                Code = nameof(FailureCode.InternalServerError),
-                Message = ex.Message,
-                TraceId = traceContext.TraceId,
-                Exception = ex
+                Code = nameof(FailureCode.ValidationError),
+                Message = "Name 不能為空",
+                TraceId = traceContext?.TraceId
             });
         }
+
+        // TODO: 加入其他驗證邏輯
+        // 例如：重複性檢查、格式驗證等
+
+        return Result.Success<{{ENTITY}}, Failure>(null);
     }
 
-    /// <summary>
-    /// 分頁查詢列表
-    /// </summary>
-    public async Task<Result<PagedList<{Resource}Response>, Failure>> Get{Resource}ListAsync(
-        int pageIndex,
-        int pageSize,
-        CancellationToken cancellationToken = default)
+    private Result<{{ENTITY}}, Failure> ValidateUpdateRequest(Update{{ENTITY}}Request request)
     {
         var traceContext = traceContextGetter.Get();
-
-        try
+        
+        // TODO: 實作更新請求的驗證邏輯
+        if (string.IsNullOrEmpty(request.Name))
         {
-            var result = await repository.GetPagedListAsync(
-                pageIndex,
-                pageSize,
-                cancellationToken);
-
-            return result.Match(
-                success => Result.Success<PagedList<{Resource}Response>, Failure>(
-                    new PagedList<{Resource}Response>
-                    {
-                        Items = success.Items.Select(MapToResponse).ToList(),
-                        PageIndex = success.PageIndex,
-                        PageSize = success.PageSize,
-                        TotalCount = success.TotalCount,
-                        TotalPages = success.TotalPages
-                    }),
-                failure => Result.Failure<PagedList<{Resource}Response>, Failure>(failure)
-            );
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<PagedList<{Resource}Response>, Failure>(new Failure
+            return Result.Failure<{{ENTITY}}, Failure>(new Failure
             {
-                Code = nameof(FailureCode.InternalServerError),
-                Message = ex.Message,
-                TraceId = traceContext.TraceId,
-                Exception = ex
+                Code = nameof(FailureCode.ValidationError),
+                Message = "Name 不能為空",
+                TraceId = traceContext?.TraceId
             });
         }
+
+        return Result.Success<{{ENTITY}}, Failure>(null);
     }
 
-    // 私有輔助方法
-    private static {Resource}Response MapToResponse({Resource} entity)
+    // 可選：實作特定業務邏輯方法
+    // 例如：搜尋、狀態變更、批量操作等
+
+    public async Task<Result<List<{{ENTITY}}>, Failure>>
+        SearchAsync(string keyword, CancellationToken cancel = default)
     {
-        return new {Resource}Response
+        if (string.IsNullOrWhiteSpace(keyword))
         {
-            Id = entity.Id,
-            Email = entity.Email,
-            Name = entity.Name,
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt
-        };
+            var traceContext = traceContextGetter.Get();
+            return Result.Failure<List<{{ENTITY}}>, Failure>(new Failure
+            {
+                Code = nameof(FailureCode.ValidationError),
+                Message = "搜尋關鍵字不能為空",
+                TraceId = traceContext?.TraceId
+            });
+        }
+
+        var result = await repository.SearchAsync(keyword, cancel);
+        return result;
     }
 }
-
-/* 使用說明
- *
- * 1. 替換佔位符：
- *    {Feature} = 功能名稱（例如：Member）
- *    {Resource} = 資源名稱（例如：Member）
- *
- * 2. 核心原則：
- *    ✅ 使用 Result Pattern
- *    ✅ 所有例外封裝到 Failure.Exception
- *    ✅ 支援 CancellationToken
- *    ✅ 透過 Repository 存取資料
- *    ❌ 不記錄錯誤日誌（由 Middleware 處理）
- *    ❌ 不拋出業務邏輯例外
- *    ❌ 不包含 HTTP 相關邏輯
- */

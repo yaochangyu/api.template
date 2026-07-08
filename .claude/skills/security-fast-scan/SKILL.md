@@ -215,7 +215,7 @@ A: 建立排除清單，並結合人工審查確認
 ## 報告範本
 
 產生完整安全掃描報告時，請參考：
-- `../templates/security-report-template.md` - 詳細的安全檢查報告範本
+- `assets/security-report-template.md` - 詳細的安全檢查報告範本
 
 範本包含：
 - 執行摘要與統計

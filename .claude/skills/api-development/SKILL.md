@@ -10,7 +10,7 @@ API 開發流程引導技能，協助開發者選擇合適的開發流程（API 
 
 ## 職責
 - 引導選擇 API First 或 Code First 開發流程
-- 協助更新/建立 OpenAPI 規格（doc/openapi.yml）
+- 協助更新/建立 OpenAPI 規格（doc/openapi.yml，相對於套用範本後的目標專案根目錄；本 repo 內為 dotnet-project-template/doc/openapi.yml）
 - 產生 Server Controller 骨架
 - 產生 Client SDK
 - 提供 Controller 實作指導

@@ -1,0 +1,14 @@
+{
+  "database": {
+    "type": "SQL Server",
+    "version": "2022",
+    "useEfCore": true
+  },
+  "cache": {
+    "useRedis": true,
+    "version": "7-alpine"
+  },
+  "projectOrganization": "single-project",
+  "createdAt": "2026-07-05T00:00:00.000Z",
+  "createdBy": "Claude CLI"
+}

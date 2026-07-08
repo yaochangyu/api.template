@@ -9,8 +9,7 @@ info:
     This is the API documentation for the JobBank1111.Job.WebAPI.
     
     ## Features
-    
-    - Fetch tags
+
     - Fetch members with cursor pagination
     - Fetch members with offset pagination
     - Insert a new member
@@ -31,7 +30,7 @@ x-tagGroups:
 #      - AML
 #      - Customers Timeline
       - Member
-      - Tag
+      - MemberV1
 #  - name: Payment Instruments
 #    tags:
 #      - Payment Instruments
@@ -39,73 +38,95 @@ x-tagGroups:
 #      - Payment Cards
 
 paths:
-  /api/v2/tags:cursor:
+  /api/v1/members:cursor:
     get:
       tags:
-        - Tag
+        - MemberV1
       description: |
-        This endpoint retrieves tags using cursor pagination.
+        This endpoint retrieves members using cursor pagination (v1).
 
-        ## Parameters
-        - **x-next-page-token**: The token for the next page of results.
-
-        ## Responses
-        - **200 OK**: Returns the tags.
-        - **400 Bad Request**: Invalid request parameters.
-      operationId: GetTagsCursor
-      parameters:
-        - in: header
-          name: x-next-page-token
-          schema:
-            type: string
-          required: true
-          description: next page token
+        Paging is controlled by request headers:
+        - **x-page-size**: page size (default 10)
+        - **x-next-page-token**: the token for the next page of results
+      operationId: GetMemberCursorV1
       responses:
         '200':
-          description: |
-            Successful response.
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+          headers:
+            x-next-page-token:
+              description: The next page token
+              schema:
+                type: string
+            x-next-previous-token:
+              description: The next previous token
+              schema:
+                type: string
+  /api/v1/members:offset:
+    get:
+      tags:
+        - MemberV1
+      description: |
+        This endpoint retrieves members using offset pagination (v1).
 
-            ### Example Response
-            ```json
-            {
-              "items": [
-                { "id": "1", "name": "Tag1" },
-                { "id": "2", "name": "Tag2" }
-              ],
-              "nextPageToken": "abc123"
-            }
-            ```
+        Paging is controlled by request headers:
+        - **x-page-index**: page index (default 0)
+        - **x-page-size**: page size (default 10)
+        - **cache-control**: set to `true` to bypass cache
+      operationId: GetMemberOffsetV1
+      responses:
+        '200':
+          description: OK
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+                $ref: '#/components/schemas/GetMemberResponsePaginatedList'
             application/json:
               schema:
-                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
+                $ref: '#/components/schemas/GetMemberResponsePaginatedList'
             text/json:
               schema:
-                $ref: '#/components/schemas/GetMemberResponseCursorPaginatedList'
-            headers:
-              x-next-page-token:
-                description: The next page token
-                schema:
-                  type: string
-              x-next-previous-token:
-                description: The next previous token
-                schema:
-                  type: string
-        '400':
-          description: Bad Request
+                $ref: '#/components/schemas/GetMemberResponsePaginatedList'
+  /api/v1/members:
+    post:
+      tags:
+        - MemberV1
+      description: |
+        Insert a new member (v1). Returns the inserted member.
+      operationId: InsertMemberV1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsertMemberRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/InsertMemberRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/InsertMemberRequest'
+      responses:
+        '200':
+          description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Failure'
+                $ref: '#/components/schemas/InsertMemberResponse'
             text/json:
               schema:
-                $ref: '#/components/schemas/Failure'
+                $ref: '#/components/schemas/InsertMemberResponse'
             text/plain:
               schema:
-                $ref: '#/components/schemas/Failure'
+                $ref: '#/components/schemas/InsertMemberResponse'
   /api/v2/members:cursor:
     get:
       tags:
@@ -244,6 +265,37 @@ components:
         age:
           type: integer
           format: int32
+      additionalProperties: false
+
+    InsertMemberResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        age:
+          type: integer
+          format: int32
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+          nullable: true
+        changedAt:
+          type: string
+          format: date-time
+          nullable: true
+        changedBy:
+          type: string
+          nullable: true
       additionalProperties: false
 
     Failure:

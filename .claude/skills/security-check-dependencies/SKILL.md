@@ -202,7 +202,7 @@ updates:
 ## 報告範本
 
 產生依賴套件檢查報告時，可參考：
-- `../templates/security-report-template.md` - 完整報告範本（參考「依賴套件漏洞」章節）
+- `../security-fast-scan/assets/security-report-template.md` - 完整報告範本（參考「依賴套件漏洞」章節）
 
 ## 相關 Skills
 - `security-fast-scan` - 快速安全掃描

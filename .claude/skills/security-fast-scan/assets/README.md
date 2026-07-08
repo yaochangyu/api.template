@@ -6,7 +6,7 @@
 
 ### 範本位置
 ```
-.github/skills/templates/security-report-template.md
+.claude/skills/security-fast-scan/assets/security-report-template.md
 ```
 
 ### 範本內容涵蓋
@@ -191,8 +191,8 @@
 
 1. **複製範本**
    ```bash
-   cp .github/skills/templates/security-report-template.md \
-      .github/skills/templates/security-report-template-custom.md
+   cp .claude/skills/security-fast-scan/assets/security-report-template.md \
+      .claude/skills/security-fast-scan/assets/security-report-template-custom.md
    ```
 
 2. **調整章節**
