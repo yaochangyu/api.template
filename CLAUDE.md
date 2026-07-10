@@ -75,7 +75,7 @@
 當建立新計畫書時，遵循以下流程：
 
 ### 建立階段
-- 檔案名格式: `{project}-PLAN.md` 或 `{project}-plan.md`
+- 檔案名格式: `{project}-plan.md` 或 `{project}-PLAN.md`
 - 位置: 專案根目錄（方便檢視）
 - 開頭標記: `**計畫時間**: YYYY-MM-DD HH:mm GMT+8` 與 `**進度**: [計畫中]`
 
@@ -84,7 +84,7 @@
 - 每完成一個 Step，標記狀態為 ✅ 與進度百分比
 
 ### 封存階段（計畫全部完成後）
-1. **移到 archive 目錄**: `mv {project}-PLAN.md .archive/` 或 `mv {project}-plan.md .archive/`
+1. **移到 archive 目錄**: `{project}-plan.md` 搬到 .archive/
 2. **在檔案頂部加標記**:
    ```markdown
    ⏹️ **Status**: COMPLETED (YYYY-MM-DD HH:mm GMT+8)
@@ -94,7 +94,6 @@
    ```
 3. **Git commit** — commit message 中**不包含 Co-authored-by**（遵守全域規則）
 
----
 
 ---
 
