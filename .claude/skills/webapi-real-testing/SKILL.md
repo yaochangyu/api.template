@@ -8,6 +8,10 @@ description: Web API 測試實作技能,協助開發者使用 Testcontainers + R
 ## 描述
 Web API 測試實作技能,協助開發者使用 Testcontainers + Reqnroll 撰寫完整的 API 整合測試,包含 Docker 測試環境、BDD 情境定義與測試步驟實作。
 
+> 💡 **獨立用戶提示**：所有參考檔案與範本自動使用 FileResolver 工具。
+> 即使您沒有下載完整專案，SKILL 也會自動從 GitHub 取得所需的測試範本與範例。
+> 無需手動複製 `dotnet-project-template` 的測試專案。
+
 ## 職責
 - Web API 整合測試架構設計
 - Docker 測試環境設定(Testcontainers)
@@ -76,7 +80,7 @@ graph TD
     K1 --> L1[使用 dotnet new xunit 建立]
     K2 --> L2[使用 dotnet new nunit 建立]
     K3 --> L3[使用 dotnet new mstest 建立]
-    J --> M1[從 dotnet-project-template 複製測試專案]
+    J --> M1[透過 FileResolver 自動取得測試專案範本]
     L1 --> M2[安裝必要套件]
     L2 --> M2
     L3 --> M2
@@ -129,7 +133,7 @@ graph TD
    ⚠️ 需要較多設定工作
 
 2️⃣ 複製完整測試專案範本（推薦）
-   ✅ 從 dotnet-project-template 複製完整測試專案
+   ✅ 透過 FileResolver 自動取得完整測試專案範本（無需手動下載專案）
    ✅ 包含完整的測試架構（BaseStep、TestServer、範例測試）
    ✅ 適合：快速啟動、遵循專案規範
    ⚠️ 需要調整命名空間
@@ -396,7 +400,7 @@ cd ../../..
 4. **DbContextExtensions.cs** - 資料庫測試輔助
 5. **TestContainerFactory.cs** - Docker 容器工廠（可選）
 
-**參考檔案**：`dotnet-project-template/src/be/JobBank1111.Job.IntegrationTest/` 目錄下的對應檔案
+**參考檔案**（透過 FileResolver 自動取得）：`JobBank1111.Job.IntegrationTest/` 目錄下的對應檔案
 
 **注意**：不同測試框架的屬性差異：
 - xUnit: `[BeforeTestRun]`, `[BeforeScenario]`
@@ -427,21 +431,21 @@ cd ../../..
 }
 ```
 
-#### 路徑 B：複製完整測試專案範本
+#### 路徑 B：使用完整測試專案範本
 
-從 `dotnet-project-template` 資料夾複製完整的測試專案。
+SKILL 自動提供範本檔案，開發者可參考這些範本建立測試專案（透過 FileResolver 自動取得，無需手動複製 `dotnet-project-template`）。
 
-##### 步驟 1：複製測試專案
+##### 步驟 1：取得測試專案範本
 
 AI 助理應執行以下操作：
 
-1. **複製測試專案範本**
-   - 來源：`dotnet-project-template/src/be/JobBank1111.Job.IntegrationTest`
+1. **取得測試專案範本**（透過 FileResolver 自動取得）
+   - 範本：`JobBank1111.Job.IntegrationTest`（完整測試專案架構）
    - 目標：`src/be/{ProjectName}.IntegrationTest`
    - 保留完整目錄結構與所有檔案
 
-2. **複製測試共用專案**（若存在）
-   - 來源：`dotnet-project-template/src/be/JobBank1111.Testing.Common`
+2. **取得測試共用範本**（若存在，透過 FileResolver 自動取得）
+   - 範本：`JobBank1111.Testing.Common`
    - 目標：`src/be/{ProjectName}.Testing.Common`
 
 ##### 步驟 2：重新命名專案檔案
@@ -868,7 +872,7 @@ public async Task BeforeScenario()
 }
 ```
 
-**參考檔案**:`src/be/JobBank1111.Job.IntegrationTest/BaseStep.cs`
+**參考檔案**（透過 FileResolver 取得）:`JobBank1111.Job.IntegrationTest/BaseStep.cs`
 
 ### 2. TestContainerFactory.cs - Docker 容器工廠
 建立與管理測試所需的 Docker 容器。
@@ -891,7 +895,7 @@ var mockServerContainer = await TestContainerFactory.CreateMockServerContainerAs
 var externalUrl = TestContainerFactory.GetMockServerConnection(mockServerContainer);
 ```
 
-**參考檔案**:`src/be/JobBank1111.Testing.Common/TestContainerFactory.cs`
+**參考檔案**（透過 FileResolver 取得）:`JobBank1111.Testing.Common/TestContainerFactory.cs`
 
 ### 3. TestServer.cs - WebApplicationFactory 測試伺服器
 模擬 Web API 執行環境。
@@ -927,7 +931,7 @@ public class TestServer(DateTimeOffset now, string userId)
 }
 ```
 
-**參考檔案**:`src/be/JobBank1111.Job.IntegrationTest/TestServer.cs`
+**參考檔案**（透過 FileResolver 取得）:`JobBank1111.Job.IntegrationTest/TestServer.cs`
 
 ### 4. ScenarioContextExtension.cs - 情境上下文擴充
 管理測試情境中的狀態與資料。
@@ -962,7 +966,7 @@ var jsonNode = context.GetJsonNode();
 var dbFactory = context.GetMemberDbContextFactory();
 ```
 
-**參考檔案**:`src/be/JobBank1111.Job.IntegrationTest/ScenarioContextExtension.cs`
+**參考檔案**（透過 FileResolver 取得）:`JobBank1111.Job.IntegrationTest/ScenarioContextExtension.cs`
 
 ### 5. DbContextExtensions.cs - 資料庫測試輔助
 資料庫測試相關的擴充方法。
@@ -985,7 +989,7 @@ await dbContext.Seed();
 SqlServerGenerateScript.OnlySupportLocal(connectionString);
 ```
 
-**參考檔案**:`src/be/JobBank1111.Job.IntegrationTest/DbContextExtensions.cs`
+**參考檔案**（透過 FileResolver 取得）:`JobBank1111.Job.IntegrationTest/DbContextExtensions.cs`
 
 ### 6. MockedServerAssistant.cs - 外部 API 模擬
 使用 MockServer 容器模擬外部 API。
@@ -1005,7 +1009,7 @@ await MockedServerAssistant.PutNewEndPointAsync(
 await MockedServerAssistant.ResetAsync(client);
 ```
 
-**參考檔案**:`src/be/JobBank1111.Testing.Common/MockServer/MockedServerAssistant.cs`
+**參考檔案**（透過 FileResolver 取得）:`JobBank1111.Testing.Common/MockServer/MockedServerAssistant.cs`
 
 ## 測試環境架構
 
@@ -1311,7 +1315,7 @@ dotnet test src/be/{ProjectName}.IntegrationTest
 
 ## Gherkin 語法完整範例
 
-請參考檔案:`src/be/JobBank1111.Job.IntegrationTest/_01_Demo/飯粒.feature`
+請參考檔案（透過 FileResolver 取得）:`JobBank1111.Job.IntegrationTest/_01_Demo/飯粒.feature`
 
 ### Feature 檔案完整結構
 
@@ -1548,19 +1552,53 @@ JobBank1111.Testing.Common/
 
 ## 參考檔案
 
+> 以下參考檔案可通過 FileResolver 取得。
+
 ### 核心測試架構
-- `src/be/JobBank1111.Job.IntegrationTest/BaseStep.cs`
-- `src/be/JobBank1111.Job.IntegrationTest/TestServer.cs`
-- `src/be/JobBank1111.Job.IntegrationTest/ScenarioContextExtension.cs`
-- `src/be/JobBank1111.Job.IntegrationTest/DbContextExtensions.cs`
+- `JobBank1111.Job.IntegrationTest/BaseStep.cs`
+  - **取得**: `node .claude/skills/shared/FileResolver.js get-content JobBank1111.Job.IntegrationTest/BaseStep.cs`
+- `JobBank1111.Job.IntegrationTest/TestServer.cs`
+  - **取得**: `node .claude/skills/shared/FileResolver.js get-content JobBank1111.Job.IntegrationTest/TestServer.cs`
+- `JobBank1111.Job.IntegrationTest/ScenarioContextExtension.cs`
+  - **取得**: `node .claude/skills/shared/FileResolver.js get-content JobBank1111.Job.IntegrationTest/ScenarioContextExtension.cs`
+- `JobBank1111.Job.IntegrationTest/DbContextExtensions.cs`
+  - **取得**: `node .claude/skills/shared/FileResolver.js get-content JobBank1111.Job.IntegrationTest/DbContextExtensions.cs`
 
 ### 測試基礎設施
-- `src/be/JobBank1111.Testing.Common/TestContainerFactory.cs`
-- `src/be/JobBank1111.Testing.Common/MockServer/MockedServerAssistant.cs`
+- `JobBank1111.Testing.Common/TestContainerFactory.cs`
+  - **取得**: `node .claude/skills/shared/FileResolver.js get-content JobBank1111.Testing.Common/TestContainerFactory.cs`
+- `JobBank1111.Testing.Common/MockServer/MockedServerAssistant.cs`
+  - **取得**: `node .claude/skills/shared/FileResolver.js get-content JobBank1111.Testing.Common/MockServer/MockedServerAssistant.cs`
 
 ### 測試範例
-- `src/be/JobBank1111.Job.IntegrationTest/_01_Demo/飯粒.feature`
-- `src/be/JobBank1111.Job.IntegrationTest/_01_Demo/飯粒Step.cs`
+- `JobBank1111.Job.IntegrationTest/_01_Demo/飯粒.feature`
+  - **取得**: `node .claude/skills/shared/FileResolver.js get-content JobBank1111.Job.IntegrationTest/_01_Demo/飯粒.feature`
+- `JobBank1111.Job.IntegrationTest/_01_Demo/飯粒Step.cs`
+  - **取得**: `node .claude/skills/shared/FileResolver.js get-content JobBank1111.Job.IntegrationTest/_01_Demo/飯粒Step.cs`
+
+### 📌 檔案可用性
+所有上述參考檔案都通過 FileResolver 自動取得。如果您：
+- ✅ 已下載整個專案：使用本地檔案（快速）
+- ✅ 只安裝了 SKILL：自動從 GitHub 下載（無需手動操作）
+- ✅ 離線環境：使用本地快取
+
+### 🔧 FileResolver CLI 命令參考
+```bash
+# 取得檔案內容（本地優先，自動從 GitHub 下載並快取）
+node .claude/skills/shared/FileResolver.js get-content <path>
+
+# 檢查本地檔案路徑（如果存在）
+node .claude/skills/shared/FileResolver.js get-path <path>
+
+# 檢視 GitHub Raw URL
+node .claude/skills/shared/FileResolver.js get-github-url <path>
+
+# 清空快取
+node .claude/skills/shared/FileResolver.js clear-cache
+
+# 列出所有快取檔案
+node .claude/skills/shared/FileResolver.js list-cache
+```
 
 ## 技術堆疊
 - **測試框架**:xUnit 2.9.2

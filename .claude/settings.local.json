@@ -4,7 +4,13 @@
       "Bash(npx:*)",
       "Bash(npm search \"modelcontextprotocol\")",
       "Bash(dotnet build:*)",
-      "Bash(dotnet sln add:*)"
+      "Bash(dotnet sln add:*)",
+      "Bash(node ~/.claude/hud/omc-hud.mjs)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(bash __TRACKED_VAR__/scripts/setup-progress.sh save 3 global)",
+      "Bash(npm view *)",
+      "Bash(PKG=/home/yao/.nvm/versions/node/v22.20.0/lib/node_modules/oh-my-claude-sisyphus; bash \"$PKG/scripts/setup-progress.sh\" save 4 global)",
+      "Bash(rtk gh *)"
     ]
   },
   "enableAllProjectMcpServers": true,
