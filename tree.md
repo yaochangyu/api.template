@@ -63,11 +63,6 @@ api.template/
 ├── .claude/skills/webapi-real-testing/test/prompt.md
 ├── .claude/skills/webapi-real-testing/test/webapi-real-testing-test-plan.md
 ├── .claude/skills/webapi-real-testing/test/webapi-real-testing-test-report.md
-├── .claude/templates/controller-template.cs
-├── .claude/templates/handler-template.cs
-├── .claude/templates/middleware-template.cs
-├── .claude/templates/model-template.cs
-├── .claude/templates/repository-template.cs
 ├── CLAUDE.md
 ├── dotnet-project-template/.dockerignore
 ├── dotnet-project-template/.editorconfig

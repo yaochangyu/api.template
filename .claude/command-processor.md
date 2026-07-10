@@ -8,14 +8,18 @@
 
 ### /webapi:handler [實體名稱]
 
-1. **讀取模板**: 載入 `.claude/templates/handler-template.cs`
+1. **取得參考實作**: 透過 FileResolver 取得真實 Handler 範例
+   ```bash
+   node .claude/skills/shared/FileResolver.js get-content \
+     JobBank1111.Job.WebAPI/Member/MemberHandler.cs
+   ```
 2. **替換變數**: 
    - `{{ENTITY}}` → 實體名稱（首字母大寫）
    - `{{entity}}` → 實體名稱（首字母小寫）
 3. **確定目標路徑**: `src/be/JobBank1111.Job.WebAPI/{實體名稱}/{實體名稱}Handler.cs`
 4. **檢查檔案存在性**: 如果檔案已存在，詢問是否覆蓋
 5. **建立目錄**: 如果目標目錄不存在，自動建立
-6. **寫入檔案**: 將處理後的模板寫入目標位置
+6. **寫入檔案**: 根據參考實作與需求生成檔案
 
 **範例**:
 ```
@@ -25,12 +29,16 @@
 
 ### /webapi:controller [實體名稱]
 
-1. **讀取模板**: 載入 `.claude/templates/controller-template.cs`
+1. **取得參考實作**: 透過 FileResolver 取得真實 Controller 範例
+   ```bash
+   node .claude/skills/shared/FileResolver.js get-content \
+     JobBank1111.Job.WebAPI/Member/MemberV1ControllerImpl.cs
+   ```
 2. **替換變數**: 
    - `{{ENTITY}}` → 實體名稱（首字母大寫）
    - `{{entity}}` → 實體名稱（首字母小寫）
-3. **確定目標路徑**: `src/be/JobBank1111.Job.WebAPI/{實體名稱}/{實體名稱}ControllerImpl.cs`
-4. **處理邏輯**: 同 Handler
+3. **確定目標路徑**: `src/be/JobBank1111.Job.WebAPI/{實體名稱}/{實體名稱}V1ControllerImpl.cs`
+4. **處理邏輯**: 根據參考實作與需求生成檔案
 
 **範例**:
 ```
@@ -40,11 +48,15 @@
 
 ### /webapi:middleware [中介軟體名稱]
 
-1. **讀取模板**: 載入 `.claude/templates/middleware-template.cs`
+1. **取得參考實作**: 透過 FileResolver 取得真實 Middleware 範例
+   ```bash
+   node .claude/skills/shared/FileResolver.js get-content \
+     JobBank1111.Job.WebAPI/TraceContextMiddleware.cs
+   ```
 2. **替換變數**: 
    - `{{MIDDLEWARE_NAME}}` → 中介軟體名稱
 3. **確定目標路徑**: `src/be/JobBank1111.Job.WebAPI/{中介軟體名稱}Middleware.cs`
-4. **處理邏輯**: 同上
+4. **處理邏輯**: 根據參考實作與需求生成檔案
 
 **範例**:
 ```
@@ -54,12 +66,16 @@
 
 ### /webapi:repository [實體名稱]
 
-1. **讀取模板**: 載入 `.claude/templates/repository-template.cs`
+1. **取得參考實作**: 透過 FileResolver 取得真實 Repository 範例
+   ```bash
+   node .claude/skills/shared/FileResolver.js get-content \
+     JobBank1111.Job.WebAPI/Member/MemberRepository.cs
+   ```
 2. **替換變數**: 
    - `{{ENTITY}}` → 實體名稱（首字母大寫）
    - `{{entity}}` → 實體名稱（首字母小寫）
 3. **確定目標路徑**: `src/be/JobBank1111.Job.WebAPI/{實體名稱}/{實體名稱}Repository.cs`
-4. **處理邏輯**: 同 Handler
+4. **處理邏輯**: 根據參考實作與需求生成檔案
 
 **範例**:
 ```
@@ -138,11 +154,15 @@ function generateFilePath(type, name) {
 ```markdown
 當用戶輸入 `/webapi:handler Product` 時，我應該：
 
-1. 讀取 `.claude/templates/handler-template.cs`
-2. 替換所有 `{{ENTITY}}` 為 `Product`，`{{entity}}` 為 `product`
+1. 透過 FileResolver 取得參考實作：
+   ```bash
+   node .claude/skills/shared/FileResolver.js get-content \
+     JobBank1111.Job.WebAPI/Member/MemberHandler.cs
+   ```
+2. 參考真實代碼，根據實體需求調整邏輯
 3. 檢查目標目錄 `src/be/JobBank1111.Job.WebAPI/Product/` 是否存在
 4. 如果不存在，建立目錄
-5. 將處理後的內容寫入 `src/be/JobBank1111.Job.WebAPI/Product/ProductHandler.cs`
+5. 根據參考實作與需求生成 `src/be/JobBank1111.Job.WebAPI/Product/ProductHandler.cs`
 6. 回覆成功訊息和後續建議
 ```
 

@@ -273,7 +273,11 @@ task codegen-api-client
 2. **Result Pattern 處理**：轉換 Result 為 HTTP 回應
 3. **HTTP 狀態碼映射**：使用 FailureCodeMapper
 
-完整實作範本請參考：`assets/controller-template.cs`
+完整實作範本請參考生產代碼（透過 FileResolver）：
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  JobBank1111.Job.WebAPI/Member/MemberV1ControllerImpl.cs
+```
 
 ## API First vs Code First 對比
 
@@ -345,9 +349,20 @@ task codegen-api-client
 ### 參考文件
 - [API 開發工作流程詳解](./references/api-development-workflow.md)
 
-### 範本檔案
-- [Controller 實作範本](./assets/controller-template.cs)
-- [OpenAPI 端點範本](./assets/openapi-endpoint-template.yml)
+### 參考代碼
+
+> 💡 所有範本已改為使用 FileResolver 動態取得真實項目代碼，確保始終同步更新。
+
+**取得真實實作範例**：
+```bash
+# Controller 實作
+node .claude/skills/shared/FileResolver.js get-content \
+  JobBank1111.Job.WebAPI/Member/MemberV1ControllerImpl.cs
+
+# Handler 實作  
+node .claude/skills/shared/FileResolver.js get-content \
+  JobBank1111.Job.WebAPI/Member/MemberHandler.cs
+```
 
 ## 注意事項
 

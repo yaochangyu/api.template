@@ -43,5 +43,10 @@ app.UseMiddleware<RequestParameterLoggerMiddleware>(); // 請求日誌
 ## 參考文件
 - [中介軟體架構](./references/middleware-architecture.md)
 
-## 範本檔案
-- [中介軟體範本](./assets/middleware-template.cs)
+## 實作參考
+
+取得中介軟體實作範例（透過 FileResolver）：
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  JobBank1111.Job.WebAPI/TraceContextMiddleware.cs
+```

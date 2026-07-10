@@ -97,7 +97,11 @@ graph LR
 
 ## 實作範本
 
-完整範本請參考：`assets/handler-template.cs`
+完整實作範本請參考生產代碼（透過 FileResolver）：
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  JobBank1111.Job.WebAPI/Member/MemberHandler.cs
+```
 
 ## 核心模式
 
@@ -184,7 +188,7 @@ public async Task<Result<OrderDetail, Failure>> CreateOrderAsync(
 - [Handler 最佳實踐](./references/handler-best-practices.md)
 
 ## 範本檔案
-- [Handler 實作範本](./assets/handler-template.cs)
+- 取得 Handler 實作：`node .claude/skills/shared/FileResolver.js get-content JobBank1111.Job.WebAPI/Member/MemberHandler.cs`
 
 ## 注意事項
 

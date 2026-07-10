@@ -23,19 +23,12 @@
 │   ├── security-check-secrets/ security-deep-review/
 │   ├── security-fast-scan/     # （assets/ 內含共用安全報告範本）
 │   └── webapi-real-testing/
-├── templates/                  # 程式碼產生模板（權威來源，{{ENTITY}} 佔位符）
-│   ├── handler-template.cs     # Handler 類別模板
-│   ├── controller-template.cs  # Controller 實作模板
-│   ├── middleware-template.cs  # Middleware 模板
-│   ├── model-template.cs       # Model 模板
-│   └── repository-template.cs  # Repository 模板
 ├── agents-workflow-guide.md    # Agent 工作流程指南
 └── command-processor.md        # 指令處理邏輯說明
 ```
 
-> 維護規則：`skills/api-development/assets/controller-template.cs` 與
-> `skills/handler/assets/handler-template.cs` 是 `templates/` 對應檔的同步副本，
-> 修改 `templates/` 後需同步（diff 應為 0）。
+> **模板管理**：所有程式碼實作參考現已改為使用 FileResolver 動態取得真實項目代碼，
+> 確保參考範例始終與生產代碼同步。詳見各 SKILL 的「實作參考」章節。
 
 ## 🚀 快速開始
 
@@ -160,30 +153,36 @@ public class ProductHandler(
 
 ### 修改模板
 
-如需客製化產生的程式碼，可以直接編輯模板檔案：
+### 程式碼參考方式
 
-1. **Handler 模板**: `.claude/templates/handler-template.cs`
-2. **Controller 模板**: `.claude/templates/controller-template.cs`
-3. **Repository 模板**: `.claude/templates/repository-template.cs`
-4. **Middleware 模板**: `.claude/templates/middleware-template.cs`
+所有程式碼範本已改為透過 FileResolver 動態取得真實項目代碼：
 
-### 變數系統
+```bash
+# 取得 Handler 實作
+node .claude/skills/shared/FileResolver.js get-content \
+  JobBank1111.Job.WebAPI/Member/MemberHandler.cs
 
-模板支援以下變數替換：
+# 取得 Controller 實作
+node .claude/skills/shared/FileResolver.js get-content \
+  JobBank1111.Job.WebAPI/Member/MemberV1ControllerImpl.cs
 
-| 變數 | 說明 | 範例 |
-|------|------|------|
-| `{{ENTITY}}` | 實體名稱 (首字母大寫) | Product |
-| `{{entity}}` | 實體名稱 (首字母小寫) | product |
-| `{{MIDDLEWARE_NAME}}` | 中介軟體名稱 | RateLimit |
+# 取得 Repository 實作
+node .claude/skills/shared/FileResolver.js get-content \
+  JobBank1111.Job.WebAPI/Member/MemberRepository.cs
+```
+
+**好處**：
+- ✅ 始終參考最新的生產代碼
+- ✅ 不需維護過時的靜態模板
+- ✅ 支援離線快取與自動同步
 
 ### 新增指令
 
 要新增自訂指令：
 
 1. 在 `.claude/commands/webapi.md` 中新增指令定義
-2. 建立對應的模板檔案
-3. 更新 `.claude/command-processor.md` 中的處理邏輯
+2. 在 `.claude/command-processor.md` 中補充處理邏輯，使用 FileResolver 取得參考代碼
+3. 根據參考代碼與需求調整邏輯
 
 ## 📝 最佳實務
 
@@ -240,12 +239,19 @@ A: 檢查目前工作目錄是否在專案根目錄。
 **Q: 編譯錯誤？**  
 A: 檢查是否已建立對應的 Request/Response 類別和 EF 實體。
 
-**Q: 如何修改產生的程式碼？**  
-A: 編輯 `.claude/templates/` 中的對應模板檔案。
+**Q: 如何查看實作範例？**  
+A: 使用 FileResolver 取得生產代碼：
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  JobBank1111.Job.WebAPI/Member/MemberHandler.cs
+```
 
 ### 除錯方式
 
-1. **檢查模板檔案**: 確保模板語法正確
+1. **檢查 FileResolver**: 確保能從 GitHub 取得參考代碼
+   ```bash
+   node .claude/skills/shared/FileResolver.js get-github-url JobBank1111.Job.WebAPI/Member/MemberHandler.cs
+   ```
 2. **驗證變數替換**: 確認實體名稱符合 C# 命名規範  
 3. **查看目標目錄**: 確保有寫入權限
 4. **檢查依賴項目**: 確認所需的 using 陳述式和類別存在
