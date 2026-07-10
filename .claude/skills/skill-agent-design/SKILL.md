@@ -370,9 +370,14 @@ description: API 開發流程引導技能
 ## 參考文件
 - [API 開發工作流程](./references/api-development-workflow.md)
 
-## 範本檔案
-- [Controller 範本](./assets/controller-template.cs)
-- [OpenAPI 端點範本](./assets/openapi-endpoint-template.yml)
+## 實作範例
+
+開發者應使用 FileResolver 參考專案內的實際代碼，而不是在 assets/ 中複製範本：
+
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  src/JobBank1111.Job.WebAPI/Member/MemberController.cs
+```
 ```
 
 ### 範例 3: Agent 定義
