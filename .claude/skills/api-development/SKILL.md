@@ -130,6 +130,26 @@ graph TD
    - 我需要從頭建立規格
 ```
 
+### 問題 2.5：確認 API 開發方式
+
+```
+請確認此專案的 API 開發方式：
+
+1️⃣ API First（推薦用於團隊協作、Client SDK 需求）
+   - 預先定義 OpenAPI 規格（openapi.yaml）
+   - 自動產生 Controller 骨架
+   - 命名約定：XxxControllerImpl
+   - 適用：公開 API、大型團隊、Client SDK 分發
+
+2️⃣ Code First（推薦用於快速原型、內部小型專案）
+   - 直接編寫 Controller 類別，無預先規格
+   - 使用 Route 和 HttpMethod 特性定義端點
+   - 命名約定：XxxController（無 Impl 後綴）
+   - 適用：快速原型、內部 API、小型團隊
+
+⚠️ 重要：同一專案內只能選擇一種方式，不得混用
+```
+
 ### 問題 3：需要實作的分層
 
 ```
@@ -272,17 +292,34 @@ task codegen-api-client
 
 ## Controller 實作指導
 
+### API First: 實作自動產生的介面
+
 產生的 Controller 骨架需要實作自動產生的介面，整合以下元件：
 
 1. **Handler 整合**：呼叫業務邏輯層
 2. **Result Pattern 處理**：轉換 Result 為 HTTP 回應
 3. **HTTP 狀態碼映射**：使用 FailureCodeMapper
 
+**命名約定**：使用 `XxxControllerImpl` 命名（Impl 後綴表示 API First 實作）
+
 完整實作範本請參考生產代碼（透過 FileResolver）：
 ```bash
 node .claude/skills/shared/FileResolver.js get-content \
   JobBank1111.Job.WebAPI/Member/MemberV1ControllerImpl.cs
 ```
+
+### Code First: 直接實作無預先介面
+
+無需實作自動產生的介面，直接建立 Controller 類別實作業務邏輯：
+
+1. **直接定義 API 端點**：使用 Route 和 HttpMethod 特性
+2. **Handler 整合**：同樣呼叫業務邏輯層
+3. **Result Pattern 處理**：同樣轉換 Result 為 HTTP 回應
+4. **HTTP 狀態碼映射**：同樣使用 FailureCodeMapper
+
+**命名約定**：使用 `XxxController` 命名（無 Impl 後綴表示 Code First 實作）
+
+**重要提醒**：Code First 開發完成後，需手動維護 OpenAPI 規格文件以保持文件同步。
 
 ## API First vs Code First 對比
 
@@ -336,6 +373,144 @@ public class MemberController(MemberHandler handler) : ControllerBase, IMemberAp
 }
 ```
 
+## Code First 完整開發流程
+
+Code First 開發方式適用於快速原型、內部小型專案或需要高度定制的場景。與 API First 不同，Code First 無需預先定義 OpenAPI 規格，而是直接撰寫 Controller 類別。
+
+### 開發流程步驟
+
+#### Code First 步驟 1：直接建立 Controller 類別
+
+無需預先產生 OpenAPI 規格，直接建立 `MemberController.cs`（無 Impl 後綴）：
+
+```csharp
+[ApiController]
+[Route("api/v2/members")]
+public class MemberController(MemberHandler handler) : ControllerBase
+{
+    [HttpPost]
+    [ProducesResponseType(typeof(MemberDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(FailureResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateMember(
+        [FromBody] CreateMemberRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await handler.CreateMemberAsync(request, cancellationToken);
+
+        return result.Match(
+            success => StatusCode(201, success),
+            failure => StatusCode(
+                FailureCodeMapper.ToHttpStatusCode(failure.Code),
+                failure)
+        );
+    }
+
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(MemberDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(FailureResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetMember(
+        [FromRoute] int id,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await handler.GetMemberAsync(id, cancellationToken);
+
+        return result.Match(
+            success => Ok(success),
+            failure => StatusCode(
+                FailureCodeMapper.ToHttpStatusCode(failure.Code),
+                failure)
+        );
+    }
+
+    [HttpPut("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(FailureResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateMember(
+        [FromRoute] int id,
+        [FromBody] UpdateMemberRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await handler.UpdateMemberAsync(id, request, cancellationToken);
+
+        return result.Match(
+            success => NoContent(),
+            failure => StatusCode(
+                FailureCodeMapper.ToHttpStatusCode(failure.Code),
+                failure)
+        );
+    }
+
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(FailureResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteMember(
+        [FromRoute] int id,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await handler.DeleteMemberAsync(id, cancellationToken);
+
+        return result.Match(
+            success => NoContent(),
+            failure => StatusCode(
+                FailureCodeMapper.ToHttpStatusCode(failure.Code),
+                failure)
+        );
+    }
+}
+```
+
+**關鍵特徵**：
+- 無需實作任何介面
+- 使用 Route 和 HttpMethod 特性（HttpPost、HttpGet 等）直接定義端點
+- 使用 ProducesResponseType 特性文件化 HTTP 回應
+- 與 API First 相同的 Handler 整合和 Result Pattern 處理
+
+#### Code First 步驟 2：實作 Handler 和業務邏輯
+
+與 API First 完全相同，實作 `MemberHandler` 和相關的 DTO、實體。
+
+#### Code First 步驟 3：維護 OpenAPI 規格文件
+
+使用工具產生初始 OpenAPI 規格，或手動編寫規格文件以保持一致性：
+
+- **自動產生**：Swashbuckle 從 Controller 特性自動產生 OpenAPI 規格
+- **手動維護**：在 `docs/openapi.yaml` 手動編寫規格，並定期與代碼同步
+
+#### Code First 步驟 4：客戶端整合
+
+Code First 開發完成後，可選擇自動產生 Client SDK 或手動實作 HTTP 客戶端。
+
+### 開發時間線對比
+
+| 階段 | API First | Code First |
+|------|-----------|-----------|
+| 規格設計 | 1-2 小時 | 0 小時（無預先規格） |
+| Code 產生 | 10 分鐘 | 0 小時（無自動產生） |
+| 實作階段 | 2-3 小時 | 2-3 小時 |
+| 文件同步 | 0 小時 | 1-2 小時（手動維護） |
+
+### 適用場景
+
+**Code First 推薦**：
+- 快速原型開發（時間優先）
+- 內部 API（無需外部 SDK 分發）
+- 小型團隊（無需複雜的 API 溝通流程）
+- 實驗性功能（規格可能頻繁變動）
+
+**API First 推薦**：
+- 公開 API（需要穩定的規格契約）
+- 大型團隊協作（預先溝通 API 結構）
+- Client SDK 分發（自動產生多種語言）
+- 文件優先開發（詳細的 API 文件）
+
+### Code First 實作參考
+
+生產代碼範例（透過 FileResolver）：
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  JobBank1111.Job.WebAPI/Member/MemberController.cs
+```
+
 ### 步驟 4：產生 Client SDK（可選）
 ```bash
 task codegen-api-client
@@ -372,9 +547,14 @@ node .claude/skills/shared/FileResolver.js get-content \
 ## 注意事項
 
 ### 🔒 核心原則
-1. **強制詢問**：不得擅自假設開發流程，必須明確詢問
-2. **文件優先**：API First 時，規格定義必須在實作之前
-3. **自動產生的程式碼不可手動編輯**：位於 AutoGenerated 資料夾
+1. **強制詢問**：不得擅自假設開發流程，必須明確詢問使用者選擇 API First 或 Code First
+2. **文件優先（API First）**：API First 開發時，OpenAPI 規格定義必須在實作之前
+3. **文件同步（Code First）**：Code First 開發時，完成實作後必須手動維護 OpenAPI 規格文件以保持一致性
+4. **禁止混用**：同一專案內只能選擇一種開發方式（API First 或 Code First），不得混用
+5. **命名約定**：
+   - API First：使用 `XxxControllerImpl` 命名（Impl 後綴表示由規格自動產生的實作）
+   - Code First：使用 `XxxController` 命名（無 Impl 後綴表示直接實作）
+   - 自動產生的程式碼不可手動編輯，位於 AutoGenerated 資料夾
 
 ### 📋 最佳實踐
 1. **API First 優先**：除非有特殊理由，建議使用 API First
@@ -417,9 +597,22 @@ node .claude/skills/shared/FileResolver.js get-content \
 ```
 
 ## 相關 Skills
-- `handler` - Handler 業務邏輯實作
-- `error-handling` - Result Pattern 錯誤處理
-- `bdd-testing` - API 端點測試
+
+**API 開發方式相關**：
+- `/api-development` - API First vs Code First 決策與流程選擇
+
+**與開發方式無關的實作 Skills**（API First 和 Code First 均適用）：
+- `/handler` - Handler 業務邏輯實作（兩種方式通用）
+- `/error-handling` - Result Pattern 錯誤處理（兩種方式通用）
+- `/bdd-testing` - API 端點 BDD 測試（兩種方式通用）
+- `/repository-design` - 資料存取層設計（兩種方式通用）
+- `/ef-core` - EF Core 最佳化（兩種方式通用）
+- `/caching-strategy` - 快取設計（兩種方式通用）
+
+**相關文檔**：
+- [development-rules.md](../../development-rules.md) - 開發規則與 Controller 命名約定
+- [decision-framework.md](../../decision-framework.md) - API 決策框架
 
 ## 相關 Agents
-- `feature-development-agent` - 使用本 skill 的完整功能開發流程
+- `feature-development-agent` - 完整功能開發流程（整合此 skill 的決策節點）
+- `architecture-review-agent` - 架構檢視（驗證 API 層設計是否遵循原則）
