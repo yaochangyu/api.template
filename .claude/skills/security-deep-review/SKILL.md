@@ -3,6 +3,9 @@ name: security-deep-review
 description: 深度程式碼安全審查，檢測注入攻擊、XSS、CSRF、身份驗證和授權問題
 ---
 
+### ⚠️ 前置條件
+本 SKILL 須搭配閱讀：[開發規則](../../DEVELOPMENT-RULES.md)
+
 # Security Deep Review
 
 深度程式碼層級的安全審查，專注於程式設計上的漏洞。

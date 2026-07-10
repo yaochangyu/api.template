@@ -3,6 +3,11 @@ name: caching-strategy
 description: 快取策略與多層快取設計技能，協助開發者實作 L1 Memory + L2 Redis 分層快取，包含 TTL 管理、版本控制與失效策略。
 ---
 
+### ⚠️ 前置條件
+本 SKILL 須搭配閱讀：
+- [開發規則](../../DEVELOPMENT-RULES.md)
+- [決策框架 - 快取策略](../../DECISION-FRAMEWORK.md#快取策略決策)
+
 # Caching Strategy Skill
 
 ## 描述

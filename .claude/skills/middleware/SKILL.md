@@ -3,6 +3,9 @@ name: middleware
 description: 中介軟體實作技能，協助開發者實作符合專案規範的中介軟體，包含 TraceContext 管理、Exception Handling、Request Logging 與管線配置。
 ---
 
+### ⚠️ 前置條件
+本 SKILL 須搭配閱讀：[開發規則](../../DEVELOPMENT-RULES.md)
+
 # Middleware Skill
 
 ## 描述

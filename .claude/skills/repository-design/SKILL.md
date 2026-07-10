@@ -3,6 +3,11 @@ name: repository-design
 description: Repository 設計指導技能，協助開發者根據業務需求選擇最合適的 Repository 設計策略（資料表導向 vs 需求導向 vs 混合模式）。
 ---
 
+### ⚠️ 前置條件
+本 SKILL 須搭配閱讀：
+- [開發規則](../../DEVELOPMENT-RULES.md)
+- [決策框架 - 資料庫選擇](../../DECISION-FRAMEWORK.md#資料庫選擇決策)
+
 # Repository Design Skill
 
 ## 描述

@@ -3,6 +3,9 @@ name: security-fast-scan
 description: 執行完整的應用程式安全掃描，檢查 OWASP Top 10 漏洞、敏感資料洩漏、依賴套件漏洞和安全配置問題。
 ---
 
+### ⚠️ 前置條件
+本 SKILL 須搭配閱讀：[開發規則](../../DEVELOPMENT-RULES.md)
+
 # Security Fast Scan
 
 ## 描述

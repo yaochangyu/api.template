@@ -3,6 +3,9 @@ name: handler
 description: Handler 業務邏輯層實作技能，協助開發者實作符合專案規範的 Handler，包含業務邏輯處理、流程協調、Result Pattern 錯誤處理與跨 Repository 操作。
 ---
 
+### ⚠️ 前置條件
+本 SKILL 須搭配閱讀：[開發規則](../../DEVELOPMENT-RULES.md)
+
 # Handler Skill
 
 ## 描述

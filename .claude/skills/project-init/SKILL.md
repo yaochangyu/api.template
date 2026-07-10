@@ -3,6 +3,11 @@ name: project-init
 description: 專案初始化與配置技能，負責引導使用者完成新專案的初始化、配置設定、GitHub 範本套用與專案狀態檢測。
 ---
 
+### ⚠️ 前置條件
+本 SKILL 須搭配閱讀：
+- [開發規則](../../DEVELOPMENT-RULES.md)
+- [決策框架 - 資料庫選擇](../../DECISION-FRAMEWORK.md#資料庫選擇決策)
+
 # Project Init Skill
 
 ## 描述

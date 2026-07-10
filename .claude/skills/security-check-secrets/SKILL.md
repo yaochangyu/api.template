@@ -3,6 +3,9 @@ name: security-check-secrets
 description: 掃描程式碼和配置檔中的敏感資料洩漏，包括 API Keys、密碼、Token 等
 ---
 
+### ⚠️ 前置條件
+本 SKILL 須搭配閱讀：[開發規則](../../DEVELOPMENT-RULES.md)
+
 # Security Check Secrets
 
 專門掃描敏感資料洩漏，防止憑證被提交到版本控制系統。

@@ -3,6 +3,9 @@ name: security-check-config
 description: 檢查應用程式的安全配置，包括 HTTPS、CORS、Security Headers、Cookie 等
 ---
 
+### ⚠️ 前置條件
+本 SKILL 須搭配閱讀：[開發規則](../../DEVELOPMENT-RULES.md)
+
 # Security Check Config
 
 檢查應用程式的安全配置問題。

@@ -3,6 +3,9 @@ name: error-handling
 description: 錯誤處理與 Result Pattern 技能，協助開發者實作統一的錯誤處理機制，包含 Result Pattern 應用、Failure 物件建立與分層錯誤處理策略。
 ---
 
+### ⚠️ 前置條件
+本 SKILL 須搭配閱讀：[開發規則](../../DEVELOPMENT-RULES.md)
+
 # Error Handling Skill
 
 ## 描述

@@ -3,6 +3,9 @@ name: security-check-dependencies
 description: 檢查專案依賴套件的已知漏洞、過時版本和安全問題
 ---
 
+### ⚠️ 前置條件
+本 SKILL 須搭配閱讀：[開發規則](../../DEVELOPMENT-RULES.md)
+
 # Security Check Dependencies
 
 檢查專案依賴套件的已知漏洞和安全問題。

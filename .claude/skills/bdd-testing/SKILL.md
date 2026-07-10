@@ -3,6 +3,11 @@ name: bdd-testing
 description: BDD 測試實作技能，協助開發者使用 Reqnroll 撰寫行為驅動開發測試，包含 Gherkin 語法、測試步驟實作與 Docker 測試環境設定。
 ---
 
+### ⚠️ 前置條件
+本 SKILL 須搭配閱讀：
+- [開發規則](../../DEVELOPMENT-RULES.md)
+- [決策框架 - 測試策略決策樹](../../DECISION-FRAMEWORK.md#測試策略決策樹)
+
 # BDD Testing Skill
 
 ## 描述

@@ -3,6 +3,9 @@ name: ef-core
 description: EF Core 操作與最佳化技能，協助開發者正確使用 Entity Framework Core，包含 DbContextFactory 模式、查詢最佳化、Migration 管理與反向工程。
 ---
 
+### ⚠️ 前置條件
+本 SKILL 須搭配閱讀：[開發規則](../../DEVELOPMENT-RULES.md)
+
 # EF Core Skill
 
 ## 描述
