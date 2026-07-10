@@ -68,5 +68,18 @@ catch
 ## 參考文件
 - [EF Core 最佳實踐](./references/ef-core-best-practices.md)
 
-## 範本檔案
-- [DbContext 使用範本](./assets/dbcontext-usage-template.cs)
+## 實作範例
+
+開發者應參考專案內的實際代碼：
+
+**DbContextFactory 使用範例**：
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  src/JobBank1111.Job.DB/JobBankDbContextFactory.cs
+```
+
+**Repository 實作範例**：
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  src/JobBank1111.Job.DB/Repositories/MemberRepository.cs
+```

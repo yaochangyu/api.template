@@ -164,6 +164,18 @@ await cache.SetAsync("api-token", token);    // ❌ 不應快取
 - [Redis 配置指南](./references/redis-configuration.md)
 - [失效策略深解](./references/cache-invalidation-strategies.md)
 
-## 實作範本
-- [多層快取範本](./assets/multi-layer-cache-template.cs)
-- [Redis 設定範本](./assets/redis-setup.yml)
+## 實作範例
+
+開發者應參考專案內的實際實作代碼：
+
+**多層快取實作**：
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  src/JobBank1111.Infrastructure/Caching/MultiLayerCacheService.cs
+```
+
+**Redis 配置**：
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  src/appsettings.json
+```

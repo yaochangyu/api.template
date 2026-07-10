@@ -65,6 +65,18 @@ public class TestServer : WebApplicationFactory<Program>
 ## 參考文件
 - [BDD 測試指南](./references/bdd-testing-guide.md)
 
-## 範本檔案
-- [Feature 範本](./assets/feature-template.feature)
-- [測試步驟範本](./assets/test-steps-template.cs)
+## 實作範例
+
+開發者應參考專案內的實際測試代碼：
+
+**Gherkin 情境範例**：
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  src/Tests/Features/Member.feature
+```
+
+**測試步驟實作範例**：
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  src/Tests/Member/MemberSteps.cs
+```

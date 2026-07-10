@@ -82,5 +82,12 @@ public enum FailureCode
 ## 參考文件
 - [Result Pattern 最佳實踐](./references/result-pattern-best-practices.md)
 
-## 範本檔案
-- [Failure 範本](./assets/failure-template.cs)
+## 實作範例
+
+開發者應參考專案內的實際實作代碼：
+
+**Failure 實作**：
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  src/JobBank1111.Infrastructure/Results/Failure.cs
+```

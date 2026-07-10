@@ -408,7 +408,7 @@ node .claude/skills/shared/FileResolver.js get-content \
 建議：
 1. 確認方法簽章與介面定義完全一致
 2. 檢查參數名稱、類型、回傳類型
-3. 參考範本：assets/controller-template.cs
+3. 參考專案內的實際 Controller 實作
 ```
 
 ## 相關 Skills
