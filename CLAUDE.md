@@ -191,6 +191,31 @@
 
 ---
 
+## 計畫書生命週期管理
+
+當建立新計畫書時，遵循以下流程：
+
+### 建立階段
+- 檔案名格式: `{project}-PLAN.md`（如 `CLAUDE-refactoring-PLAN.md`）
+- 位置: 專案根目錄（方便檢視）
+- 開頭標記: `**計畫時間**: YYYY-MM-DD HH:mm GMT+8` 與 `**進度**: [計畫中]`
+
+### 執行階段
+- 即時更新進度追蹤表
+- 每完成一個 Step，標記狀態為 ✅ 與進度百分比
+
+### 封存階段（計畫全部完成後）
+1. **將檔案改名**: `{project}-PLAN.md` → `{project}-PLAN.completed.md`
+2. **在檔案頂部加標記**:
+   ```markdown
+   ⏹️ **Status**: COMPLETED (2026-07-10 18:08 GMT+8)
+   
+   此計畫已全部執行完成，已封存。詳見 Git commit: 9d5ace9
+   ```
+3. **Git commit** 時特別說明**: `git commit -m "archive(plan): 封存 CLAUDE.md 重組計畫書（已完成）"`
+
+---
+
 ## 最佳實踐檢查清單
 
 ### 開發前
