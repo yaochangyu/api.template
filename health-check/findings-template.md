@@ -59,9 +59,10 @@
 
 ### m-2. `doc/` 與 `docs/` 兩目錄並存易混淆
 - `doc/`：`description.md`、`openapi.yml`（API 契約）
-- `docs/`：`development/bdd-best-practices.md`、`development/reqnroll-best-practices.md`（開發指南）
+- `docs/`：`development/reqnroll-best-practices.md`（開發指南）
 - 問題：內容無直接重複，但單複數兩目錄並存、命名近似，容易放錯／找錯。建議合併或明確分工。
 - 嚴重度：minor
+- **更新**：BDD 最佳實踐已遷至 `.claude/skills/bdd-practices`，不再需要 `docs/development/bdd-best-practices.md`
 
 ### m-3. `env/local.env` 明文 SA 密碼
 - 檔案：`env/local.env:2`（連線字串含 SQL Server SA 密碼）— 類型：硬編資料庫密碼

@@ -78,7 +78,6 @@ api.template/
 ├── dotnet-project-template/doc/description.md
 ├── dotnet-project-template/doc/openapi.yml
 ├── dotnet-project-template/docker-compose.yml
-├── dotnet-project-template/docs/development/bdd-best-practices.md
 ├── dotnet-project-template/docs/development/reqnroll-best-practices.md
 ├── dotnet-project-template/env/.template-config.json
 ├── dotnet-project-template/env/local.env
