@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JobBank1111.Job.WebAPI.Member;
 
-public class MemberV2ControllerImpl(
+[ApiController]
+[Route("api/v2/[controller]")]
+public class MemberController(
     MemberHandler memberHandler,
     IHttpContextAccessor httpContextAccessor
-) : IMemberController
+) : ControllerBase
 {
     public async Task<ActionResult<GetMemberResponseCursorPaginatedList>> GetMembersCursorAsync(
         CancellationToken cancellationToken = default(CancellationToken))

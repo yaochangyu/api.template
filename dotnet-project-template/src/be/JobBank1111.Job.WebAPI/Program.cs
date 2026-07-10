@@ -52,7 +52,7 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
     builder.Services.AddHttpContextAccessor();
-    builder.Services.AddScoped<JobBank1111.Job.WebAPI.Contract.IMemberController, JobBank1111.Job.WebAPI.Member.MemberV2ControllerImpl>();
+    // Code First: MemberController - ASP.NET Core 自動發現，無需手動註冊
     builder.Services.AddScoped<JobBank1111.Job.WebAPI.Contract.IMemberV1Controller, JobBank1111.Job.WebAPI.Member.MemberV1ControllerImpl>();
 
     builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
