@@ -206,13 +206,20 @@
 
 ### 封存階段（計畫全部完成後）
 1. **將檔案改名**: `{project}-PLAN.md` → `{project}-PLAN.completed.md`
-2. **在檔案頂部加標記**:
+2. **移到 archive 目錄**: `mv {project}-PLAN.completed.md .archive/plans/`
+3. **在檔案頂部加標記**:
    ```markdown
    ⏹️ **Status**: COMPLETED (2026-07-10 18:08 GMT+8)
    
-   此計畫已全部執行完成，已封存。詳見 Git commit: 9d5ace9
+   此計畫已全部執行完成，已封存至 .archive/plans/
+   詳見 Git commit: 9d5ace9
    ```
-3. **Git commit** 時特別說明**: `git commit -m "archive(plan): 封存 CLAUDE.md 重組計畫書（已完成）"`
+4. **Git commit** 時特別說明**: `git commit -m "archive(plan): 封存計畫書至 .archive/plans/"`
+
+**Archive 目錄說明**:
+- `.archive/plans/` — 所有已完成的計畫書
+- `.archive/specs/` — 所有已封存的規格書
+- `.archive/docs/` — 其他已過時文檔
 
 ---
 
