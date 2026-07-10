@@ -215,10 +215,6 @@
    ```
 3. **Git commit** — commit message 中**不包含 Co-authored-by**（遵守全域規則）
 
-**注意**：
-- commit 信息要依照現況撰寫，不可照抄
-- 遵守全域 CLAUDE.md 規則：`git commit message 不可包含 Co-authored-by`
-
 ---
 
 ## 最佳實踐檢查清單
