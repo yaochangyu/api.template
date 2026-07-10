@@ -4,7 +4,7 @@ description: 掃描程式碼和配置檔中的敏感資料洩漏，包括 API Ke
 ---
 
 ### ⚠️ 前置條件
-本 SKILL 須搭配閱讀：[開發規則](../../DEVELOPMENT-RULES.md)
+本 SKILL 須搭配閱讀：[開發規則](../../development-rules.md)
 
 # Security Check Secrets
 

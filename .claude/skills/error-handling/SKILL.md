@@ -4,7 +4,7 @@ description: 錯誤處理與 Result Pattern 技能，協助開發者實作統一
 ---
 
 ### ⚠️ 前置條件
-本 SKILL 須搭配閱讀：[開發規則](../../DEVELOPMENT-RULES.md)
+本 SKILL 須搭配閱讀：[開發規則](../../development-rules.md)
 
 # Error Handling Skill
 

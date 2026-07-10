@@ -5,8 +5,8 @@ description: API 開發流程引導技能，協助開發者選擇合適的開發
 
 ### ⚠️ 前置條件
 本 SKILL 須搭配閱讀：
-- [開發規則](../../DEVELOPMENT-RULES.md)
-- [決策框架 - API 開發流程](../../DECISION-FRAMEWORK.md#api-開發流程決策)
+- [開發規則](../../development-rules.md)
+- [決策框架 - API 開發流程](../../decision-framework.md#api-開發流程決策)
 
 # API Development Skill
 

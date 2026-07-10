@@ -4,7 +4,7 @@ description: 檢查應用程式的安全配置，包括 HTTPS、CORS、Security 
 ---
 
 ### ⚠️ 前置條件
-本 SKILL 須搭配閱讀：[開發規則](../../DEVELOPMENT-RULES.md)
+本 SKILL 須搭配閱讀：[開發規則](../../development-rules.md)
 
 # Security Check Config
 

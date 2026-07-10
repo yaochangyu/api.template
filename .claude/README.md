@@ -11,12 +11,12 @@
 | 層級 | 檔案名 | 使用對象 | 內容 |
 |------|--------|---------|------|
 | **第 1 層** | [CLAUDE.md](../CLAUDE.md) | Claude Code AI 助理 | AI 助理行為規則、互動原則、計畫管理 |
-| **第 2 層** | [DEVELOPMENT-RULES.md](./DEVELOPMENT-RULES.md) | 所有開發者 + SKILL 使用者 | 開發指令、架構概述、強制詢問情境、禁止行為、最佳實踐 |
-| **第 3 層** | [DECISION-FRAMEWORK.md](./DECISION-FRAMEWORK.md) | 特定工作流 | API 流程決策、測試策略、資料庫選擇、快取設計、效能優化 |
+| **第 2 層** | [development-rules.md](./development-rules.md) | 所有開發者 + SKILL 使用者 | 開發指令、架構概述、強制詢問情境、禁止行為、最佳實踐 |
+| **第 3 層** | [decision-framework.md](./decision-framework.md) | 特定工作流 | API 流程決策、測試策略、資料庫選擇、快取設計、效能優化 |
 
 **使用建議**：
-- 實作功能前，先讀 DEVELOPMENT-RULES.md（了解規則與詢問情境）
-- 面臨決策點時，查閱 DECISION-FRAMEWORK.md（取得決策邏輯）
+- 實作功能前，先讀 development-rules.md（了解規則與詢問情境）
+- 面臨決策點時，查閱 decision-framework.md（取得決策邏輯）
 - SKILL 使用時，檢查 SKILL.md 頂部的前置條件提示
 
 ---

@@ -8,8 +8,8 @@
 ## 文檔導航（三層架構）
 
 - **此檔案** — AI 助理行為規則（強制互動、偵測機制、計畫管理）
-- [DEVELOPMENT-RULES.md](./.claude/DEVELOPMENT-RULES.md) — 開發規則（所有人需要）
-- [DECISION-FRAMEWORK.md](./.claude/DECISION-FRAMEWORK.md) — 決策邏輯（特定工作流需要）
+- [development-rules.md](./.claude/development-rules.md) — 開發規則（所有人需要）
+- [decision-framework.md](./.claude/decision-framework.md) — 決策邏輯（特定工作流需要）
 
 ---
 
@@ -50,23 +50,23 @@
 當實作具體功能時，根據需求查閱相應 SKILL（詳細實作指南已分層組織）：
 
 ### 必讀文檔
-1. [DEVELOPMENT-RULES.md](./.claude/DEVELOPMENT-RULES.md) — 強制詢問情境、禁止行為、最佳實踐
-2. [DECISION-FRAMEWORK.md](./.claude/DECISION-FRAMEWORK.md) — API 流程、測試策略、快取設計決策
+1. [development-rules.md](./.claude/development-rules.md) — 強制詢問情境、禁止行為、最佳實踐
+2. [decision-framework.md](./.claude/decision-framework.md) — API 流程、測試策略、快取設計決策
 
 ### SKILL 索引表
 
 | 工作項 | 相關 SKILL | 前置閱讀 |
 |--------|-----------|---------|
-| 設計 API 端點 | `/api-development` | DECISION-FRAMEWORK |
-| 實作 Controller | `/handler` | DEVELOPMENT-RULES |
-| 設計資料存取 | `/repository-design` | DECISION-FRAMEWORK |
-| 處理錯誤 | `/error-handling` | DEVELOPMENT-RULES |
-| 實作中介軟體 | `/middleware` | DEVELOPMENT-RULES |
-| EF Core 最佳化 | `/ef-core` | DEVELOPMENT-RULES |
-| 快取設計 | `/caching-strategy` | DECISION-FRAMEWORK |
-| 測試實作 | `/bdd-testing` | DEVELOPMENT-RULES + DECISION-FRAMEWORK |
-| 專案初始化 | `/project-init` | DECISION-FRAMEWORK |
-| 安全性檢查 | `/security-check-*` | DEVELOPMENT-RULES |
+| 設計 API 端點 | `/api-development` | decision-framework |
+| 實作 Controller | `/handler` | development-rules |
+| 設計資料存取 | `/repository-design` | decision-framework |
+| 處理錯誤 | `/error-handling` | development-rules |
+| 實作中介軟體 | `/middleware` | development-rules |
+| EF Core 最佳化 | `/ef-core` | development-rules |
+| 快取設計 | `/caching-strategy` | decision-framework |
+| 測試實作 | `/bdd-testing` | development-rules + decision-framework |
+| 專案初始化 | `/project-init` | decision-framework |
+| 安全性檢查 | `/security-check-*` | development-rules |
 
 ---
 

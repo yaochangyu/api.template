@@ -5,8 +5,8 @@ description: 快取策略與多層快取設計技能，協助開發者實作 L1 
 
 ### ⚠️ 前置條件
 本 SKILL 須搭配閱讀：
-- [開發規則](../../DEVELOPMENT-RULES.md)
-- [決策框架 - 快取策略](../../DECISION-FRAMEWORK.md#快取策略決策)
+- [開發規則](../../development-rules.md)
+- [決策框架 - 快取策略](../../decision-framework.md#快取策略決策)
 
 # Caching Strategy Skill
 

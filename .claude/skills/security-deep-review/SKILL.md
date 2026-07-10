@@ -4,7 +4,7 @@ description: 深度程式碼安全審查，檢測注入攻擊、XSS、CSRF、身
 ---
 
 ### ⚠️ 前置條件
-本 SKILL 須搭配閱讀：[開發規則](../../DEVELOPMENT-RULES.md)
+本 SKILL 須搭配閱讀：[開發規則](../../development-rules.md)
 
 # Security Deep Review
 
