@@ -15,8 +15,8 @@
 ├── commands/
 │   ├── jb.md                   # /jb 系列指令定義
 │   └── webapi.md               # /webapi 系列指令定義
-├── skills/                     # Skill 定義（17 個，主檔一律為 SKILL.md）
-│   ├── api-development/ bdd-practices/ bdd-testing/ ef-core/
+├── skills/                     # Skill 定義（16 個，主檔一律為 SKILL.md）
+│   ├── api-development/ bdd-testing/ ef-core/
 │   ├── error-handling/ handler/ middleware/ project-init/
 │   ├── repository-design/ skill-agent-design/ skill-creator/
 │   ├── security-check-config/ security-check-dependencies/

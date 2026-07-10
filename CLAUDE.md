@@ -185,7 +185,7 @@
 | 實作中介軟體 | `/middleware` | TraceContext 管理、Exception Handling、Request Logging |
 | EF Core 最佳化 | `/ef-core` | 查詢最佳化、Migration、DbContextFactory 模式 |
 | 快取設計 | `/caching-strategy` | 多層快取（L1 Memory / L2 Redis）、失效策略 |
-| 測試實作 | `/bdd-testing` & `/bdd-practices` | Gherkin、Reqnroll、Testcontainers、Docker 測試環境 |
+| 測試實作 | `/bdd-testing` | Gherkin、Reqnroll、Testcontainers、Docker 測試環境 |
 | 監控與可觀測性 | `/observability` (P1) | 健康檢查、Seq、OpenTelemetry 整合 |
 | 安全性檢查 | `/security-check-config` | 設定安全、依賴檢查、機密掃描 |
 

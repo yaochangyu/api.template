@@ -26,10 +26,7 @@ api.template/
 ├── .claude/commands/webapi.md
 ├── .claude/settings.local.json
 ├── .claude/skills/api-development/SKILL.md
-├── .claude/skills/api-development/assets/controller-template.cs
-├── .claude/skills/api-development/assets/openapi-endpoint-template.yml
 ├── .claude/skills/api-development/references/api-development-workflow.md
-├── .claude/skills/bdd-practices/SKILL.md
 ├── .claude/skills/bdd-testing/SKILL.md
 ├── .claude/skills/ef-core/SKILL.md
 ├── .claude/skills/error-handling/SKILL.md

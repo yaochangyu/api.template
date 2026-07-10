@@ -461,7 +461,7 @@ tools: ['grep', 'glob', 'view', 'task']
 
 ## 相關 Skills
 - `project-init` - 專案初始化時可能需要建立 Skill
-- `bdd-practices` - BDD 實踐參考
+- `bdd-testing` - BDD 測試實作參考
 
 ## 相關 Agents
 - `project-setup` - 專案初始化協調

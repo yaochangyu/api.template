@@ -29,7 +29,6 @@
 | **P2.1** | `SKILL-optimization-P2.1-bdd-testing.plan.md` | 1.5h | 補強 `/bdd-testing` | /bdd-testing |
 | **P2.2** | `SKILL-optimization-P2.2-repository-design.plan.md` | 1.5h | 補強 `/repository-design` | /repository-design |
 | **P3.1** | `SKILL-optimization-P3.1-ef-core.plan.md` | 2h | 補強 `/ef-core` | /ef-core |
-| **P3.2** | `SKILL-optimization-P3.2-bdd-practices.plan.md` | 1.5h | 重構 `/bdd-practices` | /bdd-practices |
 
 ---
 
@@ -77,21 +76,6 @@
 
 ---
 
-## 🎯 P3.2：重構 `/bdd-practices` SKILL
-
-**目標**: 拆分內容到 references + assets，簡化 SKILL.md
-
-**完成條件**:
-- [ ] 重構 SKILL.md（精簡到 100-150 行）
-- [ ] 新增 `references/bdd-principles.md`
-- [ ] 新增 `references/gherkin-best-practices.md`
-- [ ] 新增 `assets/` 目錄（範本檔案）
-- [ ] Git commit + 計畫書封存
-
-**預估工時**: 1.5 小時
-
----
-
 ## 📊 優先級說明
 
 ### 🔴 P2（立即執行）— 測試和架構最關鍵
@@ -100,7 +84,6 @@
 
 ### 🟡 P3（後續執行）— 深度優化
 - **P3.1** `/ef-core` — 效能優化指南
-- **P3.2** `/bdd-practices` — 組織重構（已有內容）
 
 ---
 
@@ -113,11 +96,9 @@
 2. P2.2: repository-design (1.5h)
    ↓
 3. P3.1: ef-core (2h) [可選]
-   ↓
-4. P3.2: bdd-practices (1.5h) [可選]
 ```
 
-**總工時**: P2 = 3h（必做）, P3 = 3.5h（可選）
+**總工時**: P2 = 3h（必做）, P3 = 2h（可選）
 
 ---
 
@@ -127,10 +108,9 @@
 |------|------|------|
 | P0 (CLAUDE.md 精簡) | ✅ 完成 | 100% |
 | P1 (error-handling + middleware) | ✅ 完成 | 100% |
-| **P2.1 (bdd-testing)** | ⏳ 待執行 | 0% |
-| **P2.2 (repository-design)** | ⏳ 待執行 | 0% |
-| P3.1 (ef-core) | ⏳ 待執行 | 0% |
-| P3.2 (bdd-practices) | ⏳ 待執行 | 0% |
+| P2.1 (bdd-testing) | ✅ 完成 | 100% |
+| P2.2 (repository-design) | ✅ 完成 | 100% |
+| P3.1 (ef-core) | ✅ 完成 | 100% |
 
 ---
 
