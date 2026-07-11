@@ -1,124 +1,128 @@
-# api.template — JobBank1111 WebAPI 開發範本
+# api.template — .NET WebAPI Development Template
 
-專為 JobBank1111 API 專案設計的企業級 .NET WebAPI 開發範本，實踐 **Clean Architecture**、**分層架構** 與 **Result Pattern** 的最佳實踐。
+**Language**: English | [繁體中文](./README.zh-TW.md)
 
-## 📋 快速開始
+A comprehensive .NET WebAPI development template implementing **Clean Architecture**, **layered architecture**, and **Result Pattern** best practices.
 
-### 前置需求
+## 📋 Quick Start
+
+### Prerequisites
 - .NET 8+ SDK
-- Docker & Docker Compose（用於資料庫與快取測試環境）
+- Docker & Docker Compose (for database and cache test environments)
 - Git
 
-### 基本步驟
+### Basic Steps
 
-1. **檢出專案**
+1. **Clone the project**
    ```bash
    git clone https://github.com/yaochangyu/api.template.git
    cd api.template/dotnet-project-template
    ```
 
-2. **設定環境變數**
+2. **Configure environment variables**
    ```bash
    cp env/local.env .env
-   # 編輯 .env 以設定本機資料庫連接字串、Redis 位址等
+   # Edit .env to set local database connection strings, Redis address, etc.
    ```
 
-3. **啟動開發環境**
+3. **Start development environment**
    ```bash
-   docker-compose up -d      # 啟動 SQL Server、Redis 等依賴
-   dotnet build               # 編譯解決方案
+   docker-compose up -d      # Start SQL Server, Redis, etc.
+   dotnet build               # Build the solution
    dotnet run --project src/be/JobBank1111.Job.WebAPI
    ```
 
-4. **驗證 API 是否運行**
+4. **Verify API is running**
    ```bash
    curl http://localhost:5000/api/health
    ```
 
-5. **執行測試**
+5. **Run tests**
    ```bash
-   dotnet test                # 執行所有單元與整合測試
+   dotnet test                # Execute all unit and integration tests
    ```
 
-## 📁 目錄結構
+## 📁 Directory Structure
 
 ```
 api.template/
-├── .claude/                          # 開發工具與 AI 助理指南
-│   ├── README.md                     # SKILL 使用指南 & 開發工作流
-│   ├── skills/                       # 開發助手技能定義（16 個）
-│   │   ├── api-development/          # API 端點設計與決策邏輯
-│   │   ├── handler/                  # 業務邏輯層實現
-│   │   ├── repository-design/        # 資料存取層設計
-│   │   ├── error-handling/           # 統一錯誤處理模式
-│   │   ├── middleware/               # HTTP 中介軟體實現
-│   │   ├── ef-core/                  # EF Core 最佳化指南
-│   │   ├── bdd-testing/              # BDD 整合測試（Reqnroll/Gherkin）
-│   │   └── [其他 9 個技能]
-│   └── agents/                       # AI Agent 工作流（架構檢視、功能開發等）
+├── .claude/                          # Development tools & AI assistant guides
+│   ├── CLAUDE.md                     # AI assistant behavior rules & plan management
+│   ├── development-rules.md          # Development rules & best practices
+│   ├── decision-framework.md         # Decision logic for API development
+│   ├── skills/                       # Development helper skill definitions (16 total)
+│   │   ├── api-development/          # API endpoint design & decision logic
+│   │   ├── handler/                  # Business logic layer implementation
+│   │   ├── repository-design/        # Data access layer design
+│   │   ├── error-handling/           # Unified error handling patterns
+│   │   ├── middleware/               # HTTP middleware implementation
+│   │   ├── ef-core/                  # EF Core optimization guide
+│   │   ├── bdd-testing/              # BDD integration tests (Reqnroll/Gherkin)
+│   │   └── [9 other skills]
+│   └── agents/                       # AI Agent workflows (architecture review, feature development, etc.)
 │
-├── dotnet-project-template/          # 主要 .NET 專案
-│   ├── src/be/                       # 後端程式碼
-│   │   ├── JobBank1111.Infrastructure/    # 共用基礎設施（快取、日誌、TraceContext）
-│   │   ├── JobBank1111.Job.Contract/      # API 契約 & 自動生成的 Client
-│   │   ├── JobBank1111.Job.DB/            # EF Core DbContext & Entity
-│   │   ├── JobBank1111.Job.WebAPI/        # API Controller 與中介軟體
-│   │   ├── JobBank1111.Job.Test/          # 單元測試 (Xunit)
-│   │   └── JobBank1111.Job.IntegrationTest/ # 整合測試 (Reqnroll/BDD)
+├── dotnet-project-template/          # Main .NET project
+│   ├── src/be/                       # Backend code
+│   │   ├── JobBank1111.Infrastructure/    # Shared infrastructure (caching, logging, TraceContext)
+│   │   ├── JobBank1111.Job.Contract/      # API contracts & auto-generated Client
+│   │   ├── JobBank1111.Job.DB/            # EF Core DbContext & Entities
+│   │   ├── JobBank1111.Job.WebAPI/        # API Controllers & middleware
+│   │   ├── JobBank1111.Job.Test/          # Unit tests (Xunit)
+│   │   └── JobBank1111.Job.IntegrationTest/ # Integration tests (Reqnroll/BDD)
 │   │
-│   ├── doc/                          # API 規格文檔
-│   │   └── openapi.yml               # OpenAPI 規格（Swagger）
+│   ├── doc/                          # API specification documents
+│   │   └── openapi.yml               # OpenAPI specification (Swagger)
 │   │
-│   ├── env/                          # 環境配置
-│   │   ├── .template-config.json     # 範本配置
-│   │   └── local.env                 # 本機環境變數
+│   ├── env/                          # Environment configuration
+│   │   ├── .template-config.json     # Template configuration
+│   │   └── local.env                 # Local environment variables
 │   │
-│   ├── k8s/                          # Kubernetes 部署配置
-│   ├── docker-compose.yml            # 本機開發環境（DB、Redis）
-│   ├── Taskfile.yml                  # 常用任務（編譯、測試、部署）
-│   └── best-practices.md             # 專案最佳實踐指南
+│   ├── k8s/                          # Kubernetes deployment configuration
+│   ├── docker-compose.yml            # Local development environment (DB, Redis)
+│   ├── Taskfile.yml                  # Common tasks (build, test, deploy)
+│   └── best-practices.md             # Project best practices guide
 │
-├── CLAUDE.md                         # AI 助理行為規則與計畫管理
-├── tree.md                           # 完整檔案清單
-└── .archive/                         # 已完成的計畫文檔（用於參考）
+├── CLAUDE.md                         # AI assistant behavior rules & plan management
+├── tree.md                           # Complete file listing
+└── .archive/                         # Completed plan documents (for reference)
 ```
 
-## 🏗️ 核心架構
+## 🏗️ Core Architecture
 
-### 分層設計
+### Layered Design
 
 ```
 HTTP Request
      ↓
-[ Middleware Layer ]      # 日誌、認證、TraceContext、錯誤處理
+[ Middleware Layer ]      # Logging, authentication, TraceContext, error handling
      ↓
-[ Controller Layer ]      # HTTP 路由與請求驗證（MemberController.cs）
+[ Controller Layer ]      # HTTP routing & request validation (MemberController.cs)
      ↓
-[ Handler Layer ]         # 業務邏輯（MemberHandler.cs）
+[ Handler Layer ]         # Business logic (MemberHandler.cs)
      ↓
-[ Repository Layer ]      # 資料存取抽象（IMemberRepository）
+[ Repository Layer ]      # Data access abstraction (IMemberRepository)
      ↓
-[ EF Core DbContext ]     # ORM 實現
+[ EF Core DbContext ]     # ORM implementation
      ↓
 [ Database ]              # SQL Server / PostgreSQL
 ```
 
-### 核心概念
+### Core Concepts
 
-#### 1. **API 開發方式**
+#### 1. **API Development Approach**
 
-根據專案階段選擇合適的開發方式（**必須擇一，不得混用**）：
+Choose the appropriate development approach based on your project stage (**must choose one, do not mix**):
 
-| 方式 | 何時使用 | 代表檔案 |
-|------|--------|--------|
-| **API First** | API 規格已確定，自動產生 Controller | `MemberV1ControllerImpl.cs` |
-| **Code First** | 直接實作 Controller，無規格自動生成 | `MemberController.cs` |
+| Approach | When to Use | Example File |
+|----------|-----------|----------|
+| **API First** | API specification is finalized, auto-generate Controller | `MemberV1ControllerImpl.cs` |
+| **Code First** | Implement Controller directly without spec auto-generation | `MemberController.cs` |
 
-👉 詳細決策邏輯：見 [.claude/decision-framework.md](./.claude/decision-framework.md#api-開發流程決策)
+👉 Detailed decision logic: see [.claude/decision-framework.md](./.claude/decision-framework.md#api開發流程決策)
 
-#### 2. **Result Pattern（統一結果型態）**
+#### 2. **Result Pattern (Unified Result Type)**
 
-所有 API 端點返回統一的 `Result<T>` 結構：
+All API endpoints return a unified `Result<T>` structure:
 
 ```csharp
 {
@@ -129,27 +133,27 @@ HTTP Request
 }
 ```
 
-- **優點**：統一錯誤處理、完整的追蹤上下文、自動日誌記錄
-- **實現**：見 [/error-handling SKILL](./.claude/skills/error-handling/SKILL.md)
+- **Benefits**: Unified error handling, complete trace context, automatic logging
+- **Implementation**: see [/error-handling SKILL](./.claude/skills/error-handling/SKILL.md)
 
-#### 3. **TraceContext（請求追蹤）**
+#### 3. **TraceContext (Request Tracing)**
 
-每個請求自動分配唯一的 TraceId，貫穿整個調用鏈：
+Every request automatically gets a unique TraceId that flows through the entire call chain:
 
 ```csharp
 public class TraceContext
 {
-    public string TraceId { get; set; }  // 全局唯一識別符
-    public string UserId { get; set; }   // 當前使用者
+    public string TraceId { get; set; }  // Globally unique identifier
+    public string UserId { get; set; }   // Current user
     public DateTime RequestTime { get; set; }
 }
 ```
 
-便利於日誌聚合、效能分析、故障診斷。
+Facilitates log aggregation, performance analysis, and fault diagnosis.
 
-#### 4. **不可變物件**
+#### 4. **Immutable Objects**
 
-使用 C# record 類型與 init 屬性，確保物件創建後不可修改：
+Use C# record types and init properties to ensure objects cannot be modified after creation:
 
 ```csharp
 public record MemberResponse(
@@ -159,9 +163,9 @@ public record MemberResponse(
 );
 ```
 
-#### 5. **非同步 I/O**
+#### 5. **Async I/O**
 
-所有資料庫、網路操作都使用 async/await：
+All database and network operations use async/await:
 
 ```csharp
 public async Task<Result<MemberResponse>> GetMemberAsync(int id)
@@ -169,115 +173,115 @@ public async Task<Result<MemberResponse>> GetMemberAsync(int id)
     var member = await _repository.GetByIdAsync(id);
     return member != null 
         ? Result.Ok(new MemberResponse(member.Id, member.Name, member.Email))
-        : Result.Fail<MemberResponse>("會員不存在");
+        : Result.Fail<MemberResponse>("Member not found");
 }
 ```
 
-## 🛠️ 開發工作流
+## 🛠️ Development Workflow
 
-### 典型的 API 端點實現流程
+### Typical API Endpoint Implementation Flow
 
-假設要實作「取得會員列表」端點：
+Suppose you need to implement a "Get Member List" endpoint:
 
-1. **選擇開發方式**（API First 或 Code First）
+1. **Choose development approach** (API First or Code First)
    ```bash
    /api-development
    ```
 
-2. **設計資料存取層**
+2. **Design data access layer**
    ```bash
    /repository-design
    ```
 
-3. **實作業務邏輯層**
+3. **Implement business logic layer**
    ```bash
    /handler
    ```
 
-4. **實作 Controller**
+4. **Implement Controller**
    ```bash
-   /handler   # 同時產生 Controller 參考
+   /handler   # Also generates Controller reference
    ```
 
-5. **實作 BDD 測試**
+5. **Implement BDD tests**
    ```bash
    /bdd-testing
    ```
 
-6. **檢查完整性**
+6. **Verify completeness**
    ```bash
    dotnet test
    dotnet build
    ```
 
-## 📖 進階指南
+## 📖 Advanced Guides
 
-根據工作項查閱對應文檔：
+Consult corresponding documentation based on your task:
 
-| 工作項 | 相關文檔 | 位置 |
-|--------|--------|------|
-| 理解開發工作流 | SKILL 使用指南 | [.claude/README.md](./.claude/README.md) |
-| 設計 API 端點 | API 開發決策框架 | [.claude/decision-framework.md](./.claude/decision-framework.md) |
-| 實作 Controller | 開發規則與最佳實踐 | [.claude/development-rules.md](./.claude/development-rules.md) |
-| 撰寫整合測試 | BDD 測試指南 | [.claude/skills/bdd-testing/SKILL.md](./.claude/skills/bdd-testing/SKILL.md) |
-| 快取設計 | 快取策略決策 | [.claude/decision-framework.md#快取策略設計](./.claude/decision-framework.md) |
-| 安全檢查 | 安全掃描工具 | [.claude/skills/security-*](./.claude/skills/) |
+| Task | Related Document | Location |
+|------|---------|----------|
+| Understanding development workflow | SKILL usage guide | [CLAUDE.md](./CLAUDE.md) |
+| Designing API endpoints | API development decision framework | [.claude/decision-framework.md](./.claude/decision-framework.md) |
+| Implementing Controller | Development rules & best practices | [.claude/development-rules.md](./.claude/development-rules.md) |
+| Writing integration tests | BDD testing guide | [.claude/skills/bdd-testing/SKILL.md](./.claude/skills/bdd-testing/SKILL.md) |
+| Caching design | Caching strategy decision | [.claude/decision-framework.md#caching-strategy](./.claude/decision-framework.md) |
+| Security checks | Security scanning tools | [.claude/skills/security-*](./.claude/skills/) |
 
-## 📚 重要文檔
+## 📚 Important Documents
 
-- **[CLAUDE.md](./CLAUDE.md)** — AI 助理行為規則、計畫管理流程、進階主題索引
-- **[.claude/README.md](./.claude/README.md)** — 詳細的 SKILL 使用指南與開發工作流
-- **[dotnet-project-template/best-practices.md](./dotnet-project-template/best-practices.md)** — .NET 專案最佳實踐
-- **[dotnet-project-template/docs/development/reqnroll-best-practices.md](./dotnet-project-template/docs/development/reqnroll-best-practices.md)** — BDD/Gherkin 測試指南
+- **[CLAUDE.md](./CLAUDE.md)** — AI assistant behavior rules, plan management, advanced topics index
+- **[.claude/development-rules.md](./.claude/development-rules.md)** — Development rules and best practices
+- **[dotnet-project-template/best-practices.md](./dotnet-project-template/best-practices.md)** — .NET project best practices
+- **[dotnet-project-template/docs/development/reqnroll-best-practices.md](./dotnet-project-template/docs/development/reqnroll-best-practices.md)** — BDD/Gherkin testing guide
 
-## 🔧 常用命令
+## 🔧 Common Commands
 
 ```bash
-# 開發
-dotnet build                                    # 編譯整個解決方案
-dotnet run --project src/be/JobBank1111.Job.WebAPI   # 啟動 API 伺服器
-dotnet watch run --project src/be/JobBank1111.Job.WebAPI  # 熱重載模式
+# Development
+dotnet build                                    # Build the entire solution
+dotnet run --project src/be/JobBank1111.Job.WebAPI   # Start API server
+dotnet watch run --project src/be/JobBank1111.Job.WebAPI  # Hot reload mode
 
-# 測試
-dotnet test                                     # 執行所有測試（單元 + 整合）
-dotnet test --filter FullyQualifiedName~Member # 執行特定測試
+# Testing
+dotnet test                                     # Execute all tests (unit + integration)
+dotnet test --filter FullyQualifiedName~Member # Run specific test
 
-# 資料庫遷移（使用 EF Core）
+# Database migrations (using EF Core)
 dotnet ef migrations add CreateMemberTable --project src/be/JobBank1111.Job.DB
 dotnet ef database update --project src/be/JobBank1111.Job.DB
 
 # Docker
-docker-compose up -d                            # 啟動本機開發環境
-docker-compose down                             # 關閉開發環境
-docker-compose logs -f                          # 查看容器日誌
+docker-compose up -d                            # Start local development environment
+docker-compose down                             # Stop development environment
+docker-compose logs -f                          # View container logs
 ```
 
-## 🎯 開發政策
+## 🎯 Development Policy
 
-### 必須遵守
+### Must Follow
 
-- ✅ **分層架構**：Controller → Handler → Repository → DbContext
-- ✅ **不可變物件**：使用 record 與 init 屬性
-- ✅ **異步操作**：所有 I/O 都使用 async/await
-- ✅ **Result Pattern**：統一的成功/失敗型態
-- ✅ **TraceContext**：每個請求攜帶 TraceId
-- ✅ **BDD 測試**：整合測試使用 Gherkin/Reqnroll
+- ✅ **Layered Architecture**: Controller → Handler → Repository → DbContext
+- ✅ **Immutable Objects**: Use records and init properties
+- ✅ **Async Operations**: All I/O uses async/await
+- ✅ **Result Pattern**: Unified success/failure type
+- ✅ **TraceContext**: Every request carries a TraceId
+- ✅ **BDD Tests**: Integration tests use Gherkin/Reqnroll
 
-### 禁止
+### Prohibited
 
-- ❌ 混用 API First 和 Code First 開發方式
-- ❌ 跳過 async/await（同步 I/O 會阻塞執行緒）
-- ❌ 直接在 Controller 撰寫業務邏輯（違反分層設計）
-- ❌ Mock 資料庫（整合測試應使用真實 Docker 容器）
+- ❌ Mixing API First and Code First approaches
+- ❌ Skipping async/await (synchronous I/O blocks threads)
+- ❌ Writing business logic directly in Controllers (violates layering)
+- ❌ Mocking databases in integration tests (use real Docker containers)
 
-## 📞 疑問與支援
+## 📞 Questions & Support
 
-- 工作流疑問：查閱 [.claude/README.md](./.claude/README.md) 與 SKILL 文檔
-- 開發決策：參考 [.claude/decision-framework.md](./.claude/decision-framework.md)
-- 技術問題：查看 [dotnet-project-template/best-practices.md](./dotnet-project-template/best-practices.md)
+- Workflow questions: Consult [CLAUDE.md](./CLAUDE.md) and SKILL documentation
+- Development decisions: Refer to [.claude/decision-framework.md](./.claude/decision-framework.md)
+- Technical issues: Check [dotnet-project-template/best-practices.md](./dotnet-project-template/best-practices.md)
 
 ---
 
-**版本**: api.template v1.0  
-**最後更新**: 2026-07-11  
-**文件用途**: 適合人類與 AI Agent 閱讀
+**Version**: api.template v1.0  
+**Last Updated**: 2026-07-11  
+**Purpose**: For both human and AI Agent reading
