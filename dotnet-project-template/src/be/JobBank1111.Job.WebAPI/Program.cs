@@ -28,10 +28,10 @@ try
     builder.Services.AddSingleton(p => JsonSerializeFactory.DefaultOptions);
 
     // Configure global JSON options for both Controllers and Minimal APIs
-    builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
-    {
-        JsonSerializeFactory.Apply(options.SerializerOptions);
-    });
+    // builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
+    // {
+    //     JsonSerializeFactory.Apply(options.SerializerOptions);
+    // });
 
     // Configure MVC Controllers with System.Text.Json
     builder.Services.AddControllers(options =>
