@@ -274,6 +274,43 @@ docker-compose logs -f                          # 查看容器日誌
 - ❌ 直接在 Controller 撰寫業務邏輯（違反分層設計）
 - ❌ Mock 資料庫（整合測試應使用真實 Docker 容器）
 
+## 📝 經驗教訓：.NET 10 升級 (2026-07-11)
+
+### 問題
+升級到 .NET 10 後，3/8 個整合測試出現 HTTP 500 錯誤，初步懷疑是 JSON 序列化問題。
+
+### 根本原因分析
+❌ **錯誤假設**：怪罪於 .NET 10 的 `System.Text.Json` 非同步序列化和 `PipeWriter.UnflushedBytes`
+✅ **真正原因**：DI 容器無法解析自動生成的 NSwag wrapper 所需的 `IMemberController` 依賴
+
+### 失敗的嘗試
+- 新增 `SynchronousJsonOutputFormatter` 自訂 JSON formatter
+- 新增全域 `JsonOptions` 設定
+- 在 `Program.cs` AddControllers 中嘗試 workaround
+
+結果：代碼臃腫，但沒有解決根本問題。
+
+### 正確的解決方案
+1. 在 DI 容器中註冊 `IMemberController` → `MemberController`
+2. 在 v2 Controller 中實現 `IMemberController` 接口
+3. 隨後改回 Code First（v2 不應該實現 API First 契約）
+
+### 核心教訓
+
+| 教訓 | 為什麼重要 |
+|------|---------|
+| **框架升級 = 最少改動** | 只改 Swagger（→ OpenAPI），其他保持原樣 |
+| **不要假設症狀 = 根本原因** | HTTP 500 可能隱藏 DI、路由或序列化問題—先檢查 DI |
+| **API First (v1) ≠ Code First (v2)** | v1 實現接口；v2 直接用屬性 |
+| **NSwag 自動生成 wrapper Controller** | 手動 Controller 要麼實現接口，要麼不同時存在 |
+| **根本原因修正後移除 workaround** | 留下的防守代碼增加維護負擔 |
+
+### 最終狀態
+- ✅ 所有 8 個整合測試通過
+- ✅ 沒有不必要的 JSON 序列化 workaround
+- ✅ Program.cs 乾淨簡潔
+- ✅ v2 Controller 使用 Code First（清潔的屬性-based 方式）
+
 ## 📞 疑問與支援
 
 - 工作流疑問：查閱 [CLAUDE.md](./CLAUDE.md) 與 SKILL 文檔
