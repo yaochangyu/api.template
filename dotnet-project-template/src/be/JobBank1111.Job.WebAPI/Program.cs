@@ -25,16 +25,17 @@ try
 
     // Add services to the container.
     builder.Services.AddSingleton(p => JsonSerializeFactory.DefaultOptions);
-    builder.Services.AddControllers()
-        .AddJsonOptions(options => JsonSerializeFactory.Apply(options.JsonSerializerOptions));
 
-    // Configure HTTP JSON options for .NET 10 PipeWriter compatibility
-    builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
-    {
-        JsonSerializeFactory.Apply(options.SerializerOptions);
-        // Disable async serialization to avoid PipeWriter.UnflushedBytes issues
-        options.SerializerOptions.WriteIndented = false;
-    });
+    // Note: HttpJsonOptions removed - using Newtonsoft.Json for all serialization to avoid System.Text.Json .NET 10 PipeWriter bug
+
+    // Configure MVC Controllers - Use Newtonsoft.Json to avoid .NET 10 PipeWriter issues
+    builder.Services.AddControllers()
+        .AddNewtonsoftJson(options =>
+        {
+            options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+            options.SerializerSettings.DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore;
+            options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+        });
     builder.Host
         .UseSerilog((context, services, config) =>
                         {
@@ -85,8 +86,13 @@ try
     }
 
     app.UseHttpsRedirection();
+    app.UseMiddleware<TraceContextMiddleware>();
+    app.UseMiddleware<MeasurementMiddleware>();
+    app.UseMiddleware<ExceptionHandlingMiddleware>();
+    app.UseMiddleware<RequestParameterLoggerMiddleware>();
     app.UseRouting();
     app.UseAuthorization();
+    app.UseSerilogRequestLogging();
 
     app.MapControllers();
 
