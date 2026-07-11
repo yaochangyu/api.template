@@ -79,9 +79,9 @@ try
     // OpenAPI support
     builder.Services.AddOpenApi();
     builder.Services.AddHttpContextAccessor();
-    // API Contract implementations
-    builder.Services.AddScoped<JobBank1111.Job.WebAPI.Contract.IMemberController, JobBank1111.Job.WebAPI.Member.MemberController>();
+    // API Contract implementations (v1: API First)
     builder.Services.AddScoped<JobBank1111.Job.WebAPI.Contract.IMemberV1Controller, JobBank1111.Job.WebAPI.Member.MemberV1ControllerImpl>();
+    // v2: Code First - no interface registration needed
 
     builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
     builder.Services.AddContextAccessor();
