@@ -305,11 +305,19 @@ Result: Unnecessary code bloat, but didn't fix the underlying problem.
 | **NSwag auto-generates wrapper Controllers** | Manual Controller must either implement the interface OR not exist simultaneously |
 | **Remove workarounds once root cause is fixed** | Left-over defensive code increases maintenance burden |
 
+### Important Architecture Decision
+**Swagger packages removed in favor of .NET 10 native OpenAPI** (commit 15bcdf5)
+- Removed: Swashbuckle.AspNetCore, Swashbuckle.AspNetCore.ReDoc, Scalar.AspNetCore  
+- Now using: Microsoft.AspNetCore.OpenApi (built-in .NET 10 support)
+- Program.cs updated: `app.MapOpenApi()` for native OpenAPI endpoint
+- Simpler, fewer dependencies, native framework integration
+
 ### Final State
 - ✅ All 8 integration tests pass
 - ✅ No unnecessary JSON serialization workarounds
 - ✅ Program.cs is clean and minimal
 - ✅ v2 Controller uses Code First (clean attributes-based approach)
+- ✅ Using .NET 10 native OpenAPI (no third-party Swagger packages)
 
 ## 📞 Questions & Support
 

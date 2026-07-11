@@ -305,11 +305,19 @@ docker-compose logs -f                          # 查看容器日誌
 | **NSwag 自動生成 wrapper Controller** | 手動 Controller 要麼實現接口，要麼不同時存在 |
 | **根本原因修正後移除 workaround** | 留下的防守代碼增加維護負擔 |
 
+### 重要架構決策
+**移除 Swagger 套件，改用 .NET 10 原生 OpenAPI** (commit 15bcdf5)
+- 已移除：Swashbuckle.AspNetCore、Swashbuckle.AspNetCore.ReDoc、Scalar.AspNetCore  
+- 改用：Microsoft.AspNetCore.OpenApi（.NET 10 內置支援）
+- Program.cs 更新：`app.MapOpenApi()` 用於原生 OpenAPI 端點
+- 優勢：更簡潔、依賴更少、框架原生整合
+
 ### 最終狀態
 - ✅ 所有 8 個整合測試通過
 - ✅ 沒有不必要的 JSON 序列化 workaround
 - ✅ Program.cs 乾淨簡潔
 - ✅ v2 Controller 使用 Code First（清潔的屬性-based 方式）
+- ✅ 使用 .NET 10 原生 OpenAPI（無第三方 Swagger 套件）
 
 ## 📞 疑問與支援
 
