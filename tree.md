@@ -2,7 +2,7 @@
 ================================================================================
 
 說明：此結構為 git 追蹤的檔案清單（排除 bin/obj/.git 與未追蹤檔案）
-      總計 170 個檔案
+      總計 167 個檔案
 
 api.template/
 ├── .archive/enable-member-v1.plan.Progress.md
@@ -21,9 +21,6 @@ api.template/
 ├── .claude/agents/feature-development.md
 ├── .claude/agents/project-setup.md
 ├── .claude/agents/testing-strategy.md
-├── .claude/command-processor.md
-├── .claude/commands/jb.md
-├── .claude/commands/webapi.md
 ├── .claude/settings.local.json
 ├── .claude/skills/api-development/SKILL.md
 ├── .claude/skills/api-development/references/api-development-workflow.md

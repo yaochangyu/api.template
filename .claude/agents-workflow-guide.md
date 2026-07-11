@@ -195,24 +195,25 @@
 @testing-engineer 建立回歸測試避免問題重現
 ```
 
-## 🛠️ 與專案工具整合
+## 🛠️ 與 SKILL 系統整合
 
-### 結合 /jb 指令使用
+### 使用 Skill 建立新實體
 ```
 # 建立新實體的完整流程
 @strategic-planner 規劃 Product 實體的需求和設計
-/jb:handler Product        # 產生 Handler
-/jb:controller Product     # 產生 Controller
-/jb:repository Product     # 產生 Repository
+/api-development          # 設計 API 端點
+/handler                  # 實作 Handler
+/repository-design        # 設計資料存取層
 @testing-engineer 為 Product 實體建立完整測試套件
 @aspnetcore-code-reviewer 審查產生的 Product 相關程式碼
 ```
 
-### 結合 /webapi 指令使用
+### 使用 Skill 快速建立功能模組
 ```
 # 快速建立功能模組
 @strategic-planner 規劃 Order 管理功能
-/webapi full Order         # 一次產生完整功能模組
+/api-development          # 設計 Order API
+/handler                  # 實作 Order Handler
 @api-security-specialist 為 Order API 加強安全防護
 @performance-optimizer 最佳化 Order 相關的查詢效能
 ```
@@ -257,7 +258,7 @@
 # 輸出: specs/member-management/requirements.md, design.md, tasks.md
 
 @task-executor 執行 specs/member-management/tasks.md 中的任務
-# 或使用工具: /webapi full Member
+# 或使用工具: （SKILL 系統已取代舊指令） full Member
 
 @api-security-specialist 為會員 API 加強安全防護
 @performance-optimizer 最佳化會員查詢效能

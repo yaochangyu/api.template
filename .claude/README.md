@@ -11,7 +11,7 @@
 | 層級 | 檔案名 | 使用對象 | 內容 |
 |------|--------|---------|------|
 | **第 1 層** | [CLAUDE.md](../CLAUDE.md) | Claude Code AI 助理 | AI 助理行為規則、互動原則、計畫管理 |
-| **第 2 層** | [development-rules.md](./development-rules.md) | 所有開發者 + SKILL 使用者 | 開發指令、架構概述、強制詢問情境、禁止行為、最佳實踐 |
+| **第 2 層** | [development-rules.md](./development-rules.md) | 所有開發者 | 開發指令、架構概述、強制詢問情境、禁止行為、最佳實踐 |
 | **第 3 層** | [decision-framework.md](./decision-framework.md) | 特定工作流 | API 流程決策、測試策略、資料庫選擇、快取設計、效能優化 |
 
 **使用建議**：
@@ -31,9 +31,6 @@
 │   ├── feature-development.md  # 完整功能開發流程協調
 │   ├── project-setup.md        # 專案初始化引導
 │   └── testing-strategy.md     # 測試策略規劃
-├── commands/
-│   ├── jb.md                   # /jb 系列指令定義
-│   └── webapi.md               # /webapi 系列指令定義
 ├── skills/                     # Skill 定義（16 個，主檔一律為 SKILL.md）
 │   ├── api-development/ bdd-testing/ ef-core/
 │   ├── error-handling/ handler/ middleware/ project-init/
@@ -42,8 +39,7 @@
 │   ├── security-check-secrets/ security-deep-review/
 │   ├── security-fast-scan/     # （assets/ 內含共用安全報告範本）
 │   └── webapi-real-testing/
-├── agents-workflow-guide.md    # Agent 工作流程指南
-└── command-processor.md        # 指令處理邏輯說明
+└── agents-workflow-guide.md    # Agent 工作流程指南
 ```
 
 > **模板管理**：所有程式碼實作參考現已改為使用 FileResolver 動態取得真實項目代碼，
@@ -51,100 +47,15 @@
 
 ## 🚀 快速開始
 
-### 1. 基本使用
+所有開發工作流程現已透過 SKILL 系統實作，請使用相應的 Skill 指令：
 
-在 Claude Code 中直接輸入指令：
-
-```bash
-/webapi:handler Product        # 建立 ProductHandler.cs
-/webapi:controller Product     # 建立 ProductControllerImpl.cs
-/webapi:repository Product     # 建立 ProductRepository.cs
-/webapi:middleware RateLimit   # 建立 RateLimitMiddleware.cs
-```
-
-### 2. 完整功能建立
-
-建立完整的實體管理功能：
-
-```bash
-# 依序執行以下指令
-/webapi:handler Order
-/webapi:repository Order
-/webapi:controller Order
-```
-
-產生的檔案結構：
-```
-src/be/JobBank1111.Job.WebAPI/Order/
-├── OrderHandler.cs        # 業務邏輯處理
-├── OrderRepository.cs     # 資料存取層
-└── OrderControllerImpl.cs # API 控制器實作
-```
-
-## 📋 指令說明
-
-### `/webapi:handler [實體名稱]`
-
-**功能**: 產生符合專案規範的 Handler 類別  
-**位置**: `src/be/JobBank1111.Job.WebAPI/{實體名稱}/{實體名稱}Handler.cs`
-
-**包含功能**:
-- ✅ Result Pattern 錯誤處理
-- ✅ TraceContext 追蹤整合
-- ✅ 完整 CRUD 操作方法
-- ✅ 連續驗證邏輯鏈
-- ✅ 依賴注入設定
-
-**範例**:
-```csharp
-// 產生 ProductHandler.cs，包含：
-public class ProductHandler(
-    ProductRepository repository,
-    IContextGetter<TraceContext?> traceContextGetter,
-    ILogger<ProductHandler> logger)
-{
-    public async Task<Result<Product, Failure>> CreateAsync(...)
-    public async Task<Result<Product, Failure>> UpdateAsync(...)
-    public async Task<Result<Product, Failure>> GetByIdAsync(...)
-    // ... 其他 CRUD 方法
-}
-```
-
-### `/webapi:controller [實體名稱]`
-
-**功能**: 產生 Controller 實作類別  
-**位置**: `src/be/JobBank1111.Job.WebAPI/{實體名稱}/{實體名稱}ControllerImpl.cs`
-
-**包含功能**:
-- ✅ 繼承自動產生的 Contract 介面
-- ✅ HTTP 標頭參數自動擷取
-- ✅ Result 自動轉換為 ActionResult
-- ✅ 分頁參數標準化處理
-- ✅ 錯誤回應統一轉換
-
-### `/webapi:repository [實體名稱]`
-
-**功能**: 產生 Repository 類別  
-**位置**: `src/be/JobBank1111.Job.WebAPI/{實體名稱}/{實體名稱}Repository.cs`
-
-**包含功能**:
-- ✅ Entity Framework Core 整合
-- ✅ 多層快取機制 (Memory + Redis)
-- ✅ 完整錯誤處理和日誌記錄
-- ✅ 分頁查詢 (Offset + Cursor)
-- ✅ 搜尋功能和快取失效機制
-
-### `/webapi:middleware [中介軟體名稱]`
-
-**功能**: 產生 Middleware 類別  
-**位置**: `src/be/JobBank1111.Job.WebAPI/{中介軟體名稱}Middleware.cs`
-
-**包含功能**:
-- ✅ 標準中介軟體管線模式
-- ✅ TraceContext 和日誌系統整合
-- ✅ 前置/後置處理邏輯框架
-- ✅ 錯誤處理和效能記錄
-- ✅ 擴充方法自動產生
+- **API 端點設計**: `/api-development`
+- **Controller 實作**: `/handler`
+- **資料存取層**: `/repository-design`
+- **中介軟體**: `/middleware`
+- **錯誤處理**: `/error-handling`
+- **EF Core 最佳化**: `/ef-core`
+- **測試策略**: `/bdd-testing`
 
 ## 🎯 設計原則
 
@@ -168,40 +79,9 @@ public class ProductHandler(
 - **錯誤處理**: 統一的 Failure 物件和狀態碼對應
 - **測試友善**: 相依性注入和可測試設計
 
-## 🔧 自訂和擴展
+## 🔧 架構與程式碼參考
 
-### 修改模板
-
-### 程式碼參考方式
-
-所有程式碼範本已改為透過 FileResolver 動態取得真實項目代碼：
-
-```bash
-# 取得 Handler 實作
-node .claude/skills/shared/FileResolver.js get-content \
-  JobBank1111.Job.WebAPI/Member/MemberHandler.cs
-
-# 取得 Controller 實作
-node .claude/skills/shared/FileResolver.js get-content \
-  JobBank1111.Job.WebAPI/Member/MemberV1ControllerImpl.cs
-
-# 取得 Repository 實作
-node .claude/skills/shared/FileResolver.js get-content \
-  JobBank1111.Job.WebAPI/Member/MemberRepository.cs
-```
-
-**好處**：
-- ✅ 始終參考最新的生產代碼
-- ✅ 不需維護過時的靜態模板
-- ✅ 支援離線快取與自動同步
-
-### 新增指令
-
-要新增自訂指令：
-
-1. 在 `.claude/commands/webapi.md` 中新增指令定義
-2. 在 `.claude/command-processor.md` 中補充處理邏輯，使用 FileResolver 取得參考代碼
-3. 根據參考代碼與需求調整邏輯
+所有程式碼範本現已改為透過 FileResolver 動態取得真實項目代碼，確保參考始終與生產代碼同步。詳見各 SKILL 文件的「實作參考」章節。
 
 ## 📝 最佳實務
 
@@ -245,43 +125,3 @@ node .claude/skills/shared/FileResolver.js get-content \
 - [ ] 撰寫單元測試和整合測試
 - [ ] 執行 `task api-dev` 測試功能
 
-## 🐛 疑難排解
-
-### 常見問題
-
-**Q: 指令沒有反應？**  
-A: 確保在 Claude Code 環境中執行，且指令格式正確。
-
-**Q: 產生的檔案位置不對？**  
-A: 檢查目前工作目錄是否在專案根目錄。
-
-**Q: 編譯錯誤？**  
-A: 檢查是否已建立對應的 Request/Response 類別和 EF 實體。
-
-**Q: 如何查看實作範例？**  
-A: 使用 FileResolver 取得生產代碼：
-```bash
-node .claude/skills/shared/FileResolver.js get-content \
-  JobBank1111.Job.WebAPI/Member/MemberHandler.cs
-```
-
-### 除錯方式
-
-1. **檢查 FileResolver**: 確保能從 GitHub 取得參考代碼
-   ```bash
-   node .claude/skills/shared/FileResolver.js get-github-url JobBank1111.Job.WebAPI/Member/MemberHandler.cs
-   ```
-2. **驗證變數替換**: 確認實體名稱符合 C# 命名規範  
-3. **查看目標目錄**: 確保有寫入權限
-4. **檢查依賴項目**: 確認所需的 using 陳述式和類別存在
-
-## 🎉 總結
-
-這個 WebAPI Framework 提供了：
-
-- **快速開發**: 一個指令建立完整的類別結構
-- **一致性**: 所有程式碼遵循相同的模式和規範
-- **可維護性**: 標準化的架構便於團隊協作
-- **擴展性**: 模板系統支援客製化和擴展
-
-開始使用：`/webapi:handler YourEntityName` 🚀
