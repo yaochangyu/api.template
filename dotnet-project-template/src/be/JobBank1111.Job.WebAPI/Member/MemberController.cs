@@ -10,6 +10,7 @@ public class MemberController(
     IHttpContextAccessor httpContextAccessor
 ) : ControllerBase
 {
+    [HttpGet(":cursor")]
     public async Task<ActionResult<GetMemberResponseCursorPaginatedList>> GetMembersCursorAsync(
         CancellationToken cancellationToken = default(CancellationToken))
     {
@@ -20,6 +21,7 @@ public class MemberController(
         return result.ToActionResult();
     }
 
+    [HttpGet(":offset")]
     public async Task<ActionResult<GetMemberResponsePaginatedList>> GetMemberOffsetAsync(
         CancellationToken cancellationToken = default(CancellationToken))
     {
@@ -47,7 +49,8 @@ public class MemberController(
         return result.ToActionResult();
     }
 
-    public async Task<IActionResult> InsertMember1Async(Contract.InsertMemberRequest body,
+    [HttpPost]
+    public async Task<IActionResult> InsertMemberAsync(Contract.InsertMemberRequest body,
         CancellationToken cancellationToken =
             default(CancellationToken))
     {
@@ -66,9 +69,14 @@ public class MemberController(
     {
         var request = httpContextAccessor.HttpContext.Request;
 
-        return request.Headers.TryGetValue("x-page-size", out var pageSize)
-            ? int.Parse(pageSize.FirstOrDefault() ?? string.Empty)
-            : 10;
+        if (request.Headers.TryGetValue("x-page-size", out var pageSizeHeader))
+        {
+            if (int.TryParse(pageSizeHeader.FirstOrDefault(), out var pageSize))
+            {
+                return pageSize;
+            }
+        }
+        return 10;
     }
 
     private string TryGetPageToken()

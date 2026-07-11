@@ -12,7 +12,7 @@ namespace JobBank1111.Job.WebAPI.Member;
 
 public class MemberRepository(
     ILogger<MemberRepository> logger,
-    IContextGetter<TraceContext?> contextGetter,
+    IContextGetter<TraceContext> contextGetter,
     IDbContextFactory<MemberDbContext> dbContextFactory,
     TimeProvider timeProvider,
     IUuidProvider uuidProvider,
@@ -52,7 +52,7 @@ public class MemberRepository(
                 Message = "資料衝突，請稍後再試",
                 Data = request,
                 Exception = ex,
-                TraceId = traceContext?.TraceId
+                TraceId = traceContext.TraceId
             };
             return Result.Failure<int, Failure>(failure);
         }
@@ -65,7 +65,7 @@ public class MemberRepository(
                 Message = "執行資料庫操作時發生未預期錯誤",
                 Data = request,
                 Exception = ex,
-                TraceId = traceContext?.TraceId
+                TraceId = traceContext.TraceId
             };
             return Result.Failure<int, Failure>(failure);
         }
@@ -104,7 +104,7 @@ public class MemberRepository(
                 Message = "執行資料庫查詢時發生未預期錯誤",
                 Data = new { email },
                 Exception = ex,
-                TraceId = traceContext?.TraceId
+                TraceId = traceContext.TraceId
             };
             return Result.Failure<Member, Failure>(failure);
         }
@@ -236,7 +236,7 @@ public class MemberRepository(
                 Message = "執行資料庫查詢時發生未預期錯誤",
                 Data = new { pageSize, nextPageToken, noCache },
                 Exception = ex,
-                TraceId = traceContext?.TraceId
+                TraceId = traceContext.TraceId
             };
             return Result.Failure<CursorPaginatedList<GetMemberResponse>, Failure>(failure);
         }
