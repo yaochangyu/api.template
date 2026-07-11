@@ -66,6 +66,8 @@ try
     var app = builder.Build();
 
     // Configure the HTTP request pipeline.
+    app.UseRouting();
+
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
@@ -83,32 +85,21 @@ try
         app.MapScalarApiReference(p =>
         {
             p.OpenApiRoutePattern = "/swagger/v1/swagger.json";
-
-            // p.EndpointPathPrefix = "scalar";
         });
     }
 
+    app.UseMiddleware<TraceContextMiddleware>();
     app.UseMiddleware<MeasurementMiddleware>();
     app.UseMiddleware<ExceptionHandlingMiddleware>();
-    app.UseMiddleware<TraceContextMiddleware>();
     app.UseMiddleware<RequestParameterLoggerMiddleware>();
     app.UseAuthorization();
-    app.MapDefaultControllerRoute();
-    app.UseRouting();
+    app.UseHttpsRedirection();
+    app.UseSerilogRequestLogging();
+
     app.UseEndpoints(endpoints =>
     {
-        //注册Web API Controller
         endpoints.MapControllers();
-
-        //注册MVC Controller模板 {controller=Home}/{action=Index}/{id?}
-        // endpoints.MapDefaultControllerRoute();
-
-        //注册健康检查
-        // endpoints.MapHealthChecks("/_hc");
     });
-    app.UseSerilogRequestLogging();
-    app.UseHttpsRedirection();
-    app.MapControllers();
     app.Run();
     return 0;
 }
