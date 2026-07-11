@@ -3,14 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JobBank1111.Job.WebAPI.Member;
 
-[ApiController]
-[Route("api/v2/[controller]")]
 public class MemberController(
     MemberHandler memberHandler,
     IHttpContextAccessor httpContextAccessor
-) : ControllerBase
+) : IMemberController
 {
-    [HttpGet(":cursor")]
     public async Task<ActionResult<GetMemberResponseCursorPaginatedList>> GetMembersCursorAsync(
         CancellationToken cancellationToken = default(CancellationToken))
     {
@@ -21,7 +18,6 @@ public class MemberController(
         return result.ToActionResult();
     }
 
-    [HttpGet(":offset")]
     public async Task<ActionResult<GetMemberResponsePaginatedList>> GetMemberOffsetAsync(
         CancellationToken cancellationToken = default(CancellationToken))
     {
@@ -49,8 +45,7 @@ public class MemberController(
         return result.ToActionResult();
     }
 
-    [HttpPost]
-    public async Task<IActionResult> InsertMemberAsync(Contract.InsertMemberRequest body,
+    public async Task<IActionResult> InsertMember1Async(Contract.InsertMemberRequest body,
         CancellationToken cancellationToken =
             default(CancellationToken))
     {

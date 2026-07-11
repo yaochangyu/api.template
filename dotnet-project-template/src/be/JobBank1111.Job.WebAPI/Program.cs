@@ -79,7 +79,8 @@ try
     // OpenAPI support
     builder.Services.AddOpenApi();
     builder.Services.AddHttpContextAccessor();
-    // Code First: MemberController - ASP.NET Core 自動發現，無需手動註冊
+    // API Contract implementations
+    builder.Services.AddScoped<JobBank1111.Job.WebAPI.Contract.IMemberController, JobBank1111.Job.WebAPI.Member.MemberController>();
     builder.Services.AddScoped<JobBank1111.Job.WebAPI.Contract.IMemberV1Controller, JobBank1111.Job.WebAPI.Member.MemberV1ControllerImpl>();
 
     builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
