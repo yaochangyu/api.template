@@ -27,6 +27,7 @@ public class TestServer(DateTimeOffset now,
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseEnvironment("Testing");
         builder.ConfigureServices(this.ConfigureServices);
     }
 }

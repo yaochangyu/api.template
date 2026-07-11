@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Reqnroll;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace JobBank1111.Job.WebAPI.IntegrationTest;
 

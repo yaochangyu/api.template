@@ -1,7 +1,6 @@
 using JobBank1111.Infrastructure;
 using JobBank1111.Job.WebAPI;
 using JobBank1111.Job.WebAPI.Member;
-using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
 
@@ -31,12 +30,20 @@ try
         ;
     builder.Host
         .UseSerilog((context, services, config) =>
-                        config.ReadFrom.Configuration(context.Configuration)
-                            .ReadFrom.Services(services)
-                            .Enrich.FromLogContext()
-                            .WriteTo.Console() //正式環境不要用 Console，除非有 Log Provider 專門用來收集 Console Log
-                            .WriteTo.Seq("http://localhost:5341") //log server
-                            .WriteTo.File("logs/aspnet-.txt", rollingInterval: RollingInterval.Minute) //正式環境不要用 File
+                        {
+                            config.ReadFrom.Configuration(context.Configuration)
+                                .ReadFrom.Services(services)
+                                .Enrich.FromLogContext()
+                                .WriteTo.Console();
+
+                            if (!context.HostingEnvironment.IsEnvironment("Testing"))
+                            {
+                                config.WriteTo.Seq("http://localhost:5341", restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information,
+                                    period: TimeSpan.FromSeconds(30), batchPostingLimit: 50);
+                            }
+
+                            config.WriteTo.File("logs/aspnet-.txt", rollingInterval: RollingInterval.Minute);
+                        }
         );
 
     // 確定物件都有設定 DI Container
@@ -48,9 +55,8 @@ try
     var configuration = builder.Configuration;
     builder.Services.AddCacheProviderFactory(configuration);
 
-    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    // OpenAPI support
+    builder.Services.AddOpenApi();
     builder.Services.AddHttpContextAccessor();
     // Code First: MemberController - ASP.NET Core 自動發現，無需手動註冊
     builder.Services.AddScoped<JobBank1111.Job.WebAPI.Contract.IMemberV1Controller, JobBank1111.Job.WebAPI.Member.MemberV1ControllerImpl>();
@@ -66,40 +72,22 @@ try
     var app = builder.Build();
 
     // Configure the HTTP request pipeline.
-    app.UseRouting();
-
     if (app.Environment.IsDevelopment())
     {
-        app.UseSwagger();
-        app.UseSwaggerUI(options =>
-                             options.SwaggerEndpoint("/swagger/v1/swagger.yaml",
-                                                     "Swagger Demo Documentation v1"));
-        app.UseReDoc(options =>
-        {
-            options.DocumentTitle = "Swagger Demo Documentation";
-            options.SpecUrl = "/swagger/v1/swagger.yaml";
-            options.RoutePrefix = "redoc";
-            options.ConfigObject.HideHostname = true;
-        });
-
-        app.MapScalarApiReference(p =>
-        {
-            p.OpenApiRoutePattern = "/swagger/v1/swagger.json";
-        });
+        app.MapOpenApi();
     }
 
+    app.UseHttpsRedirection();
     app.UseMiddleware<TraceContextMiddleware>();
     app.UseMiddleware<MeasurementMiddleware>();
     app.UseMiddleware<ExceptionHandlingMiddleware>();
     app.UseMiddleware<RequestParameterLoggerMiddleware>();
+    app.UseRouting();
     app.UseAuthorization();
-    app.UseHttpsRedirection();
     app.UseSerilogRequestLogging();
 
-    app.UseEndpoints(endpoints =>
-    {
-        endpoints.MapControllers();
-    });
+    app.MapControllers();
+
     app.Run();
     return 0;
 }
