@@ -274,6 +274,43 @@ docker-compose logs -f                          # View container logs
 - ❌ Writing business logic directly in Controllers (violates layering)
 - ❌ Mocking databases in integration tests (use real Docker containers)
 
+## 📝 Lessons Learned: .NET 10 Upgrade (2026-07-11)
+
+### Problem
+HTTP 500 errors appeared in 3/8 integration tests after .NET 10 upgrade, initially suspected as JSON serialization issues.
+
+### Root Cause Analysis
+❌ **Wrong assumption**: Blamed .NET 10's `System.Text.Json` async serialization and `PipeWriter.UnflushedBytes`
+✅ **Actual cause**: DI container unable to resolve `IMemberController` dependency required by auto-generated NSwag wrapper
+
+### Failed Approach
+- Added `SynchronousJsonOutputFormatter` custom JSON formatter
+- Added global `JsonOptions` configuration
+- Attempted workarounds in `Program.cs` AddControllers configuration
+
+Result: Unnecessary code bloat, but didn't fix the underlying problem.
+
+### Correct Solution
+1. Registered `IMemberController` → `MemberController` in DI container
+2. Implemented `IMemberController` interface in v2 Controller
+3. Then reverted back to Code First (v2 shouldn't implement API First contracts)
+
+### Key Lessons
+
+| Lesson | Why It Matters |
+|--------|---|
+| **Framework upgrades = minimal config changes** | Only modify Swagger (→ OpenAPI), keep everything else as-is |
+| **Don't assume the symptom = root cause** | HTTP 500 can hide DI, routing, or serialization issues—check DI first |
+| **API First (v1) ≠ Code First (v2)** | v1 implements interfaces; v2 uses attributes directly |
+| **NSwag auto-generates wrapper Controllers** | Manual Controller must either implement the interface OR not exist simultaneously |
+| **Remove workarounds once root cause is fixed** | Left-over defensive code increases maintenance burden |
+
+### Final State
+- ✅ All 8 integration tests pass
+- ✅ No unnecessary JSON serialization workarounds
+- ✅ Program.cs is clean and minimal
+- ✅ v2 Controller uses Code First (clean attributes-based approach)
+
 ## 📞 Questions & Support
 
 - Workflow questions: Consult [CLAUDE.md](./CLAUDE.md) and SKILL documentation
