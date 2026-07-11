@@ -294,13 +294,12 @@ docker-compose logs -f                          # 查看容器日誌
 1. 在 DI 容器中註冊 `IMemberController` → `MemberController`
 2. 在 v2 Controller 中實現 `IMemberController` 接口
 3. 隨後改回 Code First（v2 不應該實現 API First 契約）
-4. 移除 OpenAPI (Swagger) 支援（`AddOpenApi()` 和 `MapOpenApi()`）
 
 ### 核心教訓
 
 | 教訓 | 為什麼重要 |
 |------|---------|
-| **框架升級 = 最少改動** | 只改必要部分，其他保持原樣 |
+| **框架升級 = 最少改動** | 只改 Swagger（→ OpenAPI），其他保持原樣 |
 | **不要假設症狀 = 根本原因** | HTTP 500 可能隱藏 DI、路由或序列化問題—先檢查 DI |
 | **API First (v1) ≠ Code First (v2)** | v1 實現接口；v2 直接用屬性 |
 | **NSwag 自動生成 wrapper Controller** | 手動 Controller 要麼實現接口，要麼不同時存在 |
@@ -309,7 +308,6 @@ docker-compose logs -f                          # 查看容器日誌
 ### 最終狀態
 - ✅ 所有 8 個整合測試通過
 - ✅ 沒有不必要的 JSON 序列化 workaround
-- ✅ 移除 OpenAPI/Swagger
 - ✅ Program.cs 乾淨簡潔
 - ✅ v2 Controller 使用 Code First（清潔的屬性-based 方式）
 

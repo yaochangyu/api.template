@@ -274,44 +274,42 @@ docker-compose logs -f                          # View container logs
 - ❌ Writing business logic directly in Controllers (violates layering)
 - ❌ Mocking databases in integration tests (use real Docker containers)
 
-## 📝 經驗教訓：.NET 10 升級 (2026-07-11)
+## 📝 Lessons Learned: .NET 10 Upgrade (2026-07-11)
 
-### 問題
-升級到 .NET 10 後，3/8 個整合測試出現 HTTP 500 錯誤，初步懷疑是 JSON 序列化問題。
+### Problem
+HTTP 500 errors appeared in 3/8 integration tests after .NET 10 upgrade, initially suspected as JSON serialization issues.
 
-### 根本原因分析
-❌ **錯誤假設**：怪罪於 .NET 10 的 `System.Text.Json` 非同步序列化和 `PipeWriter.UnflushedBytes`
-✅ **真正原因**：DI 容器無法解析自動生成的 NSwag wrapper 所需的 `IMemberController` 依賴
+### Root Cause Analysis
+❌ **Wrong assumption**: Blamed .NET 10's `System.Text.Json` async serialization and `PipeWriter.UnflushedBytes`
+✅ **Actual cause**: DI container unable to resolve `IMemberController` dependency required by auto-generated NSwag wrapper
 
-### 失敗的嘗試
-- 新增 `SynchronousJsonOutputFormatter` 自訂 JSON formatter
-- 新增全域 `JsonOptions` 設定
-- 在 `Program.cs` AddControllers 中嘗試 workaround
+### Failed Approach
+- Added `SynchronousJsonOutputFormatter` custom JSON formatter
+- Added global `JsonOptions` configuration
+- Attempted workarounds in `Program.cs` AddControllers configuration
 
-結果：代碼臃腫，但沒有解決根本問題。
+Result: Unnecessary code bloat, but didn't fix the underlying problem.
 
-### 正確的解決方案
-1. 在 DI 容器中註冊 `IMemberController` → `MemberController`
-2. 在 v2 Controller 中實現 `IMemberController` 接口
-3. 隨後改回 Code First（v2 不應該實現 API First 契約）
-4. 移除 OpenAPI (Swagger) 支援（`AddOpenApi()` 和 `MapOpenApi()`）
+### Correct Solution
+1. Registered `IMemberController` → `MemberController` in DI container
+2. Implemented `IMemberController` interface in v2 Controller
+3. Then reverted back to Code First (v2 shouldn't implement API First contracts)
 
-### 核心教訓
+### Key Lessons
 
-| 教訓 | 為什麼重要 |
-|------|---------|
-| **框架升級 = 最少改動** | 只改必要部分，其他保持原樣 |
-| **不要假設症狀 = 根本原因** | HTTP 500 可能隱藏 DI、路由或序列化問題—先檢查 DI |
-| **API First (v1) ≠ Code First (v2)** | v1 實現接口；v2 直接用屬性 |
-| **NSwag 自動生成 wrapper Controller** | 手動 Controller 要麼實現接口，要麼不同時存在 |
-| **根本原因修正後移除 workaround** | 留下的防守代碼增加維護負擔 |
+| Lesson | Why It Matters |
+|--------|---|
+| **Framework upgrades = minimal config changes** | Only modify Swagger (→ OpenAPI), keep everything else as-is |
+| **Don't assume the symptom = root cause** | HTTP 500 can hide DI, routing, or serialization issues—check DI first |
+| **API First (v1) ≠ Code First (v2)** | v1 implements interfaces; v2 uses attributes directly |
+| **NSwag auto-generates wrapper Controllers** | Manual Controller must either implement the interface OR not exist simultaneously |
+| **Remove workarounds once root cause is fixed** | Left-over defensive code increases maintenance burden |
 
-### 最終狀態
-- ✅ 所有 8 個整合測試通過
-- ✅ 沒有不必要的 JSON 序列化 workaround
-- ✅ 移除 OpenAPI/Swagger
-- ✅ Program.cs 乾淨簡潔
-- ✅ v2 Controller 使用 Code First（清潔的屬性-based 方式）
+### Final State
+- ✅ All 8 integration tests pass
+- ✅ No unnecessary JSON serialization workarounds
+- ✅ Program.cs is clean and minimal
+- ✅ v2 Controller uses Code First (clean attributes-based approach)
 
 ## 📞 Questions & Support
 

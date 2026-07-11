@@ -58,6 +58,8 @@ try
     var configuration = builder.Configuration;
     builder.Services.AddCacheProviderFactory(configuration);
 
+    // OpenAPI support
+    builder.Services.AddOpenApi();
     builder.Services.AddHttpContextAccessor();
     // API Contract implementations (v1: API First)
     builder.Services.AddScoped<JobBank1111.Job.WebAPI.Contract.IMemberV1Controller, JobBank1111.Job.WebAPI.Member.MemberV1ControllerImpl>();
@@ -74,6 +76,11 @@ try
     var app = builder.Build();
 
     // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapOpenApi();
+    }
+
     app.UseHttpsRedirection();
     app.UseMiddleware<TraceContextMiddleware>();
     app.UseMiddleware<MeasurementMiddleware>();
