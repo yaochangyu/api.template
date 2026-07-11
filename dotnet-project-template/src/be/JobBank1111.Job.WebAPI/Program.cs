@@ -1,6 +1,7 @@
 using JobBank1111.Infrastructure;
 using JobBank1111.Job.WebAPI;
 using JobBank1111.Job.WebAPI.Member;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Serilog;
 using Serilog.Events;
 
@@ -26,16 +27,28 @@ try
     // Add services to the container.
     builder.Services.AddSingleton(p => JsonSerializeFactory.DefaultOptions);
 
-    // Note: HttpJsonOptions removed - using Newtonsoft.Json for all serialization to avoid System.Text.Json .NET 10 PipeWriter bug
+    // Configure global JSON options for both Controllers and Minimal APIs
+    builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
+    {
+        JsonSerializeFactory.Apply(options.SerializerOptions);
+    });
 
-    // Configure MVC Controllers - Use Newtonsoft.Json to avoid .NET 10 PipeWriter issues
-    builder.Services.AddControllers()
-        .AddNewtonsoftJson(options =>
+    // Configure MVC Controllers with System.Text.Json
+    builder.Services.AddControllers(options =>
+    {
+        // Replace the default SystemTextJsonOutputFormatter with our custom synchronous version
+        // to avoid .NET 10 PipeWriter.UnflushedBytes issue with async serialization
+        var jsonFormatter = options.OutputFormatters.OfType<SystemTextJsonOutputFormatter>().FirstOrDefault();
+        if (jsonFormatter != null)
         {
-            options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
-            options.SerializerSettings.DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore;
-            options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
-        });
+            options.OutputFormatters.Remove(jsonFormatter);
+            options.OutputFormatters.Add(new SynchronousJsonOutputFormatter(jsonFormatter.SerializerOptions));
+        }
+    })
+    .AddJsonOptions(options =>
+    {
+        JsonSerializeFactory.Apply(options.JsonSerializerOptions);
+    });
     builder.Host
         .UseSerilog((context, services, config) =>
                         {
