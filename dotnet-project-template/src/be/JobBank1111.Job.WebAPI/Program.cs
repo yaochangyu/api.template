@@ -1,7 +1,6 @@
 using JobBank1111.Infrastructure;
 using JobBank1111.Job.WebAPI;
 using JobBank1111.Job.WebAPI.Member;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Serilog;
 using Serilog.Events;
 
@@ -27,28 +26,11 @@ try
     // Add services to the container.
     builder.Services.AddSingleton(p => JsonSerializeFactory.DefaultOptions);
 
-    // Configure global JSON options for both Controllers and Minimal APIs
-    builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
-    {
-        JsonSerializeFactory.Apply(options.SerializerOptions);
-    });
-
-    // Configure MVC Controllers with System.Text.Json
-    builder.Services.AddControllers(options =>
-    {
-        // Replace the default SystemTextJsonOutputFormatter with our custom synchronous version
-        // to avoid .NET 10 PipeWriter.UnflushedBytes issue with async serialization
-        var jsonFormatter = options.OutputFormatters.OfType<SystemTextJsonOutputFormatter>().FirstOrDefault();
-        if (jsonFormatter != null)
+    builder.Services.AddControllers()
+        .AddJsonOptions(options =>
         {
-            options.OutputFormatters.Remove(jsonFormatter);
-            options.OutputFormatters.Add(new SynchronousJsonOutputFormatter(jsonFormatter.SerializerOptions));
-        }
-    })
-    .AddJsonOptions(options =>
-    {
-        JsonSerializeFactory.Apply(options.JsonSerializerOptions);
-    });
+            JsonSerializeFactory.Apply(options.JsonSerializerOptions);
+        });
     builder.Host
         .UseSerilog((context, services, config) =>
                         {
