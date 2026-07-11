@@ -19,6 +19,19 @@ BDD 測試實作技能，協助開發者使用 Reqnroll 撰寫行為驅動開發
 - Docker 測試環境設定（Testcontainers）
 - BDD 測試策略引導
 
+## 注意事項
+
+### BDD Testing 對兩種開發方式均適用
+
+BDD 測試是獨立於 API 實作方式的測試策略，不受「API First vs Code First」選擇影響：
+- **API First**：根據生成的 API 規格撰寫 BDD 測試
+- **Code First**：根據實作的 Controller 邏輯撰寫 BDD 測試
+- **結果**：BDD 測試方式與步驟實作邏輯完全相同
+
+因此本 SKILL 未區分 API 開發流程，所有 BDD 測試實作指導均適用於兩種方式。
+
+👉 **API 開發流程選擇** → 參考 [`/api-development` SKILL](../api-development/SKILL.md)
+
 ## 核心原則
 
 ### BDD 開發循環

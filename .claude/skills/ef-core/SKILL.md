@@ -17,6 +17,19 @@ EF Core 操作與最佳化技能，協助開發者正確使用 Entity Framework 
 - Migration 管理
 - 反向工程（Database First）
 
+## 注意事項
+
+### EF Core 與 API 開發流程無關
+
+Entity Framework Core 是資料存取基礎設施，不受「API First vs Code First」選擇影響：
+- **API First**：自動產生的 Handler 使用 Repository 存取 EF Core 實體
+- **Code First**：手動實作的 Handler 使用 Repository 存取 EF Core 實體
+- **結果**：EF Core 操作與最佳化代碼完全相同
+
+因此本 SKILL 未區分 API 開發流程，所有 EF Core 實作指導均適用於兩種方式。
+
+👉 **API 開發流程選擇** → 參考 [`/api-development` SKILL](../api-development/SKILL.md)
+
 ## 核心原則
 
 ### 1. DbContextFactory 模式

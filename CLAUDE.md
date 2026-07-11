@@ -22,6 +22,13 @@
    - 在所有需要使用者決策的情境下，都必須明確詢問，不得擅自執行
    - 提供清晰的選項說明，幫助使用者做出明智選擇
 
+   **API 開發流程決策（強制確認）**
+   
+   開發任何新的 API 端點前，必須詢問使用者確認開發方式（API First 或 Code First）。
+   - **決策依據和詳細對比**，參考 [decision-framework.md 的「## API 開發流程決策」章節](./decision-framework.md#api-開發流程決策)
+   - **執行流程參考**：[/api-development SKILL](./skills/api-development/SKILL.md)
+   - ⚠️ **禁止混用**：同一專案內不得混用 API First 和 Code First
+
 2. **不得擅自假設**
    - 即使文件標註「預設」值，仍須詢問使用者確認
    - 例外：使用者已在對話中明確指定（如「使用 SQL Server」）

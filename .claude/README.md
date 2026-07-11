@@ -83,6 +83,26 @@
 
 所有程式碼範本現已改為透過 FileResolver 動態取得真實項目代碼，確保參考始終與生產代碼同步。詳見各 SKILL 文件的「實作參考」章節。
 
+### Controller 實作參考（API First vs Code First）
+
+根據所選開發方式，可參考對應的生產代碼範例：
+
+**API First 方式**（規格優先）
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  JobBank1111.Job.WebAPI/Member/MemberV1ControllerImpl.cs
+```
+適用於：API 規格已確定，自動產生 Controller 實作
+
+**Code First 方式**（實作優先）
+```bash
+node .claude/skills/shared/FileResolver.js get-content \
+  JobBank1111.Job.WebAPI/Member/MemberController.cs
+```
+適用於：直接實作 Controller，無規格自動生成
+
+👉 **如何選擇?** 參考 [/api-development SKILL](./skills/api-development/SKILL.md) 的開發方式決策說明
+
 ## 📝 最佳實務
 
 ### 建議的建立順序

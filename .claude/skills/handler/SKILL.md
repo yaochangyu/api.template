@@ -18,6 +18,19 @@ Handler 業務邏輯層實作技能，協助開發者實作符合專案規範的
 - 支援 CancellationToken
 - 協調跨 Repository 的複雜操作
 
+## 注意事項
+
+### Handler 與 API 開發流程無關
+
+Handler 是純業務邏輯層，不受「API First vs Code First」選擇影響：
+- **API First**：Controller 實作自動產生的介面 → 呼叫 Handler
+- **Code First**：Controller 直接實作 → 呼叫 Handler
+- **結果**：Handler 代碼完全相同
+
+因此本 SKILL 未區分 API 開發流程，所有 Handler 實作指導均適用於兩種方式。
+
+👉 **API 開發流程選擇** → 參考 [`/api-development` SKILL](../api-development/SKILL.md)
+
 ## 能力
 
 ### 1. 業務邏輯實作

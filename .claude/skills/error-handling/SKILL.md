@@ -17,6 +17,19 @@ description: 錯誤處理與 Result Pattern 技能，協助開發者實作統一
 - FailureCode 映射至 HTTP 狀態碼
 - 分層錯誤處理策略
 
+## 注意事項
+
+### Error Handling 與 API 開發流程無關
+
+錯誤處理是跨層級的通用模式，不受「API First vs Code First」選擇影響：
+- **API First**：Controller 實作自動產生的介面 → 使用 Result Pattern
+- **Code First**：Controller 直接實作 → 使用 Result Pattern
+- **結果**：錯誤處理代碼完全相同
+
+因此本 SKILL 未區分 API 開發流程，所有 Result Pattern 與錯誤處理指導均適用於兩種方式。
+
+👉 **API 開發流程選擇** → 參考 [`/api-development` SKILL](../api-development/SKILL.md)
+
 ## 核心原則
 
 ### Result Pattern
