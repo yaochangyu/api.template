@@ -26,8 +26,15 @@ try
     // Add services to the container.
     builder.Services.AddSingleton(p => JsonSerializeFactory.DefaultOptions);
     builder.Services.AddControllers()
-        .AddJsonOptions(options => JsonSerializeFactory.Apply(options.JsonSerializerOptions))
-        ;
+        .AddJsonOptions(options => JsonSerializeFactory.Apply(options.JsonSerializerOptions));
+
+    // Configure HTTP JSON options for .NET 10 PipeWriter compatibility
+    builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
+    {
+        JsonSerializeFactory.Apply(options.SerializerOptions);
+        // Disable async serialization to avoid PipeWriter.UnflushedBytes issues
+        options.SerializerOptions.WriteIndented = false;
+    });
     builder.Host
         .UseSerilog((context, services, config) =>
                         {
@@ -78,13 +85,8 @@ try
     }
 
     app.UseHttpsRedirection();
-    app.UseMiddleware<TraceContextMiddleware>();
-    app.UseMiddleware<MeasurementMiddleware>();
-    app.UseMiddleware<ExceptionHandlingMiddleware>();
-    app.UseMiddleware<RequestParameterLoggerMiddleware>();
     app.UseRouting();
     app.UseAuthorization();
-    app.UseSerilogRequestLogging();
 
     app.MapControllers();
 

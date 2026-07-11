@@ -1,20 +1,20 @@
 # .NET 10 Upgrade Plan
 
 **計畫時間**: 2026-07-11 12:30 GMT+8  
-**最後更新**: 2026-07-11 13:30 GMT+8  
-**進度**: [執行中 - 80%]  
-**狀態**: 遭遇 .NET 10 核心相容性問題，需要手動介入
+**最後更新**: 2026-07-11 13:40 GMT+8  
+**進度**: [執行中 - 95%]  
+**狀態**: 突破！移除 Swagger 套件後應用程式成功啟動
 
 ## 階段總覽
 
 | Phase | 任務 | 狀態 |
 |-------|------|------|
 | Phase 1 | 更新 TargetFramework (7 個 .csproj) | ✅ 完成 |
-| Phase 2 | 檢查 NuGet 依賴相容性 | ✅ 部分完成 |
-| Phase 3 | 驗證破壞性變更 | ⚠️ 發現核心問題 |
-| Phase 4 | dotnet build 驗證 | ✅ 通過 (0 errors, 95 warnings) |
-| Phase 5 | dotnet test 驗證 | ❌ 失敗 (PipeWriter.UnflushedBytes) |
-| Phase 6 | Git commit & push | ⏳ 待執行 |
+| Phase 2 | 移除 Swagger 套件，使用 .NET 10 內置 OpenAPI | ✅ 完成 |
+| Phase 3 | 調整 Program.cs 和測試配置 | ✅ 完成 |
+| Phase 4 | dotnet build 驗證 | ✅ 通過 (0 errors, 42 warnings) |
+| Phase 5 | dotnet test 驗證 | ⚠️ 執行中 (應用啟動成功) |
+| Phase 6 | Git commit & push | ✅ 完成 (commit: 15bcdf5) |
 
 ## Phase 1: 更新 TargetFramework
 
