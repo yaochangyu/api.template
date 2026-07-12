@@ -118,63 +118,6 @@ namespace JobBank1111.Job.WebAPI.Contract
 
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.5.0.0 (NJsonSchema v11.4.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public interface IMemberController
-    {
-
-        /// <returns>OK</returns>
-
-        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetMembersCursorAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-
-        /// <returns>OK</returns>
-
-        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponsePaginatedList>> GetMemberOffsetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-
-        /// <returns>OK</returns>
-
-        System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.IActionResult> InsertMember1Async(InsertMemberRequest body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.5.0.0 (NJsonSchema v11.4.0.0 (Newtonsoft.Json v13.0.0.0))")]
-
-    public partial class MemberController : Microsoft.AspNetCore.Mvc.ControllerBase
-    {
-        private IMemberController _implementation;
-
-        public MemberController(IMemberController implementation)
-        {
-            _implementation = implementation;
-        }
-
-        /// <returns>OK</returns>
-        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v2/members:cursor")]
-        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponseCursorPaginatedList>> GetMembersCursor(System.Threading.CancellationToken cancellationToken)
-        {
-
-            return _implementation.GetMembersCursorAsync(cancellationToken);
-        }
-
-        /// <returns>OK</returns>
-        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/v2/members:offset")]
-        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.ActionResult<GetMemberResponsePaginatedList>> GetMemberOffset(System.Threading.CancellationToken cancellationToken)
-        {
-
-            return _implementation.GetMemberOffsetAsync(cancellationToken);
-        }
-
-        /// <returns>OK</returns>
-        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/v2/members")]
-        public System.Threading.Tasks.Task<Microsoft.AspNetCore.Mvc.IActionResult> InsertMember1([Microsoft.AspNetCore.Mvc.FromBody] InsertMemberRequest body, System.Threading.CancellationToken cancellationToken)
-        {
-
-            return _implementation.InsertMember1Async(body, cancellationToken);
-        }
-
-    }
-
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.5.0.0 (NJsonSchema v11.4.0.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class GetMemberResponse
     {

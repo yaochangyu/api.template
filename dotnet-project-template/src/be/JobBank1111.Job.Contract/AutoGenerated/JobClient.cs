@@ -80,58 +80,6 @@ namespace JobBank1111.Job.Contract
         [Post("/api/v1/members")]
         Task<IApiResponse<InsertMemberResponse>> InsertMemberV1([Body] InsertMemberRequest body);
 
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>OK</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: text/plain, application/json, text/json")]
-        [Get("/api/v2/members:cursor")]
-        Task<IApiResponse<GetMemberResponseCursorPaginatedList>> GetMembersCursor();
-
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>OK</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Accept: text/plain, application/json, text/json")]
-        [Get("/api/v2/members:offset")]
-        Task<IApiResponse<GetMemberResponsePaginatedList>> GetMemberOffset();
-
-        /// <param name="body">body parameter</param>
-        /// <returns>
-        /// A <see cref="Task"/> representing the <see cref="IApiResponse"/> instance containing the result:
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        /// <item>
-        /// <term>200</term>
-        /// <description>OK</description>
-        /// </item>
-        /// </list>
-        /// </returns>
-        [Headers("Content-Type: application/json")]
-        [Post("/api/v2/members")]
-        Task<IApiResponse> InsertMember1([Body] InsertMemberRequest body);
-
 
     }
 
