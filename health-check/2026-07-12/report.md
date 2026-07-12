@@ -46,13 +46,13 @@
 ```bash
 cd /mnt/d/lab/api.template/dotnet-project-template/src/be
 # 1. build 基準
-dotnet build JobBank1111.sln          # 預期 0 error / ~172 warning
+dotnet build JobBank1111.Job.Management.sln   # 預期 0 error / ~172 warning
 # 2. 整合測試（需 Docker）
 dotnet test JobBank1111.Job.IntegrationTest   # 預期 3/8，失敗含 IMemberController 與 PipeWriter 兩類（看 logs/aspnet-*.txt 原始例外）
 # 3. 單元測試（本機無 Redis 時）
 dotnet test JobBank1111.Job.Test              # 預期 8/10，敗因 UnableToConnect localhost:6379
 # 4. 套件漏洞
-dotnet list JobBank1111.sln package --vulnerable --include-transitive   # 預期 Refit Critical + 3 High
+dotnet list JobBank1111.Job.Management.sln package --vulnerable --include-transitive   # 預期 Refit Critical + 3 High
 # 5. 文件連結（例）
 test -e /mnt/d/lab/api.template/decision-framework.md; echo $?          # 預期 1（CLAUDE.md:28 壞連結）
 ```
