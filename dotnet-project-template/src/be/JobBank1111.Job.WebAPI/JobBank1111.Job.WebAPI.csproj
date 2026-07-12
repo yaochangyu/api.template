@@ -10,9 +10,11 @@
 <!--        <PackageReference Include="FluentResults.Extensions.AspNetCore" Version="0.1.0" />-->
         <PackageReference Include="CSharpFunctionalExtensions" Version="3.1.0" />
         <PackageReference Include="FluentValidation" Version="11.10.0" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+        <!-- 直接引用蓋過 AspNetCore.OpenApi 帶入的 2.0.0（GHSA-v5pm-xwqc-g5wc，2.7.5 起修補） -->
+        <PackageReference Include="Microsoft.OpenApi" Version="2.10.0" />
         <PackageReference Include="Microsoft.Bcl.TimeProvider" Version="8.0.1" />
-        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.9" />
         <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
         <PackageReference Include="Serilog.Sinks.Seq" Version="8.0.0" />
     </ItemGroup>
