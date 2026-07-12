@@ -25,33 +25,8 @@ public class CacheProviderFactoryTest
         return cacheProviderFactory;
     }
 
-    [Fact]
-    public async Task 寫讀快取資料_Json_Redis()
-    {
-        var cacheProviderFactory = CreateCacheProviderFactory();
-        var cacheProvider = cacheProviderFactory.Create(CacheProviderType.Redis);
-
-        var key = "Cache:Member:1";
-        var expected = JsonSerializer.Serialize(new { Name = "小心肝" });
-        await cacheProvider.SetAsync(key, expected);
-
-        var result = await cacheProvider.GetAsync<string>(key);
-        Assert.Equal(expected, result);
-    }
-
-    [Fact]
-    public async Task 寫讀快取資料_String_Redis()
-    {
-        var cacheProviderFactory = CreateCacheProviderFactory();
-        var cacheProvider = cacheProviderFactory.Create(CacheProviderType.Redis);
-
-        var key = "Cache:Member:2";
-        var expected = "小心肝";
-        await cacheProvider.SetAsync(key, expected);
-
-        var result = await cacheProvider.GetAsync<string>(key);
-        Assert.Equal(expected, result);
-    }
+    // Redis 案例已遷至 JobBank1111.Job.IntegrationTest/CacheProviderRedisTest.cs（Testcontainers，D7）
+    // 單元測試專案維持無環境依賴
 
     [Fact]
     public async Task 寫讀快取資料_Json_Memory()

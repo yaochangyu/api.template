@@ -76,9 +76,9 @@ EFCore 系、Caching.StackExchangeRedis、Caching.Memory、Data.SqlClient、Syst
 ## S8. 單元測試 Redis 隔離（D7）｜sonnet
 CacheProviderFactoryTest 兩個 Redis 案例遷 IntegrationTest（Testcontainers Redis），或原地改 Testcontainers。
 
-**驗收**：
-- [ ] 本機**不開** Redis：`dotnet test JobBank1111.Job.Test` 全綠
-- [ ] 兩案例在新位置有實跑通過證據
+**驗收**（✅ 2026-07-12；兩案例遷至 `CacheProviderRedisTest.cs`，IAsyncLifetime 起/停 Testcontainers Redis，DisposeAsync 還原 SYS_REDIS_URL 防污染同 run 的 BDD）：
+- [x] 本機**不開** Redis：`dotnet test JobBank1111.Job.Test` 全綠 7/7
+- [x] 兩案例新位置實跑通過 2/2；整合全套 12/12（8 BDD＋DI 契約＋D5 例外＋Redis×2）
 
 ## S9. fresh-context 終驗（驗證不自驗）｜fresh opus
 只給驗收條件清單＋分支名，逐條判定並引用證據行號；不透露執行過程。
