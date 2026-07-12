@@ -164,11 +164,6 @@ await cache.SetAsync("user-password", pwd);  // ❌ 不應快取
 await cache.SetAsync("api-token", token);    // ❌ 不應快取
 ```
 
-## 參考文件
-- [快取架構設計](./references/caching-architecture.md)
-- [Redis 配置指南](./references/redis-configuration.md)
-- [失效策略深解](./references/cache-invalidation-strategies.md)
-
 ## 實作範例
 
 開發者應參考專案內的實際實作代碼：

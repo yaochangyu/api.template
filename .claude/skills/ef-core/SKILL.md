@@ -82,7 +82,8 @@ catch
 ```
 
 ## 參考文件
-- [EF Core 最佳實踐](./references/ef-core-best-practices.md)
+- [查詢最佳化](./references/query-optimization.md)
+- [Migration 策略](./references/migration-strategy.md)
 
 ## 實作範例
 

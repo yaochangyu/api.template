@@ -81,7 +81,8 @@ public class TestServer : WebApplicationFactory<Program>
 ```
 
 ## 參考文件
-- [BDD 測試指南](./references/bdd-testing-guide.md)
+- [BDD Gherkin 情境範例](./references/bdd-gherkin-examples.md)
+- [Docker Testcontainers 設定](./references/docker-testcontainers-setup.md)
 
 ## 實作範例
 

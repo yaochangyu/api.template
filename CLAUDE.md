@@ -25,9 +25,10 @@
    **API 開發流程決策（強制確認）**
    
    開發任何新的 API 端點前，必須詢問使用者確認開發方式（API First 或 Code First）。
-   - **決策依據和詳細對比**，參考 [decision-framework.md 的「## API 開發流程決策」章節](./decision-framework.md#api-開發流程決策)
-   - **執行流程參考**：[/api-development SKILL](./skills/api-development/SKILL.md)
+   - **決策依據和詳細對比**，參考 [decision-framework.md 的「## API 開發流程決策」章節](./.claude/decision-framework.md#api-開發流程決策)
+   - **執行流程參考**：[/api-development SKILL](./.claude/skills/api-development/SKILL.md)
    - ⚠️ **禁止混用**：同一專案內不得混用 API First 和 Code First
+   - 📌 **範本例外**：本範本刻意以 v1 示範 API First、v2 示範 Code First 供教學對照；由此範本建立的實際專案仍須全專案擇一，不得混用
 
 2. **不得擅自假設**
    - 即使文件標註「預設」值，仍須詢問使用者確認

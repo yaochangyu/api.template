@@ -629,6 +629,6 @@ describe('Project Initialization', () => {
 
 ## 參考資源
 
-- [CLAUDE.md - AI 助理使用規則](../../../CLAUDE.md#ai-助理使用規則)
-- [CLAUDE.md - 專案狀態檢測機制](../../../CLAUDE.md#專案狀態檢測機制)
+- [CLAUDE.md - AI 助理使用規則](../../../../CLAUDE.md#ai-助理使用規則)
+- [CLAUDE.md - 專案狀態檢測機制](../../../../CLAUDE.md#專案狀態檢測機制)
 - [GitHub 範本倉庫](https://github.com/yaochangyu/api.template)

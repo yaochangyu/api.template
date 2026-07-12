@@ -79,8 +79,7 @@ api.template/
 │   │
 │   ├── k8s/                          # Kubernetes deployment configuration
 │   ├── docker-compose.yml            # Local development environment (DB, Redis)
-│   ├── Taskfile.yml                  # Common tasks (build, test, deploy)
-│   └── best-practices.md             # Project best practices guide
+│   └── Taskfile.yml                  # Common tasks (build, test, deploy)
 │
 ├── CLAUDE.md                         # AI assistant behavior rules & plan management
 ├── tree.md                           # Complete file listing
@@ -231,7 +230,6 @@ Consult corresponding documentation based on your task:
 
 - **[CLAUDE.md](./CLAUDE.md)** — AI assistant behavior rules, plan management, advanced topics index
 - **[.claude/development-rules.md](./.claude/development-rules.md)** — Development rules and best practices
-- **[dotnet-project-template/best-practices.md](./dotnet-project-template/best-practices.md)** — .NET project best practices
 - **[dotnet-project-template/docs/development/reqnroll-best-practices.md](./dotnet-project-template/docs/development/reqnroll-best-practices.md)** — BDD/Gherkin testing guide
 
 ## 🔧 Common Commands
@@ -286,7 +284,7 @@ docker-compose logs -f                          # View container logs
 
 - Workflow questions: Consult [CLAUDE.md](./CLAUDE.md) and SKILL documentation
 - Development decisions: Refer to [.claude/decision-framework.md](./.claude/decision-framework.md)
-- Technical issues: Check [dotnet-project-template/best-practices.md](./dotnet-project-template/best-practices.md)
+- Technical issues: Check [.claude/development-rules.md](./.claude/development-rules.md)
 
 ---
 

@@ -95,7 +95,7 @@ description: 簡短描述 (一句話說明 Skill 用途)
 提供程式碼範例
 
 ## 參考文件
-- [相關文件](./references/xxx.md)
+- 相關文件：`references/<檔名>.md`（若無參考文件，整段省略）
 
 ## 相關 Skills
 - `other-skill` - 關聯說明
@@ -368,7 +368,7 @@ description: API 開發流程引導技能
 - Controller 程式碼生成
 
 ## 參考文件
-- [API 開發工作流程](./references/api-development-workflow.md)
+- [API 開發工作流程](../api-development/references/api-development-workflow.md)
 
 ## 實作範例
 

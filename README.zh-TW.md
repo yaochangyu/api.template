@@ -79,8 +79,7 @@ api.template/
 │   │
 │   ├── k8s/                          # Kubernetes 部署配置
 │   ├── docker-compose.yml            # 本機開發環境（DB、Redis）
-│   ├── Taskfile.yml                  # 常用任務（編譯、測試、部署）
-│   └── best-practices.md             # 專案最佳實踐指南
+│   └── Taskfile.yml                  # 常用任務（編譯、測試、部署）
 │
 ├── CLAUDE.md                         # AI 助理行為規則與計畫管理
 ├── tree.md                           # 完整檔案清單
@@ -231,7 +230,6 @@ public async Task<Result<MemberResponse>> GetMemberAsync(int id)
 
 - **[CLAUDE.md](./CLAUDE.md)** — AI 助理行為規則、計畫管理流程、進階主題索引
 - **[.claude/development-rules.md](./.claude/development-rules.md)** — 開發規則與最佳實踐
-- **[dotnet-project-template/best-practices.md](./dotnet-project-template/best-practices.md)** — .NET 專案最佳實踐
 - **[dotnet-project-template/docs/development/reqnroll-best-practices.md](./dotnet-project-template/docs/development/reqnroll-best-practices.md)** — BDD/Gherkin 測試指南
 
 ## 🔧 常用命令
@@ -286,7 +284,7 @@ docker-compose logs -f                          # 查看容器日誌
 
 - 工作流疑問：查閱 [CLAUDE.md](./CLAUDE.md) 與 SKILL 文檔
 - 開發決策：參考 [.claude/decision-framework.md](./.claude/decision-framework.md)
-- 技術問題：查看 [dotnet-project-template/best-practices.md](./dotnet-project-template/best-practices.md)
+- 技術問題：查看 [.claude/development-rules.md](./.claude/development-rules.md)
 
 ---
 

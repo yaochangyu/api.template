@@ -1,3 +1,10 @@
+⏹️ **Status**: COMPLETED (2026-06-07 18:58 GMT+8)
+
+此計畫已全部執行完成，已封存至 .archive/（標記補於 2026-07-12 健檢輪 S7）
+詳見 Git commit: 8a4ab45
+
+---
+
 # enable-member-v1 進度追蹤
 
 - [x] 已確認採用「沿用目前 Handler/Failure 處理方式，只新增 v1 路由」。

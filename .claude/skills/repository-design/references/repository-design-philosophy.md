@@ -164,4 +164,4 @@ public class OrderHandler(OrderManagementRepository orderRepo)
 ## 參考資源
 
 - [CLAUDE.md - Repository Pattern 設計哲學](../../../../CLAUDE.md#repository-pattern-設計哲學)
-- [MemberRepository 實作範例](../../../../src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs)
+- [MemberRepository 實作範例](../../../../dotnet-project-template/src/be/JobBank1111.Job.WebAPI/Member/MemberRepository.cs)

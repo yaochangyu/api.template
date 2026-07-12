@@ -83,13 +83,14 @@
 **a) API 開發流程**
 - ✅ API First（推薦）：定義 OpenAPI → 產生骨架 → 實作 → 文件同步
 - ✅ Code First：直接實作 → 手動維護 OpenAPI
+- ⚠️ 同一專案內不得混用兩種流程。**範本例外**：本範本刻意以 v1 示範 API First、v2 示範 Code First 供教學對照；由此範本建立的實際專案仍須全專案擇一
 
-詳細決策邏輯見 [決策框架 - API 開發流程](../DECISION-FRAMEWORK.md#api-開發流程決策)
+詳細決策邏輯見 [決策框架 - API 開發流程](./decision-framework.md#api-開發流程決策)
 
 **b) OpenAPI 規格狀態**（僅 API First 時）
 - 已定義 | 需要更新 | 尚未定義
 
-詳細決策邏輯見 [決策框架 - OpenAPI 狀態評估](../DECISION-FRAMEWORK.md#openapi-規格狀態評估)
+詳細決策邏輯見 [決策框架 - OpenAPI 狀態評估](./decision-framework.md#openapi-規格狀態評估)
 
 **c) 需要實作的分層**
 - Controller | Handler | Repository（可多選）
@@ -101,7 +102,7 @@
 - ✅ 僅單元測試
 - ❌ 暫不實作
 
-詳細決策邏輯見 [決策框架 - 測試策略決策樹](../DECISION-FRAMEWORK.md#測試策略決策樹)
+詳細決策邏輯見 [決策框架 - 測試策略決策樹](./decision-framework.md#測試策略決策樹)
 
 **問 b)：測試範圍**
 - 完整功能 | 核心業務邏輯 | 關鍵路徑 | 異常情境
@@ -123,7 +124,7 @@
 ### 5️⃣ 效能最佳化
 - 優化面向選擇（資料庫查詢 / 快取 / 非同步 / 記憶體）
 
-詳細決策邏輯見 [決策框架 - 效能優化決策](../DECISION-FRAMEWORK.md#效能優化決策)
+詳細決策邏輯見 [決策框架 - 效能優化決策](./decision-framework.md#效能優化決策)
 
 ---
 

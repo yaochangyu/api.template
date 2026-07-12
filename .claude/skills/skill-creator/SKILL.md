@@ -352,8 +352,8 @@ graph TD
 YAML 規格範本：`assets/openapi-endpoint-template.yml`
 
 ## 參考文件
-- [API 開發工作流程詳解](./references/api-development-workflow.md)
-- [Result Pattern 完整指南](./references/result-pattern-guide.md)
+- [API 開發工作流程詳解](../api-development/references/api-development-workflow.md)
+- [Result Pattern 最佳實踐](../error-handling/references/result-pattern-best-practices.md)
 ```
 
 ## MCP Server 整合指南

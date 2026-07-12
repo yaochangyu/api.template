@@ -68,9 +68,10 @@ EFCore 系、Caching.StackExchangeRedis、Caching.Memory、Data.SqlClient、Syst
 4. health-check/ 舊 4 檔檔頂加歷史橫幅（D6，不改內文）。
 5. CLAUDE.md＋development-rules.md 加「範本例外」註記（D2）；README×2 的 best-practices.md 壞連結修正（指向現存對應文件或移除該行）。
 
-**驗收**：
-- [ ] 所有 md 相對連結 `test -e` 全過（docs-scan 同法複掃 0 壞連結）
-- [ ] tree.md 自報數＝實列數＝git ls-files 數
+**驗收**（✅ 2026-07-12；掃描腳本＝scratchpad linkscan.py，git ls-files '*.md' 全檔、跳過 code fence）：
+- [x] 現行文件相對連結 0 壞連結；`.archive/`＋`health-check/` 舊檔屬歷史紀錄依 D6 不改內文（僅餘 findings-claude-dir.md:42 一處歷史壞連結，另 .archive 4 筆原報告誤判——實在 code fence 內）
+- [x] tree.md 自報數＝實列數＝git ls-files 數＝187
+- 附帶：P2.1 內文狀態經複核對齊為已完成（references 兩檔實際存在）；.archive 標記日期取自檔案進 archive 的 commit
 
 ## S8. 單元測試 Redis 隔離（D7）｜sonnet
 CacheProviderFactoryTest 兩個 Redis 案例遷 IntegrationTest（Testcontainers Redis），或原地改 Testcontainers。

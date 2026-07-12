@@ -1,3 +1,10 @@
+⏹️ **Status**: COMPLETED (2026-06-07 18:58 GMT+8)
+
+此計畫已全部執行完成，已封存至 .archive/（標記補於 2026-07-12 健檢輪 S7）
+詳見 Git commit: 8a4ab45
+
+---
+
 # 修復 testcontainers 自動清理實作計畫
 
 - [x] 釐清 `AfterTestRun`、Testcontainers 與 Reqnroll 的生命週期，找出殘留容器沒有自動清理的根因。（已確認專案使用 `Reqnroll.xUnit 2.1.1`，官方在 `2.4.1` 修正 xUnit async `[AfterTestRun]` 可能不會完整執行）
