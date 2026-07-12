@@ -30,9 +30,9 @@
 ## S3. 啟動期 Controller DI 契約測試（D8）｜sonnet
 在 IntegrationTest 加一測試：反射列舉 WebAPI 組件所有非抽象 `ControllerBase` 衍生類，用 `ActivatorUtilities`/`IServiceProvider` 驗證建構子參數皆可解析。
 
-**驗收**：
-- [ ] 測試存在且在 S2 完成的分支上綠
-- [ ] 反證測試：暫時註解掉 Program.cs:65 的 v1 註冊 → 該測試轉紅（貼輸出）→ 還原
+**驗收**（✅ 2026-07-12，`ControllerDiContractTest.cs`）：
+- [x] 測試存在且在 S2 完成的分支上綠（整合測試 9/9：8 BDD＋1 DI 契約）
+- [x] 反證測試：註解 Program.cs:65 v1 註冊 → 測試轉紅，訊息 `Unable to resolve service for type 'IMemberV1Controller' while attempting to activate 'MemberV1Controller'` → 已還原
 
 ## S4. 套件升級批 A（D3；解 Refit 以外全部漏洞）｜sonnet
 EFCore 系、Caching.StackExchangeRedis、Caching.Memory、Data.SqlClient、System.Security.Cryptography.Xml、Microsoft.OpenApi、Azure.Identity、Microsoft.Identity.Client → 10.x／最新穩定（逐一以 nuget 確認相容 net10.0）。
