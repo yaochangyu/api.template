@@ -70,7 +70,7 @@ EFCore 系、Caching.StackExchangeRedis、Caching.Memory、Data.SqlClient、Syst
 
 **驗收**（✅ 2026-07-12；掃描腳本＝scratchpad linkscan.py，git ls-files '*.md' 全檔、跳過 code fence）：
 - [x] 現行文件相對連結 0 壞連結；`.archive/`＋`health-check/` 舊檔屬歷史紀錄依 D6 不改內文（僅餘 findings-claude-dir.md:42 一處歷史壞連結，另 .archive 4 筆原報告誤判——實在 code fence 內）
-- [x] tree.md 自報數＝實列數＝git ls-files 數＝187
+- [x] tree.md 自報數＝實列數＝git ls-files 數（S7 時 187；S8 新增 CacheProviderRedisTest.cs 後於 S9 複驗發現落差，已重產為 188）
 - 附帶：P2.1 內文狀態經複核對齊為已完成（references 兩檔實際存在）；.archive 標記日期取自檔案進 archive 的 commit
 
 ## S8. 單元測試 Redis 隔離（D7）｜sonnet
@@ -83,8 +83,9 @@ CacheProviderFactoryTest 兩個 Redis 案例遷 IntegrationTest（Testcontainers
 ## S9. fresh-context 終驗（驗證不自驗）｜fresh opus
 只給驗收條件清單＋分支名，逐條判定並引用證據行號；不透露執行過程。
 
-**驗收**：
-- [ ] S1–S8 逐條複驗全過；build/測試數字實跑；報告寫入 health-check/2026-07-12/final-verification.md
+**驗收**（✅ 2026-07-12；fresh-context opus agent 實跑複驗）：
+- [x] S1–S8 逐條複驗：18 條 17 PASS／1 FAIL（S7b tree.md 因 S8 後新增檔案落差 187→188，已重產修復並複驗三數一致）；build 0 error、漏洞 0、整合 12/12、單元 7/7 均實跑；報告已 append 至 final-verification.md「修復輪終驗」章節
+- 附註：.archive/ 實為 19 個 md（原敘述 18），19/19 皆有 ⏹️ COMPLETED 標記
 
 ---
 
