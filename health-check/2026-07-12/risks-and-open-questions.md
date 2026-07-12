@@ -8,10 +8,11 @@
 3. **套件批 A 中 EFCore 8→10**：Migration 相容性未驗（本輪未跑 DB migration）。SQL Server 容器測試可蓋到查詢層，蓋不到 migration 歷史。
 4. **冒號路由模板**（S2 步驟 3）：`api/v2/members:cursor`（無斜線）在 ASP.NET Core attribute routing 的確切寫法未實測，可能需要 `~/` 絕對模板或自訂 route token；驗收（8/8）能兜底，但執行者可能要試幾次。
 
-## 未解／未驗證（本輪明確沒做的）
-1. **昨晚「8/8 通過」的真正原因**：推論是舊二進位（4–5 秒不含 Testcontainers 啟停、當時 --no-build 反覆出錯），**無法回溯證實**。列為流程教訓而非事實。
-2. **PipeWriter 修法效果未驗**：Mvc.Testing 10.x 修復 P0-2 是高信心推論（版本與症狀吻合），但本輪不改碼，S1 執行時才有實證。
-3. **MemberChain.cs 死碼判定**只靠 grep 交叉，未經編譯器層級 unused 分析（反射/DI 動態呼叫理論上可能存在，但此專案無此模式）。
+## 未解／未驗證（隨修復輪更新）
+1. **昨晚「8/8 通過」的真正原因**：⚠️ 2026-07-12 08:35 修正——原推論（舊二進位）的主要佐證「4 秒不含容器啟停」**不成立**（實測 Duration 欄位本來就不含容器時間）。原因回到未知；唯一確定的是 main @66e062c 在本機 fresh build 可重現 3/8。
+2. ~~PipeWriter 修法效果未驗~~ → ✅ 2026-07-12 已實證：Mvc.Testing 10.0.9 後 PipeWriter 例外歸零（commit 00f4295）。
+3. **Refit 13 runtime 行為未實呼**（2026-07-12 新增）：升級驗證止於「regen 零 diff＋編譯過＋整合測試綠」；整合測試未實際發出 JobClient（ExternalApi）呼叫，Refit 13 的序列化/錯誤處理行為變化未被測試覆蓋。建議 S4/S9 時補一個 JobClient 煙霧測試。
+4. **MemberChain.cs 死碼判定**只靠 grep 交叉，未經編譯器層級 unused 分析（反射/DI 動態呼叫理論上可能存在，但此專案無此模式）。
 4. **EF Core migration 健康度、docker-compose 實際起服務流程**：本輪未實測（無 SQL Server 容器定義，DB 由 Testcontainers 管理——local.env 指向的 localhost SQL Server 從何而來未查）。
 5. **`.claude/skills/` 7 個未收錄於 CLAUDE.md 索引表的目錄**：是刻意精選還是漏列，需使用者定奪。
 6. **P2.1-bdd-testing-PLAN.completed.md 檔名／內文矛盾**：實際完成與否需人工複核（本輪只記錄矛盾）。

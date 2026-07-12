@@ -37,6 +37,14 @@
 - 【死路紀錄】曾想派 Explore 做程式碼掃描——Explore 不能寫檔也罷，實際連 general-purpose
   subagent 寫報告 md 都被 harness 擋，一律改「agent 回文字、主對話落地」。
 - 【流程教訓】完成宣告必須附 fresh build 證據＋執行時間合理性（4 秒帶 Testcontainers 不可能）。
+- 【推論修正 2026-07-12 08:35】上一條的「執行時間」論據**不成立**：修復後真容器實跑的
+  `dotnet test` 摘要同樣顯示「Duration: 4 s」——該欄位不含容器啟停與 host 啟動時間。
+  昨晚「8/8 通過」的真正原因回到**未知**（舊二進位假說失去主要佐證，但也未被排除）。
+  fresh build 證據的教訓仍然成立。
+- 【S5 意外順利】Refit 7.2.1→13.1.0：Refitter 2.0 regen 後 JobClient.cs **零 diff**，
+  生成碼只依賴穩定 API（IApiResponse、[Get]/[Post] 屬性），大版本跳躍無感。原排 opus spike 免跑。
+- 【S2 手感】冒號字面路由 `[HttpGet("api/v2/members:cursor")]` 直接可用（NSwag 生成的 v1
+  controller 就是同款寫法，等於現成證明），不需 `~/` 或自訂 route token。
 - 【harness 限制】subagent 寫 health-check/2026-07-12/findings-*.md 被政策擋下 → 改為 agent 文字回報、主對話代筆落地。後續派工模板應預期此限制。
 - 【候選發現】歷史測試輸出顯示 JobBank1111.Job.Test（單元測試專案）的 CacheProviderFactoryTest 直連 localhost:6379（RedisCacheProvider.cs:46 經由真連線），Redis 沒開就 2/10 失敗 → 「單元測試」不隔離，與專案測試策略（真依賴應走 Testcontainers）衝突。待 build-test-deps 實跑交叉確認。
 - security-scan 完成：P0=0、P3=4（env/local.env 範本密碼、.mcp.json 佔位符、redis 無密碼、AllowedHosts=*）。未展開項：ExceptionHandlingMiddleware 是否洩漏 StackTrace → 入 risks。
