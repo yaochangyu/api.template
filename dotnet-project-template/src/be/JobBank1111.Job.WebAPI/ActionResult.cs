@@ -15,27 +15,11 @@ public class ActionResult<TSuccess, TFailure> : ActionResult
 
     public override async Task ExecuteResultAsync(ActionContext context)
     {
-        try
-        {
-            var logger = context.HttpContext.RequestServices
-                .GetService<ILogger<ActionResult<TSuccess, TFailure>>>();
+        var objectResult = _result.IsSuccess
+            ? CreateSuccessResult(_result.Value)
+            : CreateFailureResult(_result.Error);
 
-            logger?.LogDebug("ActionResult.ExecuteResultAsync: IsSuccess={IsSuccess}", _result.IsSuccess);
-
-            var objectResult = _result.IsSuccess
-                ? CreateSuccessResult(_result.Value)
-                : CreateFailureResult(_result.Error);
-
-            logger?.LogDebug("ActionResult: Executing with StatusCode={StatusCode}", objectResult?.StatusCode);
-            await objectResult.ExecuteResultAsync(context);
-        }
-        catch (Exception ex)
-        {
-            var logger = context.HttpContext.RequestServices
-                .GetService<ILogger<ActionResult<TSuccess, TFailure>>>();
-            logger?.LogError(ex, "ActionResult.ExecuteResultAsync failed: {Message}", ex.Message);
-            throw;
-        }
+        await objectResult.ExecuteResultAsync(context);
     }
 
     public ObjectResult CreateSuccessResult(TSuccess value)

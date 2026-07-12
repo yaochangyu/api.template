@@ -57,8 +57,9 @@ EFCore 系、Caching.StackExchangeRedis、Caching.Memory、Data.SqlClient、Syst
 4. `ExceptionHandlingMiddleware.CreateFailure`：非 Development 環境 Message 改泛用訊息（D5），保留 TraceId。
 5. 刪 `Job.Test/UnitTest1.cs` 空測試（無 Assert）。
 
-**驗收**：
-- [ ] 全部測試不低於 S5 基準；4 的行為有整合測試或最小實跑證據（非 Dev 環境 500 回應不含例外原文）
+**驗收**（✅ 2026-07-12；1–5 全數完成，header 解析抽出 `PagingHeaders.cs` 靜態擴充）：
+- [x] 全部測試不低於 S5 基準（整合 10/10＝8 BDD＋DI 契約＋D5 例外閘門；單元 7/9，僅剩 S8 範圍兩個 Redis 案例，UnitTest1 刪除故總數 10→9）；4 有整合測試 `ExceptionHandlingTest.cs`——TestServer 以 Testing（非 Dev）環境對 `/api/v1/tests:throw` 實跑，500 回應 message 不含例外原文、保留 traceId
+  - 附帶發現：TestServer.ConfigureServices 的 `AddApplicationPart`（測試組件 controller）實際無效（FakeTimeProvider 等服務覆寫有效，但 EndpointDataSource 無測試組件端點）；BDD 的 `api/v1/tests` 一直是打到 WebAPI 自己的 TestController。拋例外端點因此加在 WebAPI TestController（本就是示範端點）。
 
 ## S7. 文件批修（D6）｜haiku（模式固定）→ 驗收由另一 agent
 1. 連結修正（清單見 findings-docs.md §1-2，共 19+ 處；佔位符 xxx.md 段落整段移除或補實）。

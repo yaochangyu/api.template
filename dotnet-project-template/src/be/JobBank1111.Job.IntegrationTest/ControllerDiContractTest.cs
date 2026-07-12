@@ -16,13 +16,8 @@ public class ControllerDiContractTest
     [Fact]
     public void 所有Controller建構子相依均可自DI解析()
     {
-        // DI 解析不會真的連線，僅需環境變數存在；
-        // 只在缺值時補假值，避免蓋掉 BDD 測試由 Testcontainers 設定的真實連線字串
-        SetEnvironmentVariableIfMissing(
-            nameof(SYS_DATABASE_CONNECTION_STRING),
-            "Server=localhost,1433;Database=di-contract-test;User Id=sa;Password=dummy;TrustServerCertificate=True");
-        SetEnvironmentVariableIfMissing(nameof(SYS_REDIS_URL), "localhost:6379,abortConnect=false");
-        SetEnvironmentVariableIfMissing(nameof(EXTERNAL_API), "http://localhost:5000/api");
+        // DI 解析不會真的連線，僅需環境變數存在
+        TestAssistant.SetDummyEnvironmentVariablesIfMissing();
 
         using var server = new TestServer(DateTimeOffset.UtcNow, "di-contract-test");
 
@@ -52,13 +47,5 @@ public class ControllerDiContractTest
         failures.Should().BeEmpty(
             "以下 Controller 的建構子相依無法從 DI Container 解析，"
             + "請檢查 Program.cs 的服務註冊：\n" + string.Join("\n", failures));
-    }
-
-    private static void SetEnvironmentVariableIfMissing(string key, string value)
-    {
-        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(key)))
-        {
-            Environment.SetEnvironmentVariable(key, value);
-        }
     }
 }
